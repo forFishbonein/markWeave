@@ -27,7 +27,7 @@ import {
   insertChar,
   deleteChar,
   addBold,
-} from "./CRDT";
+} from "../components/CRDT";
 import { keymap } from "prosemirror-keymap";
 import { toggleMark } from "prosemirror-commands";
 import { ySyncPlugin, yCursorPlugin } from "y-prosemirror";

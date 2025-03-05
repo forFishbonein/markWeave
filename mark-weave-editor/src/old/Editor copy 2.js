@@ -26,7 +26,7 @@ import {
   insertChar,
   deleteChar,
   addBold,
-} from "./CRDT";
+} from "../components/CRDT";
 import "./editer.css";
 
 // 定义 ProseMirror Schema

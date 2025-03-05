@@ -1,3 +1,47 @@
+/* editer.css */
 .ProseMirror {
   white-space: pre-wrap;
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 300px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  outline: none;
+}
+
+/* 光标样式 */
+.user-cursor {
+  border-left: 2px solid;
+  margin-left: -1px;
+  padding-left: 1px;
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 工具栏样式（如果你增加工具栏） */
+.editor-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.editor-toolbar button {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editor-toolbar button:hover {
+  background: #f0f0f0;
+}
+
+.editor-toolbar button.active {
+  background: #e0e0e0;
+  border-color: #bbb;
 }

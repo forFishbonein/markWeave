@@ -1,10 +1,19 @@
+/*
+ * @FilePath: Editor copy 3.js
+ * @Author: Aron
+ * @Date: 2025-03-04 22:27:28
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2025-03-04 22:56:47
+ * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
+ * @Descripttion:
+ */
 /**
  * Editor.js
  * 完全使用自定义 CRDT（方案B）：用户输入的变更通过 dispatchTransaction 被转换为 CRDT 操作，
  * 然后通过 convertCRDTToProseMirrorDoc() 重建 ProseMirror 文档。
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EditorState, TextSelection } from "prosemirror-state";
 import { EditorView, Decoration, DecorationSet } from "prosemirror-view";
 import { Schema, Slice, Fragment } from "prosemirror-model";
@@ -24,6 +33,7 @@ import {
   removeEm,
   addLink,
   removeLink,
+  loadInitialData,
 } from "./CRDT";
 import "./editer.css";
 import { Awareness } from "y-protocols/awareness";
@@ -31,6 +41,12 @@ import { WebsocketProvider } from "y-websocket"; // 引入 WebSocket Provider
 import debounce from "lodash.debounce";
 //我们不用ySyncPlugin的Y.XmlFragment同步，而是自己定义了数据结构！
 import { ySyncPlugin, yCursorPlugin, yUndoPlugin } from "y-prosemirror";
+import { UndoManager } from "yjs";
+import "prosemirror-view/style/prosemirror.css";
+import Toolbar from "../components/Toolbar";
+import UserList from "../components/UserList";
+import { v4 as uuidv4 } from "uuid";
+
 // import { cursorPlugin, createDecorations } from "./cursor-plugin";
 
 // 定义 ProseMirror Schema
@@ -159,14 +175,17 @@ const richTextKeymap = keymap({
       chars[to - 1]?.opId ||
       (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
     console.log(`🔵 触发 Italic 操作, startId: ${startId}, endId: ${endId}`);
-    if (startId && endId) {
-      if (markActive(state, schema.marks.em)) {
-        console.log("🔵 当前选区已经斜体，调用 removeEm");
-        removeEm(startId, endId);
-      } else {
-        console.log("🔵 当前选区未斜体，调用 addEm");
-        addEm(startId, endId);
-      }
+    // 判断是否在文档末尾
+    const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
+    console.log("isAtEnd", isAtEnd);
+    // 如果在末尾，我们希望结束边界包含该字符，即 "after"
+    const boundaryType = isAtEnd ? "after" : "before";
+    if (markActive(state, schema.marks.em)) {
+      console.log("🔵 当前选区已经斜体，调用 removeEm");
+      removeEm(startId, endId, boundaryType);
+    } else {
+      console.log("🔵 当前选区未斜体，调用 addEm");
+      addEm(startId, endId, boundaryType);
     }
     return toggleMark(schema.marks.em)(state, dispatch);
   },
@@ -191,28 +210,60 @@ const richTextKeymap = keymap({
       chars[to - 1]?.opId ||
       (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
     console.log(`🔵 Link 操作, startId: ${startId}, endId: ${endId}`);
-    if (startId && endId) {
-      // 根据当前选区是否已有链接，决定调用 removeLink 或 addLink
-      if (markActive(state, schema.marks.link)) {
-        console.log("🔵 当前选区已有链接，调用 removeLink");
-        removeLink(startId, endId);
-      } else {
-        console.log("🔵 当前选区没有链接，调用 addLink", href);
-        addLink(startId, endId, href);
-      }
+    // 判断是否在文档末尾
+    const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
+    console.log("isAtEnd", isAtEnd);
+    // 如果在末尾，我们希望结束边界包含该字符，即 "after"
+    const boundaryType = isAtEnd ? "after" : "before";
+    // 根据当前选区是否已有链接，决定调用 removeLink 或 addLink
+    if (markActive(state, schema.marks.link)) {
+      console.log("🔵 当前选区已有链接，调用 removeLink");
+      removeLink(startId, endId, boundaryType);
+    } else {
+      console.log("🔵 当前选区没有链接，调用 addLink", href);
+      addLink(startId, endId, href, boundaryType);
     }
     return toggleMark(schema.marks.link)(state, dispatch);
+  },
+  "Mod-z": (state, dispatch) => {
+    console.log("🔥 Cmd+Z 被按下");
+    // 调用 UndoManager.undo() 撤销操作
+    undoManager.undo();
+    return true;
+  },
+  "Mod-Shift-z": (state, dispatch) => {
+    console.log("🔥 Cmd+Shift+Z 被按下");
+    // 调用 UndoManager.redo() 重做操作
+    undoManager.redo();
+    return true;
   },
 });
 // 辅助函数：判断选区是否已经包含指定 mark
 function markActive(state, type) {
   const { from, to, empty } = state.selection;
+
   if (empty) {
+    // ✅ 处理光标位置（单字符）
     return !!(state.storedMarks || state.selection.$from.marks()).find(
       (mark) => mark.type === type
     );
   } else {
-    return state.doc.rangeHasMark(from, to, type);
+    // ✅ 处理选区
+    let hasNonMark = false;
+    let hasMark = false;
+
+    state.doc.nodesBetween(from, to, (node) => {
+      if (node.isText) {
+        if (node.marks.some((mark) => mark.type === type)) {
+          hasMark = true;
+        } else {
+          hasNonMark = true;
+        }
+      }
+    });
+
+    // 🚀 如果选区中有至少一个非指定 mark，则返回 false（意味着应该 apply）
+    return hasNonMark ? false : hasMark;
   }
 }
 
@@ -271,7 +322,25 @@ function markActive(state, type) {
 //     schema.node("paragraph", null, paragraphContent),
 //   ]);
 // }
-function convertCRDTToProseMirrorDoc() {
+function convertCRDTToProseMirrorDoc(docId) {
+  console.log(
+    "🔥 convertCRDTToProseMirrorDoc 被调用：",
+    yformatOps.toArray(),
+    ychars.toArray(),
+    yformatOps.toArray().length,
+    ychars.toArray().length
+  );
+  // tODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到set Timeout 里面执行就可以很轻松解决了！
+  //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
+  setTimeout(() => {
+    if (
+      docId &&
+      ychars.toArray().length === 0 &&
+      yformatOps.toArray().length === 0
+    ) {
+      loadInitialData(docId);
+    }
+  }, 0);
   const allFormatOps = yformatOps.toArray().flat();
   const paragraphContent = ychars
     .toArray()
@@ -369,9 +438,26 @@ function isCharWithinMark(char, op) {
 }
 
 // 同步 CRDT 数据到 ProseMirror：完全依靠 ydoc 的更新事件，也就是说利用 ydoc.on("update") 来触发更新
-function syncToProseMirror(view) {
+function syncToProseMirror(view, docId) {
   const updateEditor = debounce(() => {
     const newDoc = convertCRDTToProseMirrorDoc();
+    fetch("http://localhost:1235/api/doc", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: docId,
+        content: ydoc,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("服务器响应：", data);
+      })
+      .catch((error) => {
+        console.error("请求错误：", error);
+      });
     if (!newDoc || !newDoc.type) {
       console.error(
         "🚨 convertCRDTToProseMirrorDoc() 返回无效的 Node:",
@@ -398,6 +484,8 @@ function syncToProseMirror(view) {
       view.state.tr,
       newDoc.content
     ); // 🚀 看看 ProseMirror 现在的状态
+    // console.log("🔍 新的文档内容:", newDoc.content.content[0]);
+
     tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
 
     // 设置 meta 表示此交易来自 CRDT 同步
@@ -406,6 +494,8 @@ function syncToProseMirror(view) {
     console.log("🔍 替换后的 Transaction:", tr);
     // if (tr.curSelectionFor !== 0) {
     view.dispatch(tr);
+    console.log("最新的ydoc", ydoc);
+
     // }
   }, 50);
 
@@ -449,38 +539,102 @@ function syncToProseMirror(view) {
 //   // **监听 awareness 变化**
 //   awareness.on("change", updateCursors);
 // }
+function getOrCreateUser() {
+  // 尝试从 sessionStorage 获取用户身份
+  let user = sessionStorage.getItem("myEditorUser");
+  if (user) {
+    return JSON.parse(user);
+  }
+  // 如果没有，创建新的用户身份
+  user = {
+    name: "User" + Math.floor(Math.random() * 100),
+    color: "#ffa500", // 或者生成随机颜色
+  };
+  sessionStorage.setItem("myEditorUser", JSON.stringify(user));
+  return user;
+}
+
+let undoManager; // 全局变量，用于撤销/重做
 const Editor = () => {
   const editorRef = useRef(null);
   const viewRef = useRef(null);
+  const [editorView, setEditorView] = useState(null);
+  const [awareness, setAwareness] = useState(null);
 
+  // 从 URL 参数中获取 docId
+  const urlParams = new URLSearchParams(window.location.search);
+  let docId = urlParams.get("docId");
+
+  // 如果 URL 中没有 docId，则生成一个新的，并更新 URL（不刷新页面）
+  if (!docId) {
+    docId = uuidv4();
+    urlParams.set("docId", docId);
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+  }
+  console.log("当前文档ID:", docId);
   useEffect(() => {
+    // if (sessionStorage.getItem("needIntial")) {
+    // }
     // 使用 WebsocketProvider 实现多人同步
     // const provider = new WebsocketProvider(
     //   "wss://demos.yjs.dev",
     //   "my-room-id",
     //   ydoc
     // );
+    // const provider = new WebsocketProvider(
+    //   "ws://localhost:1234",
+    //   "room1",
+    //   ydoc
+    // );
     const provider = new WebsocketProvider(
-      "ws://localhost:1234",
-      "room1",
+      "ws://localhost:1235", // 如果使用 HTTPS，则改为 wss://your-backend-domain.com:1234
+      // "room1",
+      docId,
       ydoc
     );
     // 可选：设置 Awareness 信息，用于显示多用户光标
-    const awareness = new Awareness(ydoc);
-    provider.awareness = awareness;
-    awareness.setLocalStateField("user", {
-      name: "User" + Math.floor(Math.random() * 100),
-      color: "#ffa500",
-    });
-    console.log("awareness", awareness);
-    // provider.on("sync", () => {
-    //   console.log("✅ WebSocket 连接成功，注册 yCursorPlugin");
-    // });
+    // const awareness = new Awareness(ydoc);
+    // provider.awareness = awareness;
+    // 假设 provider.awareness 是你的 awareness 对象
+    provider.awareness.setLocalStateField("removeTimeout", 1000); // 设置为 1 秒（示例值）
 
+    const aw = provider.awareness;
+    // 设置当前用户状态
+    // aw.setLocalStateField("user", {
+    //   name: "User" + Math.floor(Math.random() * 100),
+    //   color: "#ffa500",
+    // });
+    // const user = getOrCreateUser();
+    let user = sessionStorage.getItem("myEditorUser");
+    if (!user) {
+      // 如果没有，创建新的用户身份
+      user = {
+        name: "User" + Math.floor(Math.random() * 100),
+        color: "#ffa500", // 或者生成随机颜色
+      };
+      sessionStorage.setItem("myEditorUser", JSON.stringify(user));
+      aw.setLocalStateField("user", user);
+    } else {
+      aw.setLocalStateField("user", JSON.parse(user));
+    }
+    setAwareness(aw);
+    // awareness.setLocalStateField("user", {
+    //   name: "User" + Math.floor(Math.random() * 100),
+    //   color: "#ffa500",
+    // });
+    console.log("awareness", aw);
+    provider.on("status", (event) => {
+      // console.log("✅ WebSocket 连接成功，注册 yCursorPlugin");
+      console.log("✅ WebSocket状态：", event.status);
+    });
+    // 创建 UndoManager，监听 ychars 和 yformatOps
+    undoManager = new UndoManager([ychars, yformatOps]);
     if (editorRef.current && !viewRef.current) {
       // 注意：不使用 ySyncPlugin！我们自己管理 CRDT 同步
       // 初始化一个空的 ProseMirror 文档（可以先从 CRDT 中生成，如果为空则会自动填充空格）
-      const initialDoc = convertCRDTToProseMirrorDoc();
+      const initialDoc = convertCRDTToProseMirrorDoc(docId);
+      console.log("initialDoc：", initialDoc);
       const state = EditorState.create({
         schema,
         doc: initialDoc,
@@ -494,6 +648,7 @@ const Editor = () => {
           console.log("📝 监听到 ProseMirror 变更:", tr);
           try {
             if (tr.getMeta("fromSync")) {
+              // console.log("🚀 fromSync newState:", newState);
               //一旦这里updateState了，那么页面上的内容自然就会跟随改变了，跟下面的 steps 没有关系的！
               const newState = viewRef.current.state.apply(tr);
               viewRef.current.updateState(newState);
@@ -569,19 +724,68 @@ const Editor = () => {
         },
       });
       viewRef.current = view;
+      setEditorView(view);
       // console.log("view111", view);
-      syncToProseMirror(view);
+      syncToProseMirror(view, docId);
       // syncCursorToProseMirror(awareness, view);
     }
     //自己管理 awareness 里的光标，不需要 yCursorPlugin
+
     return () => {
       viewRef.current?.destroy();
       viewRef.current = null;
       ydoc.off("update");
+      provider.destroy();
+      // 等待连接状态为 "connected" 或 "disconnected" 后再销毁
+      // if (provider.ws && provider.ws.readyState === WebSocket.CONNECTING) {
+      //   setTimeout(() => {
+      //     try {
+      //       provider.destroy();
+      //     } catch (error) {
+      //       console.warn("销毁 provider 时发生错误：", error);
+      //     }
+      //   }, 1000);
+      // } else {
+      //   try {
+      //     provider.destroy();
+      //   } catch (error) {
+      //     console.warn("销毁 provider 时发生错误：", error);
+      //   }
+      // }
     };
   }, []);
+  const handleBold = () => {
+    if (editorView) {
+      // 模拟触发 Cmd+B
+      toggleMark(schema.marks.bold)(editorView.state, editorView.dispatch);
+    }
+  };
 
-  return <div ref={editorRef} className='ProseMirror' />;
+  const handleItalic = () => {
+    if (editorView) {
+      toggleMark(schema.marks.em)(editorView.state, editorView.dispatch);
+    }
+  };
+
+  const handleLink = () => {
+    if (editorView) {
+      const url = prompt("Enter link URL:");
+      // 这里你可以自定义处理链接逻辑
+      toggleMark(schema.marks.link)(editorView.state, editorView.dispatch);
+    }
+  };
+  // return <div ref={editorRef} className='ProseMirror' />;
+  return (
+    <div>
+      {awareness && <UserList awareness={awareness} />}
+      <Toolbar
+        onBold={handleBold}
+        onItalic={handleItalic}
+        onLink={handleLink}
+      />
+      <div ref={editorRef} className='ProseMirror' />
+    </div>
+  );
 };
 
 export default Editor;
