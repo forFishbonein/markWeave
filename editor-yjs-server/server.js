@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 23:56:50
+ * @LastEditTime: 2025-06-03 01:50:45
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -15,6 +15,7 @@ import * as Y from "yjs";
 import { loadDocState, saveDocState } from "./persistence.js";
 import cors from "cors";
 import { json } from "stream/consumers";
+import debounce from "lodash.debounce"; // npm i lodash.debounce
 
 const app = express();
 app.use(express.static("public"));
@@ -32,42 +33,85 @@ const wss = new WebSocketServer({ server });
 const docs = new Map();
 async function getYDoc(roomName) {
   console.log("文档id：", roomName);
-  if (!docs.has(roomName)) {
-    // const ydoc = new Y.Doc();
-    // console.log("ydoc000:", ydoc);
-    // 尝试从数据库加载已有状态（持久化）
-    let ydoc = await loadDocState(roomName);
-    docs.set(roomName, ydoc);
-  }
-  return docs.get(roomName);
+  // if (!docs.has(roomName)) {
+  //   // const ydoc = new Y.Doc();
+  //   // console.log("ydoc000:", ydoc);
+  //   // 尝试从数据库加载已有状态（持久化）
+  //   let ydoc = await loadDocState(roomName);
+  //   docs.set(roomName, ydoc);
+  // }
+  // return docs.get(roomName);
+  if (docs.has(roomName)) return docs.get(roomName);
+
+  const ydoc = new Y.Doc();
+  // 1) 从 Mongo 加载历史状态
+  await loadDocState(roomName, ydoc);
+
+  // 2) 挂持久化（节流，避免高频写 DB）
+  const persist = debounce(
+    () => saveDocState(roomName, ydoc /*, userId?*/),
+    2_000, // 2 秒内频率合并
+    { maxWait: 10_000 } // 最迟 10 秒一定落一次
+  );
+  ydoc.on("update", persist);
+
+  docs.set(roomName, ydoc);
+  return ydoc;
 }
 app.post("/api/doc", async (req, res) => {
-  const { id, content } = req.body;
-  if (!id || !content) {
-    return res.status(400).json({ error: "缺少 id 或文档内容" });
-  }
+  // const { id, content } = req.body;
+  // if (!id || !content) {
+  //   return res.status(400).json({ error: "缺少 id 或文档内容" });
+  // }
+  // try {
+  //   console.log("更新文档：", id);
+  //   saveDocState(id, content).catch((err) => {
+  //     console.error(`保存文档 ${docId} 出错:`, err);
+  //   });
+  //   docs.set(id, content);
+  //   res.json({ message: "文档更新并持久化成功" });
+  // } catch (err) {
+  //   console.error("更新文档时出错:", err);
+  //   res.status(500).json({ error: err.message });
+  // }
+  const { id, content } = req.body; // content 应是 base64 字符串
+  if (!id || !content)
+    return res.status(400).json({ error: "缺少 docId 或 update content" });
+
   try {
-    console.log("更新文档：", id);
-    saveDocState(id, content).catch((err) => {
-      console.error(`保存文档 ${docId} 出错:`, err);
-    });
-    docs.set(id, content);
-    res.json({ message: "文档更新并持久化成功" });
+    const ydoc = await getYDoc(id);
+    const uint8 = Uint8Array.from(Buffer.from(content, "base64"));
+    Y.applyUpdate(ydoc, uint8);
+    // saveDocState 会在 debounce 中自动调用
+    res.json({ message: "更新已应用" });
   } catch (err) {
-    console.error("更新文档时出错:", err);
+    console.error("应用 update 时出错:", err);
     res.status(500).json({ error: err.message });
   }
 });
 app.get("/api/initial", async (req, res) => {
+  // const { docId } = req.query;
+  // if (!docId) {
+  //   return res.status(400).json({ error: "缺少 docId 参数" });
+  // }
+  // try {
+  //   const initialData = await getYDoc(docId);
+  //   res.json({ docId, content: initialData });
+  // } catch (err) {
+  //   console.error("加载初始文档状态时出错:", err);
+  //   res.status(500).json({ error: err.message });
+  // }
   const { docId } = req.query;
-  if (!docId) {
-    return res.status(400).json({ error: "缺少 docId 参数" });
-  }
+  if (!docId) return res.status(400).json({ error: "缺少 docId 参数" });
+
   try {
-    const initialData = await getYDoc(docId);
-    res.json({ docId, content: initialData });
+    const ydoc = await getYDoc(docId);
+    const stateBase64 = Buffer.from(Y.encodeStateAsUpdate(ydoc)).toString(
+      "base64"
+    );
+    res.json({ docId, update: stateBase64 });
   } catch (err) {
-    console.error("加载初始文档状态时出错:", err);
+    console.error("加载初始文档失败:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -77,13 +121,21 @@ wss.on("connection", async (ws, req) => {
   // const ydoc = getYDoc(docId);
   // setupWSConnection(ws, req, { gc: true, doc: ydoc });
   // 假设 URL 格式为 "/room1"、"/room2" 等
-  let roomName = req.url.slice(1); // 移除开头的 "/"
-  if (!roomName) {
-    roomName = "default-room";
-  }
-  // const initialData = await getYDoc(roomName);
-  // 创建一个新的 Y.Doc
-  const ydoc = new Y.Doc(); //这里不用管，给个空的就可以，因为前端会进行内容填充，这里不管是什么都影响不到前端，因为我们要的结构是ychars构造出来的！
+  // let roomName = req.url.slice(1); // 移除开头的 "/"
+  // if (!roomName) {
+  //   roomName = "default-room";
+  // }
+  // // const initialData = await getYDoc(roomName);
+  // // 创建一个新的 Y.Doc
+  // const ydoc = new Y.Doc(); //这里不用管，给个空的就可以，因为前端会进行内容填充，这里不管是什么都影响不到前端，因为我们要的结构是ychars构造出来的！
+  // setupWSConnection(ws, req, { gc: true, doc: ydoc });
+  // URL 形如 /room1?token=xxx
+  const url = new URL(req.url, `ws://${req.headers.host}`);
+  const roomName = url.pathname.slice(1) || "default-room";
+
+  // TODO: 如果你做了 JWT / Cookie 登录，这里可以解析 token 得到 userId
+
+  const ydoc = await getYDoc(roomName);
   setupWSConnection(ws, req, { gc: true, doc: ydoc });
 });
 

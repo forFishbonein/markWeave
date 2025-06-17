@@ -1,0 +1,54 @@
+.doclist-layout {
+  min-height: 500px;
+  background: #fff;
+  border-radius: 8px;
+  margin: 40px auto;
+  max-width: 900px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.doclist-sider {
+  background: #fafbfc;
+  border-right: 1px solid #eee;
+  padding-top: 24px;
+}
+
+.doclist-team {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.doclist-settings {
+  position: absolute;
+  bottom: 24px;
+  left: 32px;
+  color: #888;
+  font-size: 15px;
+}
+
+.doclist-content {
+  padding: 32px 36px;
+  background: #fff;
+}
+
+.doclist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.doclist-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.doclist-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.doclist-row {
+  cursor: pointer;
+}

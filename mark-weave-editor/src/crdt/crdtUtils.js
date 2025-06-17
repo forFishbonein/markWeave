@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 23:49:23
+ * @LastEditTime: 2025-06-02 20:14:26
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -25,16 +25,17 @@ export function convertCRDTToProseMirrorDoc(docId) {
   );
   // tODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到set Timeout 里面执行就可以很轻松解决了！
   //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
-  // setTimeout(() => {
-  //   if (
-  //     docId &&
-  //     ychars.toArray().length === 0 &&
-  //     yformatOps.toArray().length === 0
-  //   ) {
-  //     alert(111);
-  //     loadInitialData(docId);
-  //   }
-  // }, 0);
+  setTimeout(() => {
+    //  alert(111);
+    if (
+      docId &&
+      ychars.toArray().length === 0 &&
+      yformatOps.toArray().length === 0
+    ) {
+      alert(111);
+      loadInitialData(docId);
+    }
+  }, 0);
   const allFormatOps = yformatOps.toArray().flat();
   const paragraphContent = ychars
     .toArray()

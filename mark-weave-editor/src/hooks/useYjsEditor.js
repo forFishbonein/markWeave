@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 23:46:34
+ * @LastEditTime: 2025-06-02 20:16:44
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -103,6 +103,7 @@ export function useYjsEditor(docId, editorRef) {
                 let afterId = null;
                 if (insertPos > 1) {
                   const chars = ychars.toArray();
+                  console.log("222222", chars);
                   const charIndex = insertPos - 2; // -2 因为 ProseMirror 是 1-based，ychars 是 0-based
                   if (charIndex >= 0 && charIndex < chars.length) {
                     afterId = chars[charIndex].opId; // 找到插入点前的字符 ID
@@ -146,6 +147,7 @@ export function useYjsEditor(docId, editorRef) {
         },
       });
       viewRef.current = view;
+
       // setTimeout(() => {
       //   console.log(
       //     "setTimeout：",
@@ -164,19 +166,47 @@ export function useYjsEditor(docId, editorRef) {
       // }, 10);
       // tODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到setTimeout 里面执行就可以很轻松解决了！
       //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
-      setTimeout(() => {
-        loadInitialData(docId);
-      }, 0);
+      //下面这个不能放开，否则会每次翻倍！
+      // setTimeout(() => {
+      //   loadInitialData(docId);
+      // }, 0);
       setEditorView(view);
       syncToProseMirror(view, docId);
     }
     //自己管理 awareness 里的光标，不需要 yCursorPlugin
 
+    setTimeout(() => {
+      // console.log(
+      //   "12121",
+      //   ychars.toArray(),
+      //   ychars.toArray()[ychars.toArray().length - 1]?.opId
+      // );
+      //todo 进行同步测试的
+      /**
+       * 我的理解：这里测试感觉没啥用，因为不能得到最新的数据，得不到合适的插入位置
+       * 但是如果用户自己手动数据那肯定是可以拿到插入位置的，既然有插入位置那么一定就是符合合并要求的，因为就只需要根据插入位置来就可以了！
+       *
+       * 至于格式的合并，因为我们有 wins 策略，自然也是可以应付过来的！
+       * 可以再在这里测试一下格式的合并，需要先构造数据然后我们手动去调用那个函数，回头试一下！
+       */
+      // if (user && JSON.parse(user).name === "User71") {
+      //   insertText(ychars.toArray()[ychars.toArray().length - 1]?.opId, "你好");
+      // } else {
+      //   insertText(
+      //     ychars.toArray()[ychars.toArray().length - 1]?.opId,
+      //     "hello"
+      //   );
+      // }
+    }, 0);
+    // const intervalId = setInterval(() => {
+    //   window.location.reload();
+    // }, 2000); // 每 5000 毫秒（5 秒）刷新一次页面
     return () => {
       viewRef.current?.destroy();
       viewRef.current = null;
       ydoc.off("update");
       provider.destroy();
+      // clearInterval(intervalId);
     };
   }, []);
 

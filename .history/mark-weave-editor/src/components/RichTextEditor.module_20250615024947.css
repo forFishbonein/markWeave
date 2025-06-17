@@ -1,0 +1,118 @@
+.container {
+  display: flex;
+  width: 900px;
+  height: 480px;
+  margin: 60px auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.sidebar {
+  width: 180px;
+  background: #fafbfc;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0 0 0;
+  align-items: flex-start;
+}
+
+.teamName button {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 18px;
+  font-size: 15px;
+  margin-left: 18px;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+.nav ul {
+  list-style: none;
+  padding: 0 0 0 18px;
+  margin: 0;
+}
+
+.nav li {
+  margin-bottom: 12px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.settings {
+  margin-top: auto;
+  margin-left: 18px;
+  margin-bottom: 18px;
+  font-size: 15px;
+  color: #888;
+  cursor: pointer;
+}
+
+.main {
+  flex: 1;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.saveBtn {
+  padding: 6px 24px;
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.toolbar button {
+  padding: 4px 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.docTitle {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 18px;
+  font-weight: 500;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.editorArea {
+  flex: 1;
+  min-height: 180px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 18px 14px;
+  background: #fafbfc;
+  font-size: 16px;
+  color: #222;
+}

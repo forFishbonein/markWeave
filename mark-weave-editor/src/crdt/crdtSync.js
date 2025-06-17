@@ -3,17 +3,22 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:59:57
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 23:10:49
+ * @LastEditTime: 2025-06-14 23:14:08
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
 import debounce from "lodash.debounce";
 import { convertCRDTToProseMirrorDoc } from "./crdtUtils";
 import { ydoc } from "./index";
+import * as Y from "yjs";
+import { Buffer } from "buffer";
 // 同步 CRDT 数据到 ProseMirror：完全依靠 ydoc 的更新事件，也就是说利用 ydoc.on("update") 来触发更新
 export function syncToProseMirror(view, docId) {
   const updateEditor = debounce(() => {
     const newDoc = convertCRDTToProseMirrorDoc();
+    const update = Y.encodeStateAsUpdate(ydoc); // Uint8Array
+    const updateB64 = Buffer.from(update).toString("base64");
+    //这里把变化传入后端，但是只作为持久化存储，方便下一次打开的时候文档还在，但是不作为向其他用户的同步
     fetch("http://localhost:1235/api/doc", {
       method: "POST",
       headers: {
@@ -21,7 +26,8 @@ export function syncToProseMirror(view, docId) {
       },
       body: JSON.stringify({
         id: docId,
-        content: ydoc,
+        // content: ydoc,
+        content: updateB64,
       }),
     })
       .then((response) => response.json())

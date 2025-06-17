@@ -1,0 +1,61 @@
+.editorpage-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.editorpage-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.editorpage-card {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 32px 36px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.editorpage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.editorpage-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.editorpage-save {
+  font-size: 16px;
+  padding: 4px 24px;
+}
+
+.editorpage-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.editorpage-content {
+  flex: 1;
+  min-height: 300px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 18px 14px;
+  background: #fafbfc;
+  font-size: 16px;
+  color: #222;
+  margin-top: 8px;
+}

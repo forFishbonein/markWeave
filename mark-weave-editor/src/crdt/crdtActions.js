@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:27
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 23:06:29
+ * @LastEditTime: 2025-03-17 02:24:43
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -29,7 +29,7 @@ export function insertChar(afterId, ch) {
   }
   console.log(`📝 插入字符 "${ch}" 在索引 ${index}`);
   ychars.insert(index, [newChar]);
-  console.log("✅ ychars 现在的内容:", ychars.toArray()); // 🚀 检查是否成功存入
+  console.log("✅ insertChar ychars 现在的内容:", ychars.toArray()); // 🚀 检查是否成功存入
 }
 let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
 export function insertText(afterId, text) {
@@ -81,7 +81,7 @@ export function deleteChars(from, to) {
 
     ychars.delete(startIndex, count); // 一次性删除多个字符
 
-    console.log("✅ ychars 现在的内容:", ychars.toArray());
+    console.log("✅ deleteChars ychars 现在的内容:", ychars.toArray());
   } else {
     console.warn("⚠️ 删除操作超出范围，未执行", { from, to, chars });
   }

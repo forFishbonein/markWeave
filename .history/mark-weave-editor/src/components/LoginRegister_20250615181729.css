@@ -1,0 +1,26 @@
+  .login-register-container {
+    width: 400px;
+    margin: 80px auto;
+    padding: 32px 32px 24px 32px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .login-register-tabs .ant-tabs-nav {
+    margin-bottom: 32px;
+  }
+
+  .login-form,
+  .register-form {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .login-form-forgot {
+    margin-top: 12px;
+    color: #888;
+    font-size: 14px;
+    text-align: right;
+    cursor: pointer;
+  }

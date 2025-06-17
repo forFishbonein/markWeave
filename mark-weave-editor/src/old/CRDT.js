@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-02-21 14:05:35
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-03-04 21:48:31
+ * @LastEditTime: 2025-03-17 02:22:55
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -88,7 +88,7 @@ export function insertChar(afterId, ch) {
   }
   console.log(`📝 插入字符 "${ch}" 在索引 ${index}`);
   ychars.insert(index, [newChar]);
-  console.log("✅ ychars 现在的内容:", ychars.toArray()); // 🚀 检查是否成功存入
+  console.log("✅ insertChar ychars 现在的内容:", ychars.toArray()); // 🚀 检查是否成功存入
 }
 let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
 export function insertText(afterId, text) {

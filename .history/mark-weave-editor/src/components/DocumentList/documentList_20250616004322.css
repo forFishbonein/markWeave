@@ -1,0 +1,74 @@
+.doclist-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.doclist-sider {
+  width: 200px;
+  background: #fafbfc;
+  border-right: 1px solid #eee;
+  padding-top: 24px;
+  position: relative;
+  min-height: 100vh;
+}
+
+.doclist-team {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.doclist-settings {
+  position: absolute;
+  bottom: 24px;
+  left: 32px;
+  color: #888;
+  font-size: 15px;
+}
+
+.doclist-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.doclist-content {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 32px 36px;
+  min-height: 400px;
+  margin-top: 24px;
+}
+
+.doclist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 18px auto;
+}
+
+.doclist-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.doclist-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.doclist-row {
+  cursor: pointer;
+}
