@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-03 01:50:45
+ * @LastEditTime: 2025-06-23 02:31:10
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -16,6 +16,13 @@ import { loadDocState, saveDocState } from "./persistence.js";
 import cors from "cors";
 import { json } from "stream/consumers";
 import debounce from "lodash.debounce"; // npm i lodash.debounce
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+import apiRoutes from "./routes/index.js";
+import { errorHandler } from "./middleware/errorMiddleware.js";
+
+dotenv.config();
 
 const app = express();
 app.use(express.static("public"));
@@ -24,38 +31,63 @@ app.use(express.json({ limit: "50mb" })); // 允许最大 50MB 的 JSON 请求�
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // 处理 URL 编码的请求体
 app.use(cors());
 
+// API 路由
+app.use("/api", apiRoutes);
+
+// 错误处理中间件
+app.use(errorHandler);
+
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
+
+const username = process.env.DB_USERNAME || "markWeave";
+const password = process.env.DB_PASSWORD || "eBkwPRfcdHHkdHYt";
+const host = process.env.DB_HOST || "8.130.52.237";
+const port = process.env.DB_PORT || "27017";
+const dbName = process.env.DB_NAME || "markweave";
+
+const mongoUrl = `mongodb://${encodeURIComponent(
+  username
+)}:${encodeURIComponent(password)}@${host}:${port}/${dbName}`;
+
+mongoose
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("✅ MongoDB connected");
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+  });
 
 // const docId = "room1"; // 示例：每个文档对应一个房间
 
 // 每个房间对应一个 Y.Doc（这里简单示例一个文档）——> 这个没法处理，因为我们获取不到 ydoc 的内容！
 const docs = new Map();
 async function getYDoc(roomName) {
-  console.log("文档id：", roomName);
-  // if (!docs.has(roomName)) {
-  //   // const ydoc = new Y.Doc();
-  //   // console.log("ydoc000:", ydoc);
-  //   // 尝试从数据库加载已有状态（持久化）
-  //   let ydoc = await loadDocState(roomName);
-  //   docs.set(roomName, ydoc);
-  // }
-  // return docs.get(roomName);
-  if (docs.has(roomName)) return docs.get(roomName);
+  console.log("📄 Loading document:", roomName);
+
+  if (docs.has(roomName)) {
+    return docs.get(roomName);
+  }
 
   const ydoc = new Y.Doc();
-  // 1) 从 Mongo 加载历史状态
+
+  // 从数据库加载文档状态
   await loadDocState(roomName, ydoc);
 
-  // 2) 挂持久化（节流，避免高频写 DB）
+  // 设置持久化（防抖处理）
   const persist = debounce(
-    () => saveDocState(roomName, ydoc /*, userId?*/),
-    2_000, // 2 秒内频率合并
-    { maxWait: 10_000 } // 最迟 10 秒一定落一次
+    () => saveDocState(roomName, ydoc),
+    2000, // 2秒内的更新合并
+    { maxWait: 10000 } // 最长10秒必须保存一次
   );
-  ydoc.on("update", persist);
 
+  ydoc.on("update", persist);
   docs.set(roomName, ydoc);
+
   return ydoc;
 }
 app.post("/api/doc", async (req, res) => {
@@ -116,27 +148,18 @@ app.get("/api/initial", async (req, res) => {
   }
 });
 wss.on("connection", async (ws, req) => {
-  // console.log("新连接的 URL:", req.url);
-  // // 从 URL 中解析房间名称，示例中直接使用固定的 docId
-  // const ydoc = getYDoc(docId);
-  // setupWSConnection(ws, req, { gc: true, doc: ydoc });
-  // 假设 URL 格式为 "/room1"、"/room2" 等
-  // let roomName = req.url.slice(1); // 移除开头的 "/"
-  // if (!roomName) {
-  //   roomName = "default-room";
-  // }
-  // // const initialData = await getYDoc(roomName);
-  // // 创建一个新的 Y.Doc
-  // const ydoc = new Y.Doc(); //这里不用管，给个空的就可以，因为前端会进行内容填充，这里不管是什么都影响不到前端，因为我们要的结构是ychars构造出来的！
-  // setupWSConnection(ws, req, { gc: true, doc: ydoc });
-  // URL 形如 /room1?token=xxx
-  const url = new URL(req.url, `ws://${req.headers.host}`);
-  const roomName = url.pathname.slice(1) || "default-room";
+  try {
+    const url = new URL(req.url, `ws://${req.headers.host}`);
+    const roomName = url.pathname.slice(1) || "default-room";
 
-  // TODO: 如果你做了 JWT / Cookie 登录，这里可以解析 token 得到 userId
+    console.log("🔌 WebSocket connection:", roomName);
 
-  const ydoc = await getYDoc(roomName);
-  setupWSConnection(ws, req, { gc: true, doc: ydoc });
+    const ydoc = await getYDoc(roomName);
+    setupWSConnection(ws, req, { gc: true, doc: ydoc });
+  } catch (error) {
+    console.error("❌ WebSocket connection error:", error);
+    ws.close();
+  }
 });
 
 // 每隔一定时间保存文档状态（例如每 10 秒保存一次）——> 没有意义，应该从前端作为入口，更新的时候调用接口来保存数据！
@@ -148,7 +171,9 @@ wss.on("connection", async (ws, req) => {
 //   });
 // }, 10000);
 
-const port = process.env.PORT || 1235;
-server.listen(port, () => {
-  console.log(`y-websocket server is running on port ${port}`);
+const PORT = process.env.PORT || 1234;
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 WebSocket server available at ws://localhost:${PORT}`);
+  console.log(`🌐 API server available at http://localhost:${PORT}/api`);
 });

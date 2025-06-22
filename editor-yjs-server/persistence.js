@@ -3,42 +3,40 @@
  * @Author: Aron
  * @Date: 2025-03-04 14:17:32
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-03 01:44:03
+ * @LastEditTime: 2025-06-23 03:24:57
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
-// persistence.js
-import * as Y from "yjs";
-import { MongoClient } from "mongodb";
 import mongoose from "mongoose";
+import * as Y from "yjs";
+import { MongodbPersistence } from "y-mongodb";
+import { json } from "stream/consumers";
+import debounce from "lodash.debounce"; // npm i lodash.debounce
 import Doc from "./models/Doc.js";
-const username = "weaveEditor"; // 替换为你的用户名
-const password = "EWA68bKFRmAzHcZ7"; // 替换为你的密码
-const host = "8.130.52.237"; // 或你的 MongoDB 服务器地址
-const port = "27017"; // MongoDB 默认端口
-const dbName = "weaveeditor"; // 数据库名称 //只能纯小写
+import dotenv from "dotenv";
 
-const mongoUrl = `mongodb://${encodeURIComponent(
+dotenv.config();
+
+const username = process.env.DB_USERNAME || "markWeave";
+const password = process.env.DB_PASSWORD || "eBkwPRfcdHHkdHYt";
+const host = process.env.DB_HOST || "8.130.52.237";
+const port = process.env.DB_PORT || "27017";
+const dbName = process.env.DB_NAME || "markweave";
+
+export const MONGODB_URI = `mongodb://${encodeURIComponent(
   username
-)}:${encodeURIComponent(password)}@${host}:${port}/${dbName}`;
+)}:${encodeURIComponent(password)}@${host}:${port}`;
 
-// 获取 MongoDB 连接（全局复用）
-// let clientPromise = null;
-// async function getDb() {
-//   if (!clientPromise) {
-//     const client = new MongoClient(mongoUrl, {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//     });
-//     clientPromise = client.connect();
-//   }
-//   const client = await clientPromise;
-//   return client.db(dbName);
-// }
+const mdb = new MongodbPersistence(MONGODB_URI, {
+  collectionName: "yjs_transactions",
+  flushSize: 100,
+  multipleCollections: true,
+});
+
 let connectPromise = null;
 function connectMongo() {
   if (!connectPromise) {
-    connectPromise = mongoose.connect(mongoUrl, {
+    connectPromise = mongoose.connect(MONGODB_URI, {
       dbName,
       // 如果你想改全局 Buffer → Binary 存储格式，可继续在这里配置
     });

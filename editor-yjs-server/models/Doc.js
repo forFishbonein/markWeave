@@ -21,12 +21,14 @@ const Participant = new Schema(
 
 const DocSchema = new Schema({
   docId: { type: String, required: true, unique: true, index: true },
+  title: { type: String, default: "Untitled", trim: true },
+  teamId: { type: Types.ObjectId, ref: "Team", required: true },
   state: { type: Buffer, required: true }, // Yjs binary
-  title: { type: String, default: "Untitled" },
   ownerId: { type: Types.ObjectId, ref: "User", required: true },
   participants: { type: [Participant], default: [] },
   createdAt: { type: Date, default: Date.now },
   lastUpdated: { type: Date, default: Date.now },
+  version: { type: Number, default: 1 },
 });
 
 export default mongoose.model("Doc", DocSchema);

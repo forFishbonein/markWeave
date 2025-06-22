@@ -1,26 +1,124 @@
+.login-register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.login-register-box {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  backdrop-filter: blur(10px);
+}
+
+.brand-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.brand-title h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1677ff;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.brand-title p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.login-register-tabs {
+  margin-bottom: 0;
+}
+
+.login-register-tabs .ant-tabs-tab {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.login-form,
+.register-form {
+  margin-top: 24px;
+}
+
+.login-form .ant-form-item,
+.register-form .ant-form-item {
+  margin-bottom: 20px;
+}
+
+.login-form .ant-form-item:last-child,
+.register-form .ant-form-item:last-child {
+  margin-bottom: 0;
+}
+
+.login-form .ant-input,
+.login-form .ant-input-password,
+.register-form .ant-input,
+.register-form .ant-input-password {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.login-form .ant-input:focus,
+.login-form .ant-input-password:focus,
+.register-form .ant-input:focus,
+.register-form .ant-input-password:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+.login-form .ant-btn,
+.register-form .ant-btn {
+  border-radius: 8px;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-form .ant-btn:hover,
+.register-form .ant-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px rgba(22, 119, 255, 0.3);
+}
+
+.ant-checkbox-wrapper {
+  color: #666;
+  font-size: 14px;
+}
+
+.ant-form-item-label>label {
+  color: #333;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
   .login-register-container {
-    width: 400px;
-    margin: 80px auto;
-    padding: 32px 32px 24px 32px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 16px;
   }
 
-  .login-register-tabs .ant-tabs-nav {
-    margin-bottom: 32px;
+  .login-register-box {
+    padding: 24px;
+    border-radius: 12px;
   }
 
-  .login-form,
-  .register-form {
-    max-width: 320px;
-    margin: 0 auto;
+  .brand-title h1 {
+    font-size: 28px;
   }
 
-  .login-form-forgot {
-    margin-top: 12px;
-    color: #888;
+  .brand-title p {
     font-size: 14px;
-    text-align: right;
-    cursor: pointer;
   }
+}

@@ -6,6 +6,9 @@ import {
   Navigate,
   Outlet,
 } from "react-router-dom";
+import { Layout } from "antd";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import LoginRegister from "./components/LoginRegister";
 import Home from "./components/Home/Home";
 import TeamLayout from "./components/Team/TeamLayout";
@@ -14,7 +17,6 @@ import EditorPage from "./components/Documents/EditorPage";
 import MemberList from "./components/Members/MemberList";
 import TeamSettings from "./components/Settings/TeamSettings";
 import GlobalHeader from "./components/GlobalHeader";
-import { Layout } from "antd";
 // import { WebsocketProvider } from "y-websocket";
 // import { ydoc } from "./components/CRDT";
 
@@ -33,22 +35,30 @@ const AppLayout = () => (
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path='/login' element={<LoginRegister />} />
-        <Route element={<AppLayout />}>
-          <Route path='/home' element={<Home />} />
-          <Route path='/team/:teamId/*' element={<TeamLayout />}>
-            <Route path='documents' element={<DocumentList />} />
-            <Route path='editor/:docId' element={<EditorPage />} />
-            <Route path='members' element={<MemberList />} />
-            <Route path='team-settings' element={<TeamSettings />} />
-            <Route index element={<Navigate to='documents' replace />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path='/login' element={<LoginRegister />} />
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }>
+            <Route path='/home' element={<Home />} />
+            <Route path='/team/:teamId/*' element={<TeamLayout />}>
+              <Route path='documents' element={<DocumentList />} />
+              <Route path='editor/:docId' element={<EditorPage />} />
+              <Route path='members' element={<MemberList />} />
+              <Route path='team-settings' element={<TeamSettings />} />
+              <Route index element={<Navigate to='documents' replace />} />
+            </Route>
           </Route>
-        </Route>
-        <Route path='*' element={<Navigate to='/login' replace />} />
-      </Routes>
-    </Router>
+          <Route path='/' element={<Navigate to='/home' replace />} />
+          <Route path='*' element={<Navigate to='/login' replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 
