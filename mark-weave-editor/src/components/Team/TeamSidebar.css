@@ -1,0 +1,114 @@
+.team-sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.team-sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.team-back-btn {
+  width: 100%;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.team-back-btn:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
+.team-info {
+  padding: 20px 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.team-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.team-icon {
+  font-size: 18px;
+  color: #3b82f6;
+  margin-right: 10px;
+}
+
+.team-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.team-navigation {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.team-menu {
+  height: 100%;
+  border-right: none;
+  background: transparent;
+}
+
+.team-menu .ant-menu-item {
+  margin: 2px 12px;
+  border-radius: 6px;
+  height: 36px;
+  line-height: 36px;
+  padding-left: 12px;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.team-menu .ant-menu-item:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.team-menu .ant-menu-item-selected {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.team-menu .ant-menu-item-selected::after {
+  display: none;
+}
+
+.team-menu .ant-menu-item .anticon {
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.team-menu .ant-menu-item-selected .anticon {
+  color: #2563eb;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .team-sidebar {
+    width: 100%;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    z-index: 100;
+    height: calc(100vh - 64px);
+  }
+}
