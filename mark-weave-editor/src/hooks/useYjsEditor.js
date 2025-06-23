@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-02 20:16:44
+ * @LastEditTime: 2025-06-24 02:34:44
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -31,12 +31,7 @@ export function useYjsEditor(docId, editorRef) {
 
   console.log("当前文档ID:", docId);
   useEffect(() => {
-    const provider = new WebsocketProvider(
-      "ws://localhost:1235",
-      // "room1",
-      docId,
-      ydoc
-    );
+    const provider = new WebsocketProvider("ws://localhost:1234", docId, ydoc);
     provider.awareness.setLocalStateField("removeTimeout", 1000); // 设置为 1 秒（示例值）
 
     const aw = provider.awareness;

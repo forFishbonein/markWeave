@@ -12,10 +12,15 @@ import http from "http";
 import { WebSocketServer } from "ws";
 import { setupWSConnection } from "y-websocket/bin/utils.js";
 import * as Y from "yjs";
-import { loadDocState, saveDocState } from "./persistence.js";
+import {
+  loadDocState,
+  saveDocState,
+  loadDocContent,
+  saveDocContent,
+  updateDocumentTitle,
+} from "./persistence.js";
 import cors from "cors";
-import { json } from "stream/consumers";
-import debounce from "lodash.debounce"; // npm i lodash.debounce
+import debounce from "lodash.debounce";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
@@ -27,12 +32,135 @@ dotenv.config();
 const app = express();
 app.use(express.static("public"));
 // 添加 JSON body 解析中间件
-app.use(express.json({ limit: "50mb" })); // 允许最大 50MB 的 JSON 请求体
-app.use(express.urlencoded({ extended: true, limit: "50mb" })); // 处理 URL 编码的请求体
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
 // API 路由
 app.use("/api", apiRoutes);
+
+// 文档内容相关API
+app.get("/api/doc/:docId", async (req, res) => {
+  const { docId } = req.params;
+
+  try {
+    const doc = await loadDocContent(docId);
+
+    if (!doc) {
+      return res.status(404).json({
+        success: false,
+        message: "文档不存在",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: doc,
+    });
+  } catch (err) {
+    console.error("获取文档失败:", err);
+    res.status(500).json({
+      success: false,
+      message: "获取文档失败",
+      error: err.message,
+    });
+  }
+});
+
+app.put("/api/doc/:docId", async (req, res) => {
+  const { docId } = req.params;
+  const { content, userId, teamId } = req.body;
+
+  if (!content) {
+    return res.status(400).json({
+      success: false,
+      message: "缺少文档内容",
+    });
+  }
+
+  try {
+    await saveDocContent(docId, content, userId, teamId);
+
+    res.json({
+      success: true,
+      message: "文档保存成功",
+    });
+  } catch (err) {
+    console.error("保存文档失败:", err);
+    res.status(500).json({
+      success: false,
+      message: "保存文档失败",
+      error: err.message,
+    });
+  }
+});
+
+app.put("/api/doc/:docId/title", async (req, res) => {
+  const { docId } = req.params;
+  const { title } = req.body;
+
+  if (!title || !title.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "标题不能为空",
+    });
+  }
+
+  try {
+    await updateDocumentTitle(docId, title.trim());
+
+    res.json({
+      success: true,
+      message: "标题更新成功",
+    });
+  } catch (err) {
+    console.error("更新标题失败:", err);
+    res.status(500).json({
+      success: false,
+      message: "更新标题失败",
+      error: err.message,
+    });
+  }
+});
+
+// CRDT同步相关的API端点
+app.post("/api/doc", async (req, res) => {
+  const { id, content } = req.body; // content是base64编码的Yjs更新
+
+  if (!id || !content) {
+    return res.status(400).json({ error: "缺少 docId 或 update content" });
+  }
+
+  try {
+    const ydoc = await getYDoc(id);
+    const uint8 = Uint8Array.from(Buffer.from(content, "base64"));
+    Y.applyUpdate(ydoc, uint8);
+    // saveDocState 会在 debounce 中自动调用
+    res.json({ message: "更新已应用" });
+  } catch (err) {
+    console.error("应用 update 时出错:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/initial", async (req, res) => {
+  const { docId } = req.query;
+
+  if (!docId) {
+    return res.status(400).json({ error: "缺少 docId 参数" });
+  }
+
+  try {
+    const ydoc = await getYDoc(docId);
+    const stateBase64 = Buffer.from(Y.encodeStateAsUpdate(ydoc)).toString(
+      "base64"
+    );
+    res.json({ docId, update: stateBase64 });
+  } catch (err) {
+    console.error("加载初始文档失败:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // 错误处理中间件
 app.use(errorHandler);
@@ -62,10 +190,9 @@ mongoose
     console.error("❌ MongoDB connection error:", err);
   });
 
-// const docId = "room1"; // 示例：每个文档对应一个房间
-
-// 每个房间对应一个 Y.Doc（这里简单示例一个文档）——> 这个没法处理，因为我们获取不到 ydoc 的内容！
+// Yjs文档管理
 const docs = new Map();
+
 async function getYDoc(roomName) {
   console.log("📄 Loading document:", roomName);
 
@@ -90,63 +217,8 @@ async function getYDoc(roomName) {
 
   return ydoc;
 }
-app.post("/api/doc", async (req, res) => {
-  // const { id, content } = req.body;
-  // if (!id || !content) {
-  //   return res.status(400).json({ error: "缺少 id 或文档内容" });
-  // }
-  // try {
-  //   console.log("更新文档：", id);
-  //   saveDocState(id, content).catch((err) => {
-  //     console.error(`保存文档 ${docId} 出错:`, err);
-  //   });
-  //   docs.set(id, content);
-  //   res.json({ message: "文档更新并持久化成功" });
-  // } catch (err) {
-  //   console.error("更新文档时出错:", err);
-  //   res.status(500).json({ error: err.message });
-  // }
-  const { id, content } = req.body; // content 应是 base64 字符串
-  if (!id || !content)
-    return res.status(400).json({ error: "缺少 docId 或 update content" });
 
-  try {
-    const ydoc = await getYDoc(id);
-    const uint8 = Uint8Array.from(Buffer.from(content, "base64"));
-    Y.applyUpdate(ydoc, uint8);
-    // saveDocState 会在 debounce 中自动调用
-    res.json({ message: "更新已应用" });
-  } catch (err) {
-    console.error("应用 update 时出错:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
-app.get("/api/initial", async (req, res) => {
-  // const { docId } = req.query;
-  // if (!docId) {
-  //   return res.status(400).json({ error: "缺少 docId 参数" });
-  // }
-  // try {
-  //   const initialData = await getYDoc(docId);
-  //   res.json({ docId, content: initialData });
-  // } catch (err) {
-  //   console.error("加载初始文档状态时出错:", err);
-  //   res.status(500).json({ error: err.message });
-  // }
-  const { docId } = req.query;
-  if (!docId) return res.status(400).json({ error: "缺少 docId 参数" });
-
-  try {
-    const ydoc = await getYDoc(docId);
-    const stateBase64 = Buffer.from(Y.encodeStateAsUpdate(ydoc)).toString(
-      "base64"
-    );
-    res.json({ docId, update: stateBase64 });
-  } catch (err) {
-    console.error("加载初始文档失败:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
+// WebSocket处理
 wss.on("connection", async (ws, req) => {
   try {
     const url = new URL(req.url, `ws://${req.headers.host}`);
@@ -161,15 +233,6 @@ wss.on("connection", async (ws, req) => {
     ws.close();
   }
 });
-
-// 每隔一定时间保存文档状态（例如每 10 秒保存一次）——> 没有意义，应该从前端作为入口，更新的时候调用接口来保存数据！
-// setInterval(() => {
-//   docs.forEach((ydoc, id) => {
-//     saveDocState(id, ydoc).catch((err) => {
-//       console.error(`保存文档 ${docId} 出错:`, err);
-//     });
-//   });
-// }, 10000);
 
 const PORT = process.env.PORT || 1234;
 server.listen(PORT, () => {

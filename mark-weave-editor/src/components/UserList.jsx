@@ -25,10 +25,10 @@ const UserList = ({ awareness }) => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    // 监听 awareness 变化
+    // Listen for awareness changes
     const onAwarenessChange = () => {
       const states = Array.from(awareness.getStates().values());
-      // 过滤出包含 user 信息的状态
+      // Filter states that contain user information
       let userList = states
         .filter((state) => state.user)
         .map((state) => state.user);
@@ -39,7 +39,7 @@ const UserList = ({ awareness }) => {
 
     awareness.on("change", onAwarenessChange);
 
-    // 初始时也更新一次
+    // Update once initially
     onAwarenessChange();
 
     return () => {
@@ -48,8 +48,8 @@ const UserList = ({ awareness }) => {
   }, [awareness]);
 
   return (
-    <div className='user-list'>
-      <h3>当前在线用户：</h3>
+    <div className='online-users'>
+      <h4>Online Users:</h4>
       <ul>
         {users.map((user, idx) => (
           <li key={idx} style={{ color: user.color }}>

@@ -138,7 +138,7 @@ export async function loadInitialData(docId) {
     try {
       // 这里请求一个接口，接口地址根据实际情况设置
       const response = await fetch(
-        `http://localhost:1235/api/initial?docId=${docId}`
+        `http://localhost:1234/api/initial?docId=${docId}`
       );
       if (!response.ok) {
         throw new Error("网络响应错误");

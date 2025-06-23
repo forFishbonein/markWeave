@@ -1,41 +1,39 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Modal, Form, Input } from 'antd';
 
-const NewDocModal = ({ open, onClose, onCreate }) => {
+const NewDocModal = ({ visible, onOk, onCancel, loading }) => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
 
-  const handleOk = async () => {
-    try {
-      setLoading(true);
-      const values = await form.validateFields();
-      // 生成新文档对象（实际应由后端返回）
-      const newDoc = {
-        key: Date.now().toString(),
-        name: values.name,
-        updated: new Date().toLocaleDateString(),
-      };
-      onCreate(newDoc);
+  const handleOk = () => {
+    form.validateFields().then(values => {
+      onOk(values);
       form.resetFields();
-      setLoading(false);
-      onClose();
-    } catch (e) {
-      setLoading(false);
-    }
+    });
   };
+
+  // Generate new document object (should be returned by backend in actual implementation)
+  const generateNewDoc = (values) => ({
+    id: Date.now(),
+    name: values.name,
+    type: 'document',
+    updated: new Date().toISOString(),
+    created: new Date().toISOString(),
+  });
 
   return (
     <Modal
-      title="新建文档"
-      open={open}
+      title="New Document"
+      open={visible}
       onOk={handleOk}
-      onCancel={onClose}
+      onCancel={onCancel}
       confirmLoading={loading}
-      okText="创建"
-      cancelText="取消"
+      okText="Create"
+      cancelText="Cancel"
     >
       <Form form={form} layout="vertical">
-        <Form.Item label="文档名称" name="name" rules={[{ required: true, message: '请输入文档名称' }]}> <Input /> </Form.Item>
+        <Form.Item label="Document Name" name="name" rules={[{ required: true, message: 'Please enter document name' }]}>
+          <Input />
+        </Form.Item>
       </Form>
     </Modal>
   );

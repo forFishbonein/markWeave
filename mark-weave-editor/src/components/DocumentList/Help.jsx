@@ -2,8 +2,8 @@ import React from 'react';
 
 const Help = () => (
   <div style={{ maxWidth: 400 }}>
-    <h3>帮助</h3>
-    <p>这里是帮助内容（可根据实际需求扩展）。</p>
+    <h3>Help</h3>
+    <p>Help content can be expanded here based on actual requirements.</p>
   </div>
 );
 

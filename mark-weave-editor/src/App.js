@@ -13,7 +13,7 @@ import LoginRegister from "./components/LoginRegister";
 import Home from "./components/Home/Home";
 import TeamLayout from "./components/Team/TeamLayout";
 import DocumentList from "./components/Documents/DocumentList";
-import EditorPage from "./components/Documents/EditorPage";
+import EditorPage from "./components/EditorPage/EditorPage";
 import MemberList from "./components/Members/MemberList";
 import TeamSettings from "./components/Settings/TeamSettings";
 import GlobalHeader from "./components/GlobalHeader";
@@ -46,9 +46,9 @@ function App() {
               </ProtectedRoute>
             }>
             <Route path='/home' element={<Home />} />
+            <Route path='/editor/:id' element={<EditorPage />} />
             <Route path='/team/:teamId/*' element={<TeamLayout />}>
               <Route path='documents' element={<DocumentList />} />
-              <Route path='editor/:docId' element={<EditorPage />} />
               <Route path='members' element={<MemberList />} />
               <Route path='team-settings' element={<TeamSettings />} />
               <Route index element={<Navigate to='documents' replace />} />

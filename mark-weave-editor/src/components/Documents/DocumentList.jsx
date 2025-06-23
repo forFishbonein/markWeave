@@ -13,15 +13,15 @@ const DocumentList = () => {
   const navigate = useNavigate();
   const { teamId } = useParams();
 
-  // 加载团队文档
+  // Load team documents
   const loadDocuments = async () => {
     try {
       setLoading(true);
       const response = await apiService.getTeamDocuments(teamId);
       setDocuments(response || []);
     } catch (error) {
-      console.error('加载文档失败:', error);
-      message.error('加载文档失败：' + error.message);
+      console.error('Failed to load documents:', error);
+      message.error('Failed to load documents: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -35,7 +35,7 @@ const DocumentList = () => {
 
   const columns = [
     {
-      title: '名称',
+      title: 'Name',
       dataIndex: 'title',
       key: 'title',
       render: (text, record) => (
@@ -46,20 +46,20 @@ const DocumentList = () => {
       ),
     },
     {
-      title: '创建者',
+      title: 'Creator',
       dataIndex: 'ownerId',
       key: 'owner',
-      render: (owner) => owner?.username || '未知',
+      render: (owner) => owner?.username || 'Unknown',
     },
     {
-      title: '最后更新时间',
+      title: 'Last Updated',
       dataIndex: 'lastUpdated',
       key: 'lastUpdated',
       render: (date) => new Date(date).toLocaleString(),
     },
   ];
 
-  // 新建文档逻辑
+  // Create new document logic
   const handleCreateDoc = async (values) => {
     try {
       setCreating(true);
@@ -68,13 +68,13 @@ const DocumentList = () => {
         teamId: teamId,
       });
 
-      message.success('文档创建成功');
+      message.success('Document created successfully');
       setNewDocModalOpen(false);
       createForm.resetFields();
-      await loadDocuments(); // 重新加载文档列表
+      await loadDocuments(); // Reload document list
     } catch (error) {
-      console.error('创建文档失败:', error);
-      message.error('创建文档失败：' + error.message);
+      console.error('Failed to create document:', error);
+      message.error('Failed to create document: ' + error.message);
     } finally {
       setCreating(false);
     }
@@ -121,7 +121,7 @@ const DocumentList = () => {
           margin: 0,
           color: '#333'
         }}>
-          文档列表
+          Document List
         </h2>
         <Button
           type="primary"
@@ -130,13 +130,13 @@ const DocumentList = () => {
           size="large"
           style={{ borderRadius: 6 }}
         >
-          新建文档
+          New Document
         </Button>
       </div>
 
       <div style={{ marginBottom: 16 }}>
         <Input.Search
-          placeholder="搜索文档..."
+          placeholder="Search documents..."
           style={{ width: 300 }}
           size="large"
         />
@@ -147,8 +147,8 @@ const DocumentList = () => {
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={
             <span style={{ color: '#999' }}>
-              还没有创建任何文档<br />
-              点击上方按钮创建第一个文档
+              No documents created yet<br />
+              Click the button above to create your first document
             </span>
           }
         >
@@ -157,16 +157,17 @@ const DocumentList = () => {
             icon={<PlusOutlined />}
             onClick={() => setNewDocModalOpen(true)}
           >
-            新建文档
+            New Document
           </Button>
         </Empty>
       ) : (
         <Table
           dataSource={documents}
           columns={columns}
+          rowKey="docId"
           rowClassName="doclist-row"
           onRow={record => ({
-            onClick: () => navigate(`/team/${teamId}/editor/${record._id}`),
+            onClick: () => navigate(`/editor/${record.docId}`),
             style: { cursor: 'pointer' }
           })}
           pagination={{
@@ -177,9 +178,9 @@ const DocumentList = () => {
         />
       )}
 
-      {/* 新建文档弹窗 */}
+      {/* New document modal */}
       <Modal
-        title="新建文档"
+        title="New Document"
         open={newDocModalOpen}
         onCancel={handleModalCancel}
         footer={null}
@@ -192,16 +193,16 @@ const DocumentList = () => {
           style={{ marginTop: 24 }}
         >
           <Form.Item
-            label="文档标题"
+            label="Document Title"
             name="title"
             rules={[
-              { required: true, message: '请输入文档标题' },
-              { min: 1, message: '文档标题不能为空' },
-              { max: 100, message: '文档标题最多100个字符' }
+              { required: true, message: 'Please enter document title' },
+              { min: 1, message: 'Document title cannot be empty' },
+              { max: 100, message: 'Document title must be at most 100 characters' }
             ]}
           >
             <Input
-              placeholder="请输入文档标题"
+              placeholder="Enter document title"
               size="large"
               style={{ borderRadius: 6 }}
             />
@@ -213,7 +214,7 @@ const DocumentList = () => {
                 onClick={handleModalCancel}
                 style={{ borderRadius: 6 }}
               >
-                取消
+                Cancel
               </Button>
               <Button
                 type="primary"
@@ -221,7 +222,7 @@ const DocumentList = () => {
                 loading={creating}
                 style={{ borderRadius: 6 }}
               >
-                创建文档
+                Create Document
               </Button>
             </div>
           </Form.Item>

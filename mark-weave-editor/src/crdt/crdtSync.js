@@ -19,7 +19,7 @@ export function syncToProseMirror(view, docId) {
     const update = Y.encodeStateAsUpdate(ydoc); // Uint8Array
     const updateB64 = Buffer.from(update).toString("base64");
     //这里把变化传入后端，但是只作为持久化存储，方便下一次打开的时候文档还在，但是不作为向其他用户的同步
-    fetch("http://localhost:1235/api/doc", {
+    fetch("http://localhost:1234/api/doc", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

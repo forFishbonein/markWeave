@@ -1,16 +1,16 @@
 import React from 'react';
 import { Modal } from 'antd';
 
-const FilterModal = ({ open, onClose }) => (
+const FilterModal = ({ visible, onOk, onCancel }) => (
   <Modal
-    title="筛选"
-    open={open}
-    onOk={onClose}
-    onCancel={onClose}
-    okText="确定"
-    cancelText="取消"
+    title="Filter"
+    open={visible}
+    onOk={onOk}
+    onCancel={onCancel}
+    okText="OK"
+    cancelText="Cancel"
   >
-    <p>这里是筛选条件（可根据实际需求扩展）。</p>
+    <p>Filter conditions can be expanded here based on actual requirements.</p>
   </Modal>
 );
 

@@ -13,15 +13,15 @@ const MemberList = () => {
   const [inviting, setInviting] = useState(false);
   const [inviteForm] = Form.useForm();
 
-  // 加载团队成员信息
+  // Load team member information
   const loadTeamMembers = async () => {
     try {
       setLoading(true);
       const response = await apiService.getTeamDetails(teamId);
       setTeam(response);
     } catch (error) {
-      console.error('加载团队成员失败:', error);
-      message.error('加载团队成员失败：' + error.message);
+      console.error('Failed to load team members:', error);
+      message.error('Failed to load team members: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -33,60 +33,60 @@ const MemberList = () => {
     }
   }, [teamId]);
 
-  // 邀请成员逻辑
+  // Invite member logic
   const handleInvite = async (values) => {
     try {
       setInviting(true);
       await apiService.inviteMember(teamId, {
         email: values.email,
-        role: values.role === '管理员' ? 'admin' : 'member',
+        role: values.role === 'Administrator' ? 'admin' : 'member',
       });
 
-      message.success('邀请已发送');
+      message.success('Invitation sent');
       inviteForm.resetFields();
-      // 重新加载团队信息
+      // Reload team information
       await loadTeamMembers();
     } catch (error) {
-      console.error('邀请成员失败:', error);
-      message.error('邀请成员失败：' + error.message);
+      console.error('Failed to invite member:', error);
+      message.error('Failed to invite member: ' + error.message);
     } finally {
       setInviting(false);
     }
   };
 
-  // 移除成员逻辑
+  // Remove member logic
   const handleRemove = (member) => {
     Modal.confirm({
-      title: '确认移除该成员？',
-      content: `移除后 ${member.userId.username} 将无法访问团队内容。`,
-      okText: '确认',
-      cancelText: '取消',
+      title: 'Confirm to remove this member?',
+      content: `After removal, ${member.userId.username} will not be able to access team content.`,
+      okText: 'Confirm',
+      cancelText: 'Cancel',
       onOk: async () => {
         try {
           await apiService.removeMember(teamId, member.userId._id);
-          message.success('成员已移除');
+          message.success('Member removed');
           await loadTeamMembers();
         } catch (error) {
-          console.error('移除成员失败:', error);
-          message.error('移除成员失败：' + error.message);
+          console.error('Failed to remove member:', error);
+          message.error('Failed to remove member: ' + error.message);
         }
       },
     });
   };
 
-  // 获取角色显示文本
+  // Get role display text
   const getRoleText = (role) => {
     switch (role) {
       case 'owner':
-        return '所有者';
+        return 'Owner';
       case 'admin':
-        return '管理员';
+        return 'Administrator';
       default:
-        return '成员';
+        return 'Member';
     }
   };
 
-  // 获取角色标签颜色
+  // Get role tag color
   const getRoleColor = (role) => {
     switch (role) {
       case 'owner':
@@ -98,7 +98,7 @@ const MemberList = () => {
     }
   };
 
-  // 检查当前用户是否有权限操作
+  // Check if current user has permission to manage
   const canManageMembers = () => {
     if (!team || !user) return false;
     const currentUserMember = team.members?.find(m => m.userId._id === user.userId);
@@ -135,10 +135,10 @@ const MemberList = () => {
         marginBottom: 24,
         color: '#333'
       }}>
-        成员管理
+        Member Management
       </h3>
 
-      {/* 邀请成员表单 */}
+      {/* Invite member form */}
       {canManageMembers() && (
         <div style={{
           background: '#fafafa',
@@ -146,7 +146,7 @@ const MemberList = () => {
           borderRadius: 8,
           marginBottom: 24
         }}>
-          <h4 style={{ marginBottom: 16, color: '#333' }}>邀请新成员</h4>
+          <h4 style={{ marginBottom: 16, color: '#333' }}>Invite New Member</h4>
           <Form
             form={inviteForm}
             layout="inline"
@@ -155,12 +155,12 @@ const MemberList = () => {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: '请输入邮箱' },
-                { type: 'email', message: '请输入有效的邮箱地址' }
+                { required: true, message: 'Please enter email' },
+                { type: 'email', message: 'Please enter a valid email address' }
               ]}
             >
               <Input
-                placeholder="请输入成员邮箱"
+                placeholder="Enter member email"
                 prefix={<MailOutlined />}
                 style={{ width: 240 }}
               />
@@ -168,11 +168,11 @@ const MemberList = () => {
 
             <Form.Item
               name="role"
-              initialValue="成员"
+              initialValue="Member"
             >
               <Select style={{ width: 120 }}>
-                <Select.Option value="成员">成员</Select.Option>
-                <Select.Option value="管理员">管理员</Select.Option>
+                <Select.Option value="Member">Member</Select.Option>
+                <Select.Option value="Administrator">Administrator</Select.Option>
               </Select>
             </Form.Item>
 
@@ -182,14 +182,14 @@ const MemberList = () => {
                 htmlType="submit"
                 loading={inviting}
               >
-                发送邀请
+                Send Invitation
               </Button>
             </Form.Item>
           </Form>
         </div>
       )}
 
-      {/* 成员列表 */}
+      {/* Member list */}
       <List
         dataSource={team?.members || []}
         renderItem={(member) => (
@@ -207,7 +207,7 @@ const MemberList = () => {
                   size="small"
                   onClick={() => handleRemove(member)}
                 >
-                  移除
+                  Remove
                 </Button>
               ] : [])
             ]}
@@ -226,7 +226,7 @@ const MemberList = () => {
                     {member.userId.username}
                   </span>
                   {member.userId._id === user?.userId && (
-                    <Tag size="small" color="green">我</Tag>
+                    <Tag size="small" color="green">Me</Tag>
                   )}
                 </div>
               }
@@ -234,7 +234,7 @@ const MemberList = () => {
                 <div>
                   <div style={{ color: '#666' }}>{member.userId.email}</div>
                   <div style={{ color: '#999', fontSize: 12 }}>
-                    加入时间：{new Date(member.joinedAt).toLocaleDateString()}
+                    Joined: {new Date(member.joinedAt).toLocaleDateString()}
                   </div>
                 </div>
               }
@@ -242,7 +242,7 @@ const MemberList = () => {
           </List.Item>
         )}
         locale={{
-          emptyText: '暂无成员'
+          emptyText: 'No members'
         }}
       />
     </div>

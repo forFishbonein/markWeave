@@ -6,6 +6,11 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
+  // 获取基础URL
+  getBaseURL() {
+    return this.baseURL;
+  }
+
   // 通用请求方法
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
@@ -52,6 +57,11 @@ class ApiService {
 
   async getProfile() {
     return this.request("/auth/profile");
+  }
+
+  // 便捷方法，和 getProfile 功能相同
+  async getCurrentUser() {
+    return this.getProfile();
   }
 
   // 团队相关API
@@ -106,6 +116,11 @@ class ApiService {
     return this.request(`/documents/${docId}`);
   }
 
+  // 便捷方法，和 getDocumentDetails 功能相同
+  async getDocument(docId) {
+    return this.getDocumentDetails(docId);
+  }
+
   async updateDocument(docId, documentData) {
     return this.request(`/documents/${docId}`, {
       method: "PUT",
@@ -116,6 +131,25 @@ class ApiService {
   async deleteDocument(docId) {
     return this.request(`/documents/${docId}`, {
       method: "DELETE",
+    });
+  }
+
+  // 文档内容相关API
+  async getDocumentContent(docId) {
+    return this.request(`/doc/${docId}`);
+  }
+
+  async saveDocumentContent(docId, content, userId, teamId) {
+    return this.request(`/doc/${docId}`, {
+      method: "PUT",
+      body: JSON.stringify({ content, userId, teamId }),
+    });
+  }
+
+  async updateDocumentTitle(docId, title) {
+    return this.request(`/doc/${docId}/title`, {
+      method: "PUT",
+      body: JSON.stringify({ title }),
     });
   }
 }

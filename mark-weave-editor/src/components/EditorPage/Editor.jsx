@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:38:04
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-15 03:05:53
+ * @LastEditTime: 2025-06-24 02:30:57
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -18,21 +18,17 @@ import { v4 as uuidv4 } from "uuid";
 import { toggleMark } from "prosemirror-commands";
 import { schema } from "../../plugins/schema";
 
-// 这里假设我们从 URL 参数或外部 props 中获取 docId
-export default function Editor() {
+// 接收docId作为props
+export default function Editor({ docId }) {
   const editorRef = useRef(null);
 
-  // 从 URL 参数中获取 docId
-  const urlParams = new URLSearchParams(window.location.search);
-  let docId = urlParams.get("docId");
-
-  // 如果 URL 中没有 docId，则生成一个新的，并更新 URL（不刷新页面）
+  // 如果没有传入docId，则生成一个新的
   if (!docId) {
     docId = uuidv4();
-    urlParams.set("docId", docId);
-    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-    window.history.replaceState(null, "", newUrl);
+    console.warn("没有提供docId，生成新的docId:", docId);
   }
+
+  console.log("Editor组件使用的docId:", docId);
 
   // 调用自定义 Hook 获取 editorView
   const [editorView, awareness] = useYjsEditor(docId, editorRef);

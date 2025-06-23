@@ -1,14 +1,127 @@
 /* editer.css */
 .ProseMirror {
   white-space: pre-wrap;
-  padding: 1em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  min-height: 300px;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: 1.5rem;
+  border: none;
+  border-radius: 12px;
+  min-height: 350px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.7;
+  color: #2d3748;
   outline: none;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.ProseMirror:focus {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.ProseMirror p {
+  margin: 0.75rem 0;
+}
+
+.ProseMirror p:first-child {
+  margin-top: 0;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  color: #1a202c;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  color: #4a5568;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  color: #4a5568;
+}
+
+.ProseMirror strong {
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.ProseMirror em {
+  font-style: italic;
+  color: #4a5568;
+}
+
+.ProseMirror a {
+  color: #4a90e2;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(74, 144, 226, 0.3);
+  transition: all 0.2s ease;
+}
+
+.ProseMirror a:hover {
+  color: #667eea;
+  border-bottom-color: rgba(102, 126, 234, 0.5);
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid rgba(74, 144, 226, 0.3);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: #4a5568;
+  background: rgba(74, 144, 226, 0.05);
+  border-radius: 0 8px 8px 0;
+}
+
+.ProseMirror code {
+  background: rgba(74, 144, 226, 0.1);
+  color: #4a90e2;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+  font-size: 0.9em;
+}
+
+.ProseMirror pre {
+  background: rgba(45, 55, 72, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: #2d3748;
 }
 
 /* 光标样式 */
@@ -19,29 +132,126 @@
   position: absolute;
   pointer-events: none;
   z-index: 10;
+  animation: blink 1s infinite;
 }
 
-/* 工具栏样式（如果你增加工具栏） */
+@keyframes blink {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.user-cursor.user-1 {
+  border-color: #4a90e2;
+}
+
+.user-cursor.user-2 {
+  border-color: #ed64a6;
+}
+
+.user-cursor.user-3 {
+  border-color: #38b2ac;
+}
+
+.user-cursor.user-4 {
+  border-color: #ed8936;
+}
+
+.user-cursor.user-5 {
+  border-color: #9f7aea;
+}
+
+/* 选择区域样式 */
+.ProseMirror-selectednode {
+  outline: 2px solid rgba(74, 144, 226, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 占位符样式 */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #a0aec0;
+  pointer-events: none;
+  height: 0;
+}
+
+/* 工具栏样式增强 */
 .editor-toolbar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .editor-toolbar button {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 4px 8px;
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  color: #4a5568;
+  font-weight: 500;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
 }
 
 .editor-toolbar button:hover {
-  background: #f0f0f0;
+  background: rgba(102, 126, 234, 0.1);
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #667eea;
+  transform: translateY(-1px);
 }
 
 .editor-toolbar button.active {
-  background: #e0e0e0;
-  border-color: #bbb;
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.4);
+  color: #667eea;
+  font-weight: 600;
+}
+
+.editor-toolbar button:active {
+  transform: translateY(0);
+}
+
+/* 加载状态 */
+.editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  color: #a0aec0;
+  font-size: 1rem;
+}
+
+.editor-loading::before {
+  content: '✨';
+  margin-right: 0.5rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

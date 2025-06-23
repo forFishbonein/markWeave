@@ -11,7 +11,7 @@ const LoginRegister = () => {
   const navigate = useNavigate();
   const { login, register, loading, isAuthenticated, error } = useAuth();
 
-  // 如果已经登录，重定向到首页
+  // If already logged in, redirect to home page
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/home');
@@ -24,16 +24,16 @@ const LoginRegister = () => {
         email: values.email,
         password: values.password,
       });
-      message.success('登录成功！');
+      message.success('Login successful!');
       navigate('/home');
     } catch (error) {
-      message.error(error.message || '登录失败');
+      message.error(error.message || 'Login failed');
     }
   };
 
   const handleRegister = async (values) => {
     if (values.password !== values.confirmPassword) {
-      message.error('两次输入的密码不一致');
+      message.error('Passwords do not match');
       return;
     }
 
@@ -43,10 +43,10 @@ const LoginRegister = () => {
         username: values.username,
         password: values.password,
       });
-      message.success('注册成功！');
+      message.success('Registration successful!');
       navigate('/home');
     } catch (error) {
-      message.error(error.message || '注册失败');
+      message.error(error.message || 'Registration failed');
     }
   };
 
@@ -68,7 +68,7 @@ const LoginRegister = () => {
       <div className="login-register-box">
         <div className="brand-title">
           <h1>MarkWeave</h1>
-          <p>协作编辑，共创未来</p>
+          <p>Collaborative Editing, Creating the Future</p>
         </div>
 
         <Tabs
@@ -77,7 +77,7 @@ const LoginRegister = () => {
           centered
           className="login-register-tabs"
         >
-          <Tabs.TabPane tab="登录" key="login">
+          <Tabs.TabPane tab="Login" key="login">
             <Form
               form={loginForm}
               layout="vertical"
@@ -86,29 +86,29 @@ const LoginRegister = () => {
               autoComplete="off"
             >
               <Form.Item
-                label="邮箱"
+                label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: '请输入邮箱' },
-                  { type: 'email', message: '请输入有效的邮箱地址' }
+                  { required: true, message: 'Please enter your email' },
+                  { type: 'email', message: 'Please enter a valid email address' }
                 ]}
               >
-                <Input size="large" placeholder="请输入邮箱" />
+                <Input size="large" placeholder="Enter your email" />
               </Form.Item>
 
               <Form.Item
-                label="密码"
+                label="Password"
                 name="password"
                 rules={[
-                  { required: true, message: '请输入密码' },
-                  { min: 6, message: '密码至少6位' }
+                  { required: true, message: 'Please enter your password' },
+                  { min: 6, message: 'Password must be at least 6 characters' }
                 ]}
               >
-                <Input.Password size="large" placeholder="请输入密码" />
+                <Input.Password size="large" placeholder="Enter your password" />
               </Form.Item>
 
               <Form.Item name="remember" valuePropName="checked">
-                <Checkbox>记住我</Checkbox>
+                <Checkbox>Remember me</Checkbox>
               </Form.Item>
 
               <Form.Item>
@@ -119,13 +119,13 @@ const LoginRegister = () => {
                   size="large"
                   loading={loading}
                 >
-                  登录
+                  Login
                 </Button>
               </Form.Item>
             </Form>
           </Tabs.TabPane>
 
-          <Tabs.TabPane tab="注册" key="register">
+          <Tabs.TabPane tab="Register" key="register">
             <Form
               form={registerForm}
               layout="vertical"
@@ -134,55 +134,55 @@ const LoginRegister = () => {
               autoComplete="off"
             >
               <Form.Item
-                label="用户名"
+                label="Username"
                 name="username"
                 rules={[
-                  { required: true, message: '请输入用户名' },
-                  { min: 2, message: '用户名至少2位' },
-                  { max: 30, message: '用户名最多30位' }
+                  { required: true, message: 'Please enter a username' },
+                  { min: 2, message: 'Username must be at least 2 characters' },
+                  { max: 30, message: 'Username must be at most 30 characters' }
                 ]}
               >
-                <Input size="large" placeholder="请输入用户名" />
+                <Input size="large" placeholder="Enter your username" />
               </Form.Item>
 
               <Form.Item
-                label="邮箱"
+                label="Email"
                 name="email"
                 rules={[
-                  { required: true, message: '请输入邮箱' },
-                  { type: 'email', message: '请输入有效的邮箱地址' }
+                  { required: true, message: 'Please enter your email' },
+                  { type: 'email', message: 'Please enter a valid email address' }
                 ]}
               >
-                <Input size="large" placeholder="请输入邮箱" />
+                <Input size="large" placeholder="Enter your email" />
               </Form.Item>
 
               <Form.Item
-                label="密码"
+                label="Password"
                 name="password"
                 rules={[
-                  { required: true, message: '请输入密码' },
-                  { min: 6, message: '密码至少6位' }
+                  { required: true, message: 'Please enter a password' },
+                  { min: 6, message: 'Password must be at least 6 characters' }
                 ]}
               >
-                <Input.Password size="large" placeholder="请输入密码" />
+                <Input.Password size="large" placeholder="Enter your password" />
               </Form.Item>
 
               <Form.Item
-                label="确认密码"
+                label="Confirm Password"
                 name="confirmPassword"
                 rules={[
-                  { required: true, message: '请确认密码' },
+                  { required: true, message: 'Please confirm your password' },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (!value || getFieldValue('password') === value) {
                         return Promise.resolve();
                       }
-                      return Promise.reject(new Error('两次输入的密码不一致'));
+                      return Promise.reject(new Error('Passwords do not match'));
                     },
                   }),
                 ]}
               >
-                <Input.Password size="large" placeholder="请再次输入密码" />
+                <Input.Password size="large" placeholder="Confirm your password" />
               </Form.Item>
 
               <Form.Item>
@@ -193,7 +193,7 @@ const LoginRegister = () => {
                   size="large"
                   loading={loading}
                 >
-                  注册
+                  Register
                 </Button>
               </Form.Item>
             </Form>

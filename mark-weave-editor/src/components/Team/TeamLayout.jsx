@@ -5,9 +5,20 @@ import TeamSidebar from './TeamSidebar';
 const TeamLayout = () => {
   const { teamId } = useParams();
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#f5f6fa' }}>
+    <div style={{
+      display: 'flex',
+      minHeight: '100vh',
+      background: '#fafbfc'
+    }}>
       <TeamSidebar teamId={teamId} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '40px 40px', minWidth: 0, background: '#f5f6fa' }}>
+      <div style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        padding: '32px 40px',
+        minWidth: 0,
+        background: '#fafbfc'
+      }}>
         {/* 可选顶部栏 TeamHeader */}
         <Outlet />
       </div>
