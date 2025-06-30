@@ -1,0 +1,319 @@
+@startuml
+!theme cerulean-outline
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classAttributeFontSize 10
+skinparam packageStyle rectangle
+
+package "Entity Layer (实体层)" {
+  class User {
+    +_id: ObjectId
+    +email: String
+    +username: String
+    +password: String
+    +avatar: String
+    +lastLogin: Date
+    +createdAt: Date
+    +updatedAt: Date
+    --
+    +comparePassword(): Boolean
+  }
+
+  class Team {
+    +_id: ObjectId
+    +name: String
+    +description: String
+    +ownerId: ObjectId
+    +members: TeamMember[]
+    +createdAt: Date
+    +updatedAt: Date
+    --
+    +memberCount: Number {virtual}
+    +addMember(): void
+  }
+
+  class TeamMember {
+    +userId: ObjectId
+    +role: String
+    +joinedAt: Date
+  }
+
+  class TeamInvite {
+    +_id: ObjectId
+    +teamId: ObjectId
+    +email: String
+    +role: String
+    +status: String
+    +invitedBy: ObjectId
+    +expiresAt: Date
+    +createdAt: Date
+    +updatedAt: Date
+  }
+
+  class Doc {
+    +_id: ObjectId
+    +docId: String
+    +title: String
+    +teamId: ObjectId
+    +ownerId: ObjectId
+    +content: Mixed
+    +participants: Participant[]
+    +createdAt: Date
+    +lastUpdated: Date
+    +version: Number
+  }
+
+  class Participant {
+    +userId: ObjectId
+    +role: String
+  }
+}
+
+package "Controller Layer (控制层)" {
+  class AuthController {
+    +register(req, res, next): void
+    +login(req, res, next): void
+    +getProfile(req, res, next): void
+  }
+
+  class TeamController {
+    +createTeam(req, res, next): void
+    +getUserTeams(req, res, next): void
+    +getTeamDetails(req, res, next): void
+    +updateTeam(req, res, next): void
+    +inviteMember(req, res, next): void
+    +removeMember(req, res, next): void
+  }
+
+  class DocumentController {
+    +createDocument(req, res, next): void
+    +getTeamDocuments(req, res, next): void
+    +getDocumentDetails(req, res, next): void
+    +updateDocument(req, res, next): void
+    +deleteDocument(req, res, next): void
+  }
+}
+
+package "Service Layer (服务层)" {
+  class AuthService {
+    +authenticateUser(): User
+    +generateToken(): String
+    +validateToken(): Boolean
+  }
+
+  class TeamService {
+    +createTeam(): Team
+    +validateMembership(): Boolean
+    +sendInvitation(): void
+  }
+
+  class DocumentService {
+    +createDocument(): Doc
+    +validateAccess(): Boolean
+    +syncContent(): void
+  }
+
+  class PersistenceService {
+    +loadDocState(): void
+    +saveDocState(): void
+    +loadDocContent(): Object
+    +saveDocContent(): void
+    +updateDocumentTitle(): void
+  }
+}
+
+package "Middleware Layer (中间件层)" {
+  class AuthMiddleware {
+    +authenticate(req, res, next): void
+  }
+
+  class ValidationMiddleware {
+    +validateRequest(req, res, next): void
+  }
+
+  class ErrorMiddleware {
+    +errorHandler(err, req, res, next): void
+  }
+}
+
+package "Router Layer (路由层)" {
+  class AuthRoutes {
+    +POST /register
+    +POST /login
+    +GET /profile
+  }
+
+  class TeamRoutes {
+    +POST /teams
+    +GET /teams
+    +GET /teams/:id
+    +PUT /teams/:id
+    +POST /teams/:id/invites
+  }
+
+  class DocumentRoutes {
+    +POST /documents
+    +GET /documents/team/:teamId
+    +GET /documents/:docId
+    +PUT /documents/:docId
+    +DELETE /documents/:docId
+  }
+}
+
+package "Boundary Layer (边界层) - Frontend Components" {
+  class LoginRegister {
+    +handleLogin(): void
+    +handleRegister(): void
+    +render(): JSX
+  }
+
+  class Home {
+    +loadTeams(): void
+    +handleCreateTeam(): void
+    +render(): JSX
+  }
+
+  class DocumentList {
+    +loadDocuments(): void
+    +handleCreateDoc(): void
+    +render(): JSX
+  }
+
+  class MemberList {
+    +loadTeamMembers(): void
+    +handleInvite(): void
+    +handleRemove(): void
+    +render(): JSX
+  }
+
+  class TeamSettings {
+    +loadTeamInfo(): void
+    +handleSave(): void
+    +handleDelete(): void
+    +render(): JSX
+  }
+
+  class EditorPage {
+    +loadDocument(): void
+    +handleSave(): void
+    +render(): JSX
+  }
+
+  class EditorHeader {
+    +handleTitleEdit(): void
+    +handleBack(): void
+    +render(): JSX
+  }
+
+  class GlobalHeader {
+    +handleLogout(): void
+    +render(): JSX
+  }
+}
+
+package "API Service Layer (API服务层)" {
+  class ApiService {
+    +request(): Promise
+    +login(): Promise
+    +register(): Promise
+    +getCurrentUser(): Promise
+    +createTeam(): Promise
+    +getUserTeams(): Promise
+    +getTeamDetails(): Promise
+    +updateTeam(): Promise
+    +inviteMember(): Promise
+    +createDocument(): Promise
+    +getTeamDocuments(): Promise
+    +getDocumentDetails(): Promise
+    +updateDocument(): Promise
+    +saveDocumentContent(): Promise
+  }
+}
+
+package "Context Layer (上下文层)" {
+  class AuthContext {
+    +user: User
+    +isAuthenticated: Boolean
+    +loading: Boolean
+    +login(): Promise
+    +register(): Promise
+    +logout(): void
+  }
+
+  class ProtectedRoute {
+    +checkAuth(): Boolean
+    +render(): JSX
+  }
+}
+
+package "Real-time Collaboration Layer (实时协作层)" {
+  class YjsProvider {
+    +doc: Y.Doc
+    +awareness: Awareness
+    +connect(): void
+    +disconnect(): void
+  }
+
+  class Editor {
+    +editorView: EditorView
+    +handleChange(): void
+    +syncChanges(): void
+    +render(): JSX
+  }
+
+  class UserList {
+    +users: User[]
+    +updateUsers(): void
+    +render(): JSX
+  }
+}
+
+' Relationships between layers
+AuthController --> AuthService
+TeamController --> TeamService
+DocumentController --> DocumentService
+DocumentController --> PersistenceService
+
+AuthRoutes --> AuthController
+TeamRoutes --> TeamController
+DocumentRoutes --> DocumentController
+
+AuthController --> AuthMiddleware
+TeamController --> AuthMiddleware
+DocumentController --> AuthMiddleware
+
+AuthController --> ValidationMiddleware
+TeamController --> ValidationMiddleware
+DocumentController --> ValidationMiddleware
+
+LoginRegister --> ApiService
+Home --> ApiService
+DocumentList --> ApiService
+MemberList --> ApiService
+TeamSettings --> ApiService
+EditorPage --> ApiService
+
+ApiService --> AuthRoutes
+ApiService --> TeamRoutes
+ApiService --> DocumentRoutes
+
+AuthContext --> ApiService
+ProtectedRoute --> AuthContext
+
+LoginRegister --> AuthContext
+Home --> AuthContext
+GlobalHeader --> AuthContext
+
+Team ||--o{ TeamMember
+Team ||--o{ TeamInvite
+Team ||--o{ Doc
+User ||--o{ TeamMember
+User ||--o{ TeamInvite
+User ||--o{ Doc
+Doc ||--o{ Participant
+
+Editor --> YjsProvider
+UserList --> YjsProvider
+Editor --> PersistenceService
+
+@enduml
