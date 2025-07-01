@@ -99,7 +99,7 @@ const Home = () => {
                 </span>
               }
             >
-              <Button
+              {/* <Button
                 type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => setCreateModalOpen(true)}
@@ -107,7 +107,7 @@ const Home = () => {
                 style={{ marginTop: 16 }}
               >
                 Create Team
-              </Button>
+              </Button> */}
             </Empty>
           </div>
         ) : (

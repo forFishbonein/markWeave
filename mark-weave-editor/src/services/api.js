@@ -88,7 +88,7 @@ class ApiService {
   }
 
   async inviteMember(teamId, inviteData) {
-    return this.request(`/teams/${teamId}/invites`, {
+    return this.request(`/teams/${teamId}/invite`, {
       method: "POST",
       body: JSON.stringify(inviteData),
     });

@@ -30,17 +30,39 @@ export function createDecorations(state, awareness) {
       return;
     }
 
-    // **创建光标装饰**
+    // **创建光标装饰（带用户名气泡）**
     decorations.push(
       Decoration.widget(pos, () => {
+        const wrapper = document.createElement("span");
+        wrapper.style.position = "relative";
+        // 光标竖线
         const cursorEl = document.createElement("span");
         cursorEl.className = "user-cursor";
         cursorEl.style.borderLeft = `2px solid ${color}`;
         cursorEl.style.marginLeft = "-1px";
         cursorEl.style.paddingLeft = "1px";
         cursorEl.style.position = "absolute";
-        cursorEl.style.height = "100%";
-        return cursorEl;
+        cursorEl.style.height = "1.2em";
+        cursorEl.style.zIndex = "10";
+        // 用户名气泡
+        const label = document.createElement("span");
+        label.className = "user-cursor-label";
+        label.textContent = name || "User";
+        label.style.background = color;
+        label.style.color = "#fff";
+        label.style.fontSize = "12px";
+        label.style.padding = "2px 8px";
+        label.style.borderRadius = "8px";
+        label.style.position = "absolute";
+        label.style.left = "6px";
+        label.style.top = "-1.6em";
+        label.style.whiteSpace = "nowrap";
+        label.style.boxShadow = "0 2px 8px rgba(0,0,0,0.08)";
+        label.style.pointerEvents = "none";
+        // 组合
+        wrapper.appendChild(cursorEl);
+        wrapper.appendChild(label);
+        return wrapper;
       })
     );
   });

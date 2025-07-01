@@ -61,7 +61,11 @@ const TeamSettings = () => {
   // Check if user is team owner
   const isOwner = () => {
     if (!team || !user) return false;
-    return team.ownerId === user.userId;
+    // Handle both object and string ownerId types
+    const ownerIdValue = typeof team.ownerId === 'object' && team.ownerId._id
+      ? team.ownerId._id
+      : team.ownerId;
+    return ownerIdValue === user.userId || ownerIdValue === user._id;
   };
 
   // Delete team (dangerous operation)

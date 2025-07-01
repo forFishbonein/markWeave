@@ -19,12 +19,12 @@ const TeamSidebar = () => {
       try {
         // Load team information
         const response = await apiService.getTeamDetails(teamId);
-        if (response.success) {
-          setTeam(response.data);
-        }
+        // 后端直接返回团队对象，不需要检查success字段
+        setTeam(response);
+        console.log('团队信息加载成功:', response);
       } catch (error) {
         console.error('Failed to load team information:', error);
-        message.error('Failed to load team information');
+        message.error('Failed to load team information: ' + error.message);
       } finally {
         setLoading(false);
       }

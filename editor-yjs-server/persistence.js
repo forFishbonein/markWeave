@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 14:17:32
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-24 02:58:05
+ * @LastEditTime: 2025-07-02 03:06:57
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -150,7 +150,7 @@ export async function saveDocState(docId, ydoc, userId, teamId = null) {
 
     // 将Yjs转换为JSON格式
     const jsonContent = yjsToJson(ydoc);
-
+    // console.log("jsonContent:", jsonContent);
     const result = await Doc.updateOne(
       { docId },
       {

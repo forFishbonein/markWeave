@@ -17,6 +17,7 @@ import EditorPage from "./components/EditorPage/EditorPage";
 import MemberList from "./components/Members/MemberList";
 import TeamSettings from "./components/Settings/TeamSettings";
 import GlobalHeader from "./components/GlobalHeader";
+import InvitePage from "./components/Invite/InvitePage";
 // import { WebsocketProvider } from "y-websocket";
 // import { ydoc } from "./components/CRDT";
 
@@ -39,6 +40,7 @@ function App() {
       <Router>
         <Routes>
           <Route path='/login' element={<LoginRegister />} />
+          <Route path='/invite/:token' element={<InvitePage />} />
           <Route
             element={
               <ProtectedRoute>

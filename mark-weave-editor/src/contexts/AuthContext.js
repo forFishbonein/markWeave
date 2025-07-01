@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
-          const user = await apiService.getProfile();
+          const response = await apiService.getProfile();
+          // 确保处理后端返回的数据格式 { success: true, user: {...} }
+          const user = response.user || response;
           dispatch({ type: "SET_USER", payload: user });
         } catch (error) {
           console.error("认证检查失败:", error);
@@ -87,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: {
-          user: {
+          user: response.user || {
             userId: response.userId,
             username: response.username,
           },
@@ -112,7 +114,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: {
-          user: {
+          user: response.user || {
             userId: response.userId,
             username: response.username,
           },

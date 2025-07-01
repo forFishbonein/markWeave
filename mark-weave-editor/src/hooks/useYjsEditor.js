@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-24 02:34:44
+ * @LastEditTime: 2025-07-02 03:32:31
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -24,33 +24,122 @@ import { syncToProseMirror } from "../crdt/crdtSync";
 import { schema } from "../plugins/schema";
 import { createKeymap } from "../plugins/keymap"; // ← 注意引用
 import { insertChar, insertText, deleteChars } from "../crdt/crdtActions";
+import { cursorPlugin } from "../old/cursor-plugin";
+import { useAuth } from "../contexts/AuthContext";
+
 export function useYjsEditor(docId, editorRef) {
   const viewRef = useRef(null);
   const [editorView, setEditorView] = useState(null);
   const [awareness, setAwareness] = useState(null);
+  const { user: authUser } = useAuth(); // 获取真实登录用户
 
   console.log("当前文档ID:", docId);
   useEffect(() => {
     const provider = new WebsocketProvider("ws://localhost:1234", docId, ydoc);
-    provider.awareness.setLocalStateField("removeTimeout", 1000); // 设置为 1 秒（示例值）
+    // 设置用户状态保持时间，避免过快清理
+    // 注意：这个设置要在设置用户信息之前
 
     const aw = provider.awareness;
-    let user = sessionStorage.getItem("myEditorUser");
-    if (!user) {
-      // 如果没有，创建新的用户身份
-      user = {
-        name: "User" + Math.floor(Math.random() * 100),
-        color: "#ffa500", // 或者生成随机颜色
-      };
-      sessionStorage.setItem("myEditorUser", JSON.stringify(user));
-      aw.setLocalStateField("user", user);
-    } else {
-      aw.setLocalStateField("user", JSON.parse(user));
-    }
+
+    // 获取当前登录用户的ID用于判断是否为本人
+    const currentUserId = authUser?.userId;
+
+    // 设置用户信息 - 立即生效
+    const setUserInfo = () => {
+      // 使用真实登录用户信息
+      if (authUser) {
+        const userInfo = {
+          name: authUser.username || authUser.email || "Unknown User",
+          email: authUser.email,
+          userId: authUser.userId,
+          color: "#2563eb",
+          timestamp: Date.now(),
+          online: true, // 明确标记在线状态
+        };
+
+        aw.setLocalStateField("user", userInfo);
+        console.log("✅ 立即设置用户信息:", userInfo);
+
+        // 强制触发awareness同步 - 这是关键！
+        setTimeout(() => {
+          aw.setLocalStateField("trigger", Date.now());
+          console.log("🔄 强制触发awareness同步");
+        }, 100);
+      } else {
+        const fallbackUser = {
+          name: "访客" + Math.floor(Math.random() * 100),
+          color: "#10b981",
+          timestamp: Date.now(),
+          online: true,
+        };
+        aw.setLocalStateField("user", fallbackUser);
+        console.log("⚠️ 设置访客信息:", fallbackUser);
+
+        // 同样强制触发同步
+        setTimeout(() => {
+          aw.setLocalStateField("trigger", Date.now());
+          console.log("🔄 强制触发awareness同步(访客)");
+        }, 100);
+      }
+    };
+
+    // WebSocket状态监听
+    provider.on("status", (event) => {
+      console.log("🔌 WebSocket状态:", event.status);
+      if (event.status === "connected") {
+        console.log("✅ WebSocket已连接");
+        // WebSocket连接后重新设置用户信息并强制同步
+        setUserInfo();
+
+        // 额外的强制同步措施
+        setTimeout(() => {
+          console.log("🚀 WebSocket连接后强制同步用户状态");
+          aw.setLocalStateField("forceSync", Date.now());
+
+          // 发送一个空的文档更新来触发同步
+          ydoc.transact(() => {
+            // 这会触发WebSocket同步
+          });
+        }, 200);
+      }
+    });
+
+    // 立即设置用户信息
+    setUserInfo();
+
+    // 定期强制同步awareness状态，确保其他客户端能看到
+    const syncInterval = setInterval(() => {
+      if (aw.getLocalState().user) {
+        // 更新时间戳触发awareness变化
+        aw.setLocalStateField("lastSeen", Date.now());
+        console.log("⏰ 定期同步用户在线状态");
+      }
+    }, 3000); // 每3秒同步一次
+
     setAwareness(aw);
     console.log("awareness", aw);
     provider.on("status", (event) => {
-      console.log("✅ WebSocket状态：", event.status);
+      console.log("🔌 WebSocket状态变化：", event.status);
+      if (event.status === "connected") {
+        console.log("✅ WebSocket已连接，用户可以开始协作");
+      } else if (event.status === "disconnected") {
+        console.log("❌ WebSocket连接断开");
+      }
+    });
+
+    // 监听awareness变化 - 实时同步
+    provider.awareness.on("change", (changes) => {
+      console.log("👥 Awareness状态变化:", {
+        added: changes.added,
+        updated: changes.updated,
+        removed: changes.removed,
+        totalUsers: Array.from(provider.awareness.getStates().values()).length,
+      });
+
+      // 强制触发awareness状态更新
+      if (changes.added.length > 0 || changes.removed.length > 0) {
+        console.log("🔄 用户加入/离开，强制同步状态");
+      }
     });
     // 创建 UndoManager，监听 ychars 和 yformatOps
     // 1. 创建 UndoManager
@@ -66,8 +155,7 @@ export function useYjsEditor(docId, editorRef) {
       const state = EditorState.create({
         schema,
         doc: initialDoc,
-        // plugins: [richTextKeymap, cursorPlugin(awareness)],
-        plugins: [myKeymapPlugin],
+        plugins: [myKeymapPlugin, cursorPlugin(aw)],
       });
       const view = new EditorView(editorRef.current, {
         state,
@@ -143,28 +231,22 @@ export function useYjsEditor(docId, editorRef) {
       });
       viewRef.current = view;
 
-      // setTimeout(() => {
-      //   console.log(
-      //     "setTimeout：",
-      //     ychars.toArray().length,
-      //     yformatOps.toArray().length
-      //   );
-      // if (
-      //   docId &&
-      //   ychars.toArray().length === 0 &&
-      //   yformatOps.toArray().length === 0
-      // ) {
-      //   console.log("!!!!执行函数了！！");
-      //   loadInitialData(docId);
-      // }
-      //   loadInitialData(docId);
-      // }, 10);
-      // tODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到setTimeout 里面执行就可以很轻松解决了！
-      //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
-      //下面这个不能放开，否则会每次翻倍！
-      // setTimeout(() => {
-      //   loadInitialData(docId);
-      // }, 0);
+      // --- 实时同步本地光标到awareness ---
+      view.dom.addEventListener("mouseup", updateCursorAwareness);
+      view.dom.addEventListener("keyup", updateCursorAwareness);
+      function updateCursorAwareness() {
+        const sel = view.state.selection;
+        if (!sel) return;
+        const user = aw.getLocalState().user;
+        aw.setLocalStateField("cursor", {
+          pos: sel.anchor,
+          name: user?.name || "User",
+          color: user?.color || "#ffa500",
+        });
+      }
+      // 初始化时同步一次
+      setTimeout(updateCursorAwareness, 100);
+
       setEditorView(view);
       syncToProseMirror(view, docId);
     }
@@ -196,14 +278,27 @@ export function useYjsEditor(docId, editorRef) {
     // const intervalId = setInterval(() => {
     //   window.location.reload();
     // }, 2000); // 每 5000 毫秒（5 秒）刷新一次页面
+    // 页面卸载时清理用户状态
+    const handleBeforeUnload = () => {
+      aw.setLocalStateField("user", null);
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     return () => {
+      // 清理定期同步
+      clearInterval(syncInterval);
+
+      // 离开时立即清理用户状态
+      aw.setLocalStateField("user", null);
+
       viewRef.current?.destroy();
       viewRef.current = null;
       ydoc.off("update");
       provider.destroy();
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       // clearInterval(intervalId);
     };
-  }, []);
+  }, [docId, authUser]); // 添加authUser依赖
 
   return [editorView, awareness];
 }

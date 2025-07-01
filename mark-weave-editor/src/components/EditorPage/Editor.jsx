@@ -17,6 +17,9 @@ import "./editer.css";
 import { v4 as uuidv4 } from "uuid";
 import { toggleMark } from "prosemirror-commands";
 import { schema } from "../../plugins/schema";
+import { addBold, removeBold, addEm, removeEm } from "../../crdt/crdtActions";
+import { ychars } from "../../crdt";
+import { markActive } from "../../plugins/utils";
 
 // 接收docId作为props
 export default function Editor({ docId }) {
@@ -37,13 +40,74 @@ export default function Editor({ docId }) {
   // 也可以在这里通过 editorView 调用 toggleMark 等
   const handleBold = () => {
     if (editorView) {
-      // 模拟触发 Cmd+B
+      const state = editorView.state;
+      const { from, to } = state.selection;
+
+      console.log("🔥 Bold按钮被点击");
+
+      if (from === to) {
+        console.warn("⚠️ 不能在空选区加粗！");
+        return;
+      }
+
+      const chars = ychars.toArray();
+      // 获取选区开始和结束对应的 opId
+      const startId = chars[from - 1]?.opId || null;
+      const endId = chars[to - 1]?.opId ||
+        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+
+      console.log(`🔵 Bold按钮操作, startId: ${startId}, endId: ${endId}`);
+
+      // 判断是否在文档末尾
+      const isAtEnd = to === state.doc.content.size - 1;
+      const boundaryType = isAtEnd ? "after" : "before";
+
+      // 使用辅助函数判断当前选区是否已经是 bold
+      if (markActive(state, schema.marks.bold)) {
+        console.log("🔵 当前选区已经加粗，调用 removeBold");
+        removeBold(startId, endId, boundaryType);
+      } else {
+        console.log("🔵 当前选区未加粗，调用 addBold");
+        addBold(startId, endId, boundaryType);
+      }
+
+      // 调用ProseMirror操作更新UI
       toggleMark(schema.marks.bold)(editorView.state, editorView.dispatch);
     }
   };
 
   const handleItalic = () => {
     if (editorView) {
+      const state = editorView.state;
+      const { from, to } = state.selection;
+
+      console.log("🔥 Italic按钮被点击");
+
+      if (from === to) {
+        console.warn("⚠️ 不能在空选区斜体！");
+        return;
+      }
+
+      const chars = ychars.toArray();
+      const startId = chars[from - 1]?.opId || null;
+      const endId = chars[to - 1]?.opId ||
+        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+
+      console.log(`🔵 Italic按钮操作, startId: ${startId}, endId: ${endId}`);
+
+      // 判断是否在文档末尾
+      const isAtEnd = to === state.doc.content.size - 1;
+      const boundaryType = isAtEnd ? "after" : "before";
+
+      if (markActive(state, schema.marks.em)) {
+        console.log("🔵 当前选区已经斜体，调用 removeEm");
+        removeEm(startId, endId, boundaryType);
+      } else {
+        console.log("🔵 当前选区未斜体，调用 addEm");
+        addEm(startId, endId, boundaryType);
+      }
+
+      // 调用ProseMirror操作更新UI
       toggleMark(schema.marks.em)(editorView.state, editorView.dispatch);
     }
   };
