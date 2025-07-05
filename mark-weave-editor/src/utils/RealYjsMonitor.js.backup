@@ -1,0 +1,505 @@
+/*
+ * @FilePath: RealYjsMonitor.js
+ * @Author: Aron
+ * @Date: 2025-01-27
+ * @Description: 真实Yjs性能监控器 - 通过事件监听获取真实数据
+ */
+
+/**
+ * 真实Yjs性能监控器
+ * 通过监听Yjs文档事件和WebSocket事件来获取真实性能数据
+ */
+class RealYjsMonitor {
+  constructor() {
+    this.isMonitoring = false;
+    this.startTime = null;
+
+    // 性能数据
+    this.metrics = {
+      // 文档操作
+      documentUpdates: 0,
+      totalUpdateSize: 0,
+      updateTimes: [],
+
+      // 网络数据
+      networkEvents: [],
+      connectionEvents: [],
+
+      // 用户操作
+      userOperations: [],
+      keystrokes: 0,
+
+      // 协作数据
+      collaborators: new Map(),
+      awarenessChanges: [],
+
+      // 延迟数据
+      operationLatencies: [],
+      networkLatencies: [],
+    };
+
+    // 绑定方法
+    this.handleDocumentUpdate = this.handleDocumentUpdate.bind(this);
+    this.handleAwarenessChange = this.handleAwarenessChange.bind(this);
+    this.handleKeydown = this.handleKeydown.bind(this);
+    this.handleProviderStatus = this.handleProviderStatus.bind(this);
+  }
+
+  /**
+   * 开始监控
+   */
+  startMonitoring(ydoc, awareness, provider) {
+    if (this.isMonitoring) {
+      console.warn("监控已经在运行中");
+      return;
+    }
+
+    this.isMonitoring = true;
+    this.startTime = performance.now();
+    this.ydoc = ydoc;
+    this.awareness = awareness;
+    this.provider = provider;
+
+    console.log("🚀 开始真实Yjs性能监控");
+
+    // 监听文档更新
+    if (ydoc) {
+      ydoc.on("update", this.handleDocumentUpdate);
+      console.log("✅ 已监听文档更新事件");
+    }
+
+    // 监听awareness变化
+    if (awareness) {
+      awareness.on("change", this.handleAwarenessChange);
+      console.log("✅ 已监听awareness变化事件");
+    }
+
+    // 监听WebSocket状态
+    if (provider) {
+      provider.on("status", this.handleProviderStatus);
+      console.log("✅ 已监听WebSocket状态事件");
+    }
+
+    // 监听键盘输入
+    document.addEventListener("keydown", this.handleKeydown);
+    console.log("✅ 已监听键盘输入事件");
+
+    // 拦截WebSocket来监控网络数据
+    this.interceptWebSocket();
+  }
+
+  /**
+   * 停止监控
+   */
+  stopMonitoring() {
+    if (!this.isMonitoring) return;
+
+    this.isMonitoring = false;
+
+    // 移除事件监听
+    if (this.ydoc) {
+      this.ydoc.off("update", this.handleDocumentUpdate);
+    }
+    if (this.awareness) {
+      this.awareness.off("change", this.handleAwarenessChange);
+    }
+    if (this.provider) {
+      this.provider.off("status", this.handleProviderStatus);
+    }
+
+    document.removeEventListener("keydown", this.handleKeydown);
+
+    console.log("⏹️ 已停止Yjs性能监控");
+  }
+
+  /**
+   * 处理文档更新事件
+   */
+  handleDocumentUpdate(update, origin) {
+    const timestamp = performance.now();
+    const updateSize = update.length;
+
+    this.metrics.documentUpdates++;
+    this.metrics.totalUpdateSize += updateSize;
+    this.metrics.updateTimes.push(timestamp);
+
+    // 记录操作延迟（从用户输入到文档更新的时间）
+    if (this.lastUserOperation) {
+      const latency = timestamp - this.lastUserOperation;
+      this.metrics.operationLatencies.push({
+        latency,
+        timestamp,
+        updateSize,
+        origin,
+      });
+
+      console.log(
+        `📊 文档更新延迟: ${latency.toFixed(2)}ms, 大小: ${updateSize}字节`
+      );
+    }
+
+    console.log(
+      `📝 文档更新 #${this.metrics.documentUpdates}, 大小: ${updateSize}字节, 来源: ${origin}`
+    );
+  }
+
+  /**
+   * 处理awareness变化
+   */
+  handleAwarenessChange(changes) {
+    const timestamp = performance.now();
+
+    // 记录用户加入/离开
+    changes.added.forEach((clientId) => {
+      const state = this.awareness.getStates().get(clientId);
+      if (state?.user) {
+        this.metrics.collaborators.set(clientId, {
+          user: state.user,
+          joinTime: timestamp,
+        });
+        console.log(`👥 用户加入: ${state.user.name || clientId}`);
+      }
+    });
+
+    changes.removed.forEach((clientId) => {
+      const collaborator = this.metrics.collaborators.get(clientId);
+      if (collaborator) {
+        const sessionDuration = timestamp - collaborator.joinTime;
+        console.log(
+          `👋 用户离开: ${
+            collaborator.user.name || clientId
+          }, 会话时长: ${sessionDuration.toFixed(0)}ms`
+        );
+        this.metrics.collaborators.delete(clientId);
+      }
+    });
+
+    // 记录awareness变化
+    this.metrics.awarenessChanges.push({
+      timestamp,
+      added: changes.added.length,
+      updated: changes.updated.length,
+      removed: changes.removed.length,
+      totalUsers: this.awareness.getStates().size,
+    });
+  }
+
+  /**
+   * 处理键盘输入
+   */
+  handleKeydown(event) {
+    // 只记录编辑相关的按键
+    if (
+      event.target.closest("[contenteditable]") ||
+      event.target.closest(".ProseMirror")
+    ) {
+      this.metrics.keystrokes++;
+      this.lastUserOperation = performance.now();
+
+      this.metrics.userOperations.push({
+        timestamp: this.lastUserOperation,
+        key: event.key,
+        keyCode: event.keyCode,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+      });
+    }
+  }
+
+  /**
+   * 处理WebSocket状态变化
+   */
+  handleProviderStatus(event) {
+    const timestamp = performance.now();
+
+    this.metrics.connectionEvents.push({
+      timestamp,
+      status: event.status,
+    });
+
+    console.log(`🔌 WebSocket状态: ${event.status}`);
+
+    // 如果是连接建立，开始ping测试
+    if (event.status === "connected") {
+      this.startPingTest();
+    }
+  }
+
+  /**
+   * 拦截WebSocket进行网络监控
+   */
+  interceptWebSocket() {
+    if (this.provider && this.provider.ws) {
+      const ws = this.provider.ws;
+
+      // 拦截send方法
+      const originalSend = ws.send.bind(ws);
+      ws.send = (data) => {
+        const timestamp = performance.now();
+        const size = data.length || data.byteLength || 0;
+
+        this.metrics.networkEvents.push({
+          type: "send",
+          timestamp,
+          size,
+        });
+
+        console.log(`📤 发送数据: ${size}字节`);
+        return originalSend(data);
+      };
+
+      // 监听消息接收
+      ws.addEventListener("message", (event) => {
+        const timestamp = performance.now();
+        const size = event.data.length || event.data.byteLength || 0;
+
+        this.metrics.networkEvents.push({
+          type: "receive",
+          timestamp,
+          size,
+        });
+
+        console.log(`📥 接收数据: ${size}字节`);
+      });
+    }
+  }
+
+  /**
+   * 开始ping测试来测量网络延迟
+   */
+  startPingTest() {
+    if (!this.provider || !this.provider.ws) return;
+
+    const pingInterval = setInterval(() => {
+      if (
+        !this.isMonitoring ||
+        !this.provider.ws ||
+        this.provider.ws.readyState !== WebSocket.OPEN
+      ) {
+        clearInterval(pingInterval);
+        return;
+      }
+
+      const startTime = performance.now();
+      const pingId = Math.random().toString(36).substr(2, 9);
+
+      // 发送ping（通过awareness更新）
+      this.awareness.setLocalStateField("ping", {
+        id: pingId,
+        timestamp: startTime,
+      });
+
+      // 监听pong（通过awareness变化）
+      const handlePong = (changes) => {
+        const states = this.awareness.getStates();
+        states.forEach((state, clientId) => {
+          if (
+            state.ping &&
+            state.ping.id === pingId &&
+            clientId !== this.awareness.clientID
+          ) {
+            const endTime = performance.now();
+            const latency = endTime - startTime;
+
+            this.metrics.networkLatencies.push({
+              latency,
+              timestamp: endTime,
+              clientId,
+            });
+
+            console.log(`🏓 网络延迟: ${latency.toFixed(2)}ms`);
+            this.awareness.off("change", handlePong);
+          }
+        });
+      };
+
+      this.awareness.on("change", handlePong);
+
+      // 5秒后清理
+      setTimeout(() => {
+        this.awareness.off("change", handlePong);
+      }, 5000);
+    }, 3000); // 每3秒ping一次
+  }
+
+  /**
+   * 获取实时性能统计
+   */
+  getPerformanceStats() {
+    if (!this.isMonitoring || !this.startTime) {
+      return null;
+    }
+
+    const now = performance.now();
+    const monitoringDuration = (now - this.startTime) / 1000; // 秒
+
+    // 计算最近的统计数据
+    const recentWindow = 5000; // 最近5秒
+    const recentTime = now - recentWindow;
+
+    const recentUpdates = this.metrics.updateTimes.filter(
+      (t) => t > recentTime
+    );
+    const recentNetworkEvents = this.metrics.networkEvents.filter(
+      (e) => e.timestamp > recentTime
+    );
+    const recentLatencies = this.metrics.operationLatencies.filter(
+      (l) => l.timestamp > recentTime
+    );
+
+    // 计算延迟统计
+    const latencies = this.metrics.operationLatencies.map((l) => l.latency);
+    const avgLatency =
+      latencies.length > 0
+        ? latencies.reduce((a, b) => a + b, 0) / latencies.length
+        : 0;
+    const sortedLatencies = [...latencies].sort((a, b) => a - b);
+    const p95Latency =
+      sortedLatencies.length > 0
+        ? sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] || 0
+        : 0;
+
+    // 计算网络延迟
+    const networkLatencies = this.metrics.networkLatencies.map(
+      (l) => l.latency
+    );
+    const avgNetworkLatency =
+      networkLatencies.length > 0
+        ? networkLatencies.reduce((a, b) => a + b, 0) / networkLatencies.length
+        : 0;
+
+    // 计算带宽
+    const sentBytes = this.metrics.networkEvents
+      .filter((e) => e.type === "send")
+      .reduce((sum, e) => sum + e.size, 0);
+    const receivedBytes = this.metrics.networkEvents
+      .filter((e) => e.type === "receive")
+      .reduce((sum, e) => sum + e.size, 0);
+
+    return {
+      // 基本信息
+      monitoringDuration,
+      isConnected:
+        this.provider &&
+        this.provider.ws &&
+        this.provider.ws.readyState === WebSocket.OPEN,
+
+      // 文档操作统计
+      documentUpdates: this.metrics.documentUpdates,
+      totalUpdateSize: this.metrics.totalUpdateSize,
+      updatesPerSecond: this.metrics.documentUpdates / monitoringDuration,
+      avgUpdateSize:
+        this.metrics.documentUpdates > 0
+          ? this.metrics.totalUpdateSize / this.metrics.documentUpdates
+          : 0,
+
+      // 用户操作统计
+      keystrokes: this.metrics.keystrokes,
+      keystrokesPerSecond: this.metrics.keystrokes / monitoringDuration,
+
+      // 延迟统计
+      avgLatency,
+      p95Latency,
+      avgNetworkLatency,
+      latencySamples: latencies.length,
+      networkLatencySamples: networkLatencies.length,
+
+      // 网络统计
+      sentBytes,
+      receivedBytes,
+      totalBytes: sentBytes + receivedBytes,
+      bandwidthKBps: (sentBytes + receivedBytes) / 1024 / monitoringDuration,
+
+      // 协作统计
+      activeCollaborators: this.metrics.collaborators.size,
+      totalAwarenessChanges: this.metrics.awarenessChanges.length,
+
+      // 最近活动
+      recentUpdates: recentUpdates.length,
+      recentNetworkEvents: recentNetworkEvents.length,
+      recentLatencies: recentLatencies.length,
+
+      // 原始数据
+      rawData: {
+        operationLatencies: this.metrics.operationLatencies,
+        networkLatencies: this.metrics.networkLatencies,
+        networkEvents: this.metrics.networkEvents,
+        awarenessChanges: this.metrics.awarenessChanges,
+        userOperations: this.metrics.userOperations,
+      },
+    };
+  }
+
+  /**
+   * 导出学术数据
+   */
+  exportAcademicData() {
+    const stats = this.getPerformanceStats();
+    if (!stats) return null;
+
+    return {
+      // 基本信息
+      algorithm: "CRDT-Yjs",
+      timestamp: new Date().toISOString(),
+      testDuration: stats.monitoringDuration,
+
+      // 核心性能指标
+      performance: {
+        averageLatency: stats.avgLatency,
+        p95Latency: stats.p95Latency,
+        averageNetworkLatency: stats.avgNetworkLatency,
+        throughput: stats.updatesPerSecond,
+        bandwidthEfficiency: stats.bandwidthKBps,
+        totalOperations: stats.documentUpdates,
+        userInteractions: stats.keystrokes,
+      },
+
+      // 详细统计
+      detailed: {
+        documentUpdates: stats.documentUpdates,
+        totalUpdateSize: stats.totalUpdateSize,
+        avgUpdateSize: stats.avgUpdateSize,
+        sentBytes: stats.sentBytes,
+        receivedBytes: stats.receivedBytes,
+        activeCollaborators: stats.activeCollaborators,
+        awarenessChanges: stats.totalAwarenessChanges,
+      },
+
+      // 数据完整性
+      dataIntegrity: {
+        latencySamples: stats.latencySamples,
+        networkLatencySamples: stats.networkLatencySamples,
+        networkEvents: stats.rawData.networkEvents.length,
+        userOperations: stats.rawData.userOperations.length,
+      },
+
+      // 原始数据
+      rawData: stats.rawData,
+    };
+  }
+
+  /**
+   * 重置数据
+   */
+  reset() {
+    this.metrics = {
+      documentUpdates: 0,
+      totalUpdateSize: 0,
+      updateTimes: [],
+      networkEvents: [],
+      connectionEvents: [],
+      userOperations: [],
+      keystrokes: 0,
+      collaborators: new Map(),
+      awarenessChanges: [],
+      operationLatencies: [],
+      networkLatencies: [],
+    };
+
+    this.startTime = performance.now();
+    console.log("🔄 性能监控数据已重置");
+  }
+}
+
+export default RealYjsMonitor;

@@ -31,15 +31,21 @@ export function useYjsEditor(docId, editorRef) {
   const viewRef = useRef(null);
   const [editorView, setEditorView] = useState(null);
   const [awareness, setAwareness] = useState(null);
+  const [provider, setProvider] = useState(null);
   const { user: authUser } = useAuth(); // 获取真实登录用户
 
   console.log("当前文档ID:", docId);
   useEffect(() => {
-    const provider = new WebsocketProvider("ws://localhost:1234", docId, ydoc);
+    const wsProvider = new WebsocketProvider(
+      "ws://localhost:1234",
+      docId,
+      ydoc
+    );
+    setProvider(wsProvider);
     // 设置用户状态保持时间，避免过快清理
     // 注意：这个设置要在设置用户信息之前
 
-    const aw = provider.awareness;
+    const aw = wsProvider.awareness;
 
     // 获取当前登录用户的ID用于判断是否为本人
     const currentUserId = authUser?.userId;
@@ -84,7 +90,7 @@ export function useYjsEditor(docId, editorRef) {
     };
 
     // WebSocket状态监听
-    provider.on("status", (event) => {
+    wsProvider.on("status", (event) => {
       console.log("🔌 WebSocket状态:", event.status);
       if (event.status === "connected") {
         console.log("✅ WebSocket已连接");
@@ -118,7 +124,7 @@ export function useYjsEditor(docId, editorRef) {
 
     setAwareness(aw);
     console.log("awareness", aw);
-    provider.on("status", (event) => {
+    wsProvider.on("status", (event) => {
       console.log("🔌 WebSocket状态变化：", event.status);
       if (event.status === "connected") {
         console.log("✅ WebSocket已连接，用户可以开始协作");
@@ -128,12 +134,13 @@ export function useYjsEditor(docId, editorRef) {
     });
 
     // 监听awareness变化 - 实时同步
-    provider.awareness.on("change", (changes) => {
+    wsProvider.awareness.on("change", (changes) => {
       console.log("👥 Awareness状态变化:", {
         added: changes.added,
         updated: changes.updated,
         removed: changes.removed,
-        totalUsers: Array.from(provider.awareness.getStates().values()).length,
+        totalUsers: Array.from(wsProvider.awareness.getStates().values())
+          .length,
       });
 
       // 强制触发awareness状态更新
@@ -294,11 +301,11 @@ export function useYjsEditor(docId, editorRef) {
       viewRef.current?.destroy();
       viewRef.current = null;
       ydoc.off("update");
-      provider.destroy();
+      wsProvider.destroy();
       window.removeEventListener("beforeunload", handleBeforeUnload);
       // clearInterval(intervalId);
     };
   }, [docId, authUser]); // 添加authUser依赖
 
-  return [editorView, awareness];
+  return [editorView, awareness, provider];
 }
