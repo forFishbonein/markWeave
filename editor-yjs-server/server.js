@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-07 02:38:43
+ * @LastEditTime: 2025-07-07 04:02:15
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -136,6 +136,8 @@ app.post("/api/doc", async (req, res) => {
     const ydoc = await getYDoc(id);
     const uint8 = Uint8Array.from(Buffer.from(content, "base64"));
     Y.applyUpdate(ydoc, uint8);
+    // ⚡ 立刻持久化，避免服务器在 debounce 周期内被重启导致数据丢失
+    // await saveDocState(id, ydoc);
     // saveDocState 会在 debounce 中自动调用
     res.json({ message: "更新已应用" });
   } catch (err) {
@@ -304,4 +306,27 @@ server.listen(PORT, async () => {
 
   // 启动OT服务器
   await initializeOTServer();
+});
+
+// --------------------------
+// 进程退出前主动把所有文档状态写入数据库
+// --------------------------
+async function flushAllDocs() {
+  try {
+    console.log("💾 正在持久化所有内存中的 Y.Doc ...");
+    for (const [docId, ydoc] of docs.entries()) {
+      await saveDocState(docId, ydoc);
+    }
+    console.log("✅ 持久化完成，准备退出");
+  } catch (err) {
+    console.error("❌ 持久化所有文档失败:", err);
+  }
+}
+
+// 在常见的退出信号(SIGINT Ctrl+C、SIGTERM)以及进程异常退出前触发持久化
+["SIGINT", "SIGTERM", "beforeExit"].forEach((event) => {
+  process.on(event, async () => {
+    await flushAllDocs();
+    if (event !== "beforeExit") process.exit(0);
+  });
 });

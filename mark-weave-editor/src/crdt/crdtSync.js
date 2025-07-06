@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:59:57
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-14 23:14:08
+ * @LastEditTime: 2025-07-07 04:02:50
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -82,4 +82,7 @@ export function syncToProseMirror(view, docId) {
   ydoc.on("update", updateEditor);
   // ychars.observeDeep(updateEditor); //如果远程增加了字符，会触发这个
   // yformatOps.observeDeep(updateEditor); //如果远程增加了操作符，会触发这个
+
+  // 🔄 初始化时立即同步一次，防止错过早期的远程更新
+  // updateEditor();
 }
