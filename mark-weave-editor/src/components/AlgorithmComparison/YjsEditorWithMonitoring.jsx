@@ -35,7 +35,7 @@ const YjsEditorWithMonitoring = forwardRef(({
   onMetricsUpdate = null
 }, ref) => {
   const editorRef = useRef(null);
-  const [editorView, awareness, provider] = useYjsEditor(docId, editorRef);
+  const [editorView, awareness, provider, isConnected] = useYjsEditor(docId, editorRef);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [performanceData, setPerformanceData] = useState(null);
   const [latencyHistory, setLatencyHistory] = useState([]);
@@ -153,8 +153,8 @@ const YjsEditorWithMonitoring = forwardRef(({
   }, [isMonitoring]);
 
   const handleStartMonitoring = () => {
-    if (!ydoc || !awareness || !provider) {
-      message.error('编辑器未完全初始化，请稍后再试');
+    if (!ydoc || !awareness || !provider || !isConnected) {
+      message.error('Editor not fully initialized or not connected, please try again later');
       return;
     }
 
@@ -163,7 +163,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     setLatencyHistory([]);
 
     monitorRef.current.startMonitoring(ydoc, awareness, provider);
-    message.success('🚀 已开始多窗口同步性能监控，请在编辑器中输入内容');
+    message.success('🚀 Multi-window sync performance monitoring started, please input content in the editor');
   };
 
   const handleStopMonitoring = () => {
@@ -171,7 +171,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     if (monitorRef.current) {
       monitorRef.current.stopMonitoring();
     }
-    message.info('⏹️ 已停止性能监控');
+    message.info('⏹️ Performance monitoring stopped');
   };
 
   const handleReset = () => {
@@ -180,7 +180,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     }
     setPerformanceData(null);
     setLatencyHistory([]);
-    message.success('🔄 监控数据已重置');
+    message.success('🔄 Monitoring data reset');
   };
 
   const handleExportData = () => {
@@ -188,11 +188,11 @@ const YjsEditorWithMonitoring = forwardRef(({
 
     const academicData = monitorRef.current.exportAcademicData();
     if (!academicData) {
-      message.error('没有可导出的数据');
+      message.error('No data available for export');
       return;
     }
 
-    // 下载JSON文件
+    // Download JSON file
     const blob = new Blob([JSON.stringify(academicData, null, 2)], {
       type: 'application/json'
     });
@@ -205,7 +205,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    message.success('📊 多窗口学术数据已导出');
+    message.success('📊 Multi-window academic data exported');
   };
 
   const handleMultiWindowTest = () => {
@@ -216,7 +216,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     );
 
     if (newWindow) {
-      message.success('✅ 新窗口已打开！数据将自动同步，请在两个窗口中同时编辑测试');
+      message.success('✅ New window opened! Data will sync automatically, please edit in both windows to test');
     }
   };
 
@@ -228,10 +228,10 @@ const YjsEditorWithMonitoring = forwardRef(({
   };
 
   const getLatencyLevel = (latency) => {
-    if (latency < 20) return '优秀';
-    if (latency < 100) return '良好';
-    if (latency < 500) return '一般';
-    return '需优化';
+    if (latency < 20) return 'Excellent';
+    if (latency < 100) return 'Good';
+    if (latency < 500) return 'Fair';
+    return 'Needs Improvement';
   };
 
   const editorStyle = {
@@ -247,14 +247,14 @@ const YjsEditorWithMonitoring = forwardRef(({
 
   const latencyColumns = [
     {
-      title: '时间',
+      title: 'Time',
       dataIndex: 'timestamp',
       key: 'timestamp',
       render: (timestamp) => new Date(timestamp).toLocaleTimeString(),
       width: 70
     },
     {
-      title: '延迟(ms)',
+      title: 'Latency (ms)',
       dataIndex: 'latency',
       key: 'latency',
       render: (latency) => (
@@ -265,7 +265,7 @@ const YjsEditorWithMonitoring = forwardRef(({
       width: 70
     },
     {
-      title: 'P95(ms)',
+      title: 'P95 (ms)',
       dataIndex: 'p95',
       key: 'p95',
       render: (p95) => (
@@ -276,7 +276,7 @@ const YjsEditorWithMonitoring = forwardRef(({
       width: 70
     },
     {
-      title: '窗口',
+      title: 'Windows',
       dataIndex: 'windows',
       key: 'windows',
       render: (windows) => (
@@ -290,7 +290,7 @@ const YjsEditorWithMonitoring = forwardRef(({
   if (!showMetrics) {
     return (
       <div style={{ padding: '12px' }}>
-        <Card title="CRDT协作编辑器" size="small">
+        <Card title="CRDT Collaborative Editor" size="small">
           <div style={{ marginBottom: '12px' }}>
             <Space>
               <Button
@@ -298,8 +298,9 @@ const YjsEditorWithMonitoring = forwardRef(({
                 icon={isMonitoring ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
                 onClick={isMonitoring ? handleStopMonitoring : handleStartMonitoring}
                 size="small"
+                disabled={!isConnected}
               >
-                {isMonitoring ? '停止监控' : '开始监控'}
+                {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
               </Button>
               <Button
                 icon={<ReloadOutlined />}
@@ -307,14 +308,14 @@ const YjsEditorWithMonitoring = forwardRef(({
                 disabled={isMonitoring}
                 size="small"
               >
-                重置
+                Reset
               </Button>
-              <Tag color={provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? 'green' : 'red'} size="small">
-                {provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? '已连接' : '未连接'}
+              <Tag color={isConnected ? 'green' : 'red'} size="small">
+                {isConnected ? 'Connected' : 'Disconnected'}
               </Tag>
               {performanceData && (
                 <Tag color="blue" size="small">
-                  延迟: {performanceData.avgLatency.toFixed(1)}ms
+                  Latency: {performanceData.avgLatency.toFixed(1)}ms
                 </Tag>
               )}
             </Space>
@@ -323,22 +324,22 @@ const YjsEditorWithMonitoring = forwardRef(({
           <div
             ref={editorRef}
             style={editorStyle}
-            placeholder="在此输入内容进行CRDT性能测试..."
+            placeholder="Enter content here for CRDT performance testing..."
           />
 
           <div style={{ marginTop: '8px', padding: '6px', backgroundColor: '#f6f8fa', borderRadius: '4px', fontSize: '11px' }}>
             <Row gutter={8}>
               <Col span={12}>
                 <Space size="small">
-                  <strong>文档:</strong>
+                  <strong>Document:</strong>
                   <span>{docId}</span>
                 </Space>
               </Col>
               <Col span={12}>
                 {performanceData && (
                   <Space size="small">
-                    <span>操作: {performanceData.documentUpdates}</span>
-                    <span>窗口: {performanceData.totalWindows}</span>
+                    <span>Operations: {performanceData.operationsCount}</span>
+                    <span>Windows: {performanceData.totalWindows || 1}</span>
                   </Space>
                 )}
               </Col>
@@ -355,8 +356,8 @@ const YjsEditorWithMonitoring = forwardRef(({
         title={
           <Space>
             <ExperimentOutlined />
-            <span>Yjs CRDT 多窗口同步性能监控</span>
-            <Tag color="purple">实时同步版本</Tag>
+            <span>Yjs CRDT Multi-window Sync Performance Monitor</span>
+            <Tag color="purple">Real-time Sync Version</Tag>
           </Space>
         }
         extra={
@@ -367,21 +368,21 @@ const YjsEditorWithMonitoring = forwardRef(({
               onClick={isMonitoring ? handleStopMonitoring : handleStartMonitoring}
               size="large"
             >
-              {isMonitoring ? '停止监控' : '开始监控'}
+              {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
             </Button>
             <Button
               icon={<ReloadOutlined />}
               onClick={handleReset}
               disabled={isMonitoring}
             >
-              重置数据
+              Reset Data
             </Button>
             <Button
               icon={<DownloadOutlined />}
               onClick={handleExportData}
               disabled={!performanceData}
             >
-              导出数据
+              Export Data
             </Button>
             <Button
               icon={<GlobalOutlined />}
@@ -389,15 +390,15 @@ const YjsEditorWithMonitoring = forwardRef(({
               type="primary"
               ghost
             >
-              打开新窗口
+              Open New Window
             </Button>
           </Space>
         }
       >
-        {/* 多窗口同步说明 */}
+        {/* Multi-window sync description */}
         <Alert
-          message="🔄 多窗口实时同步监控"
-          description="支持多窗口数据实时同步，P95延迟基于最近数据计算，确保数据准确性。打开多个窗口同时编辑，数据将自动合并显示。"
+          message="🔄 Real-time Multi-window Sync Monitoring"
+          description="Supports real-time data sync across multiple windows. P95 latency is calculated based on recent data to ensure accuracy. Open multiple windows to edit simultaneously, data will merge automatically."
           type="success"
           showIcon
           style={{ marginBottom: 16 }}
@@ -405,8 +406,8 @@ const YjsEditorWithMonitoring = forwardRef(({
 
         {performanceData && performanceData.totalWindows > 1 && (
           <Alert
-            message={`🌐 检测到 ${performanceData.totalWindows} 个监控窗口`}
-            description="数据已自动合并多个窗口的性能指标，显示的是所有窗口的综合性能表现。"
+            message={`🌐 Detected ${performanceData.totalWindows} Monitoring Windows`}
+            description="Data has been automatically merged from all windows, showing combined performance metrics from all monitoring points."
             type="info"
             showIcon
             style={{ marginBottom: 16 }}
@@ -415,8 +416,8 @@ const YjsEditorWithMonitoring = forwardRef(({
 
         {!isMonitoring && (
           <Alert
-            message="多窗口测试指南"
-            description="1. 点击'开始监控' → 2. 点击'打开新窗口' → 3. 在两个窗口中同时编辑 → 4. 观察实时同步的性能数据"
+            message="Multi-window Testing Guide"
+            description="1. Click 'Start Monitoring' → 2. Click 'Open New Window' → 3. Edit simultaneously in both windows → 4. Observe real-time sync performance data"
             type="warning"
             showIcon
             style={{ marginBottom: 16 }}
@@ -424,22 +425,22 @@ const YjsEditorWithMonitoring = forwardRef(({
         )}
 
         <Row gutter={16}>
-          {/* 左侧：编辑器 */}
+          {/* Left: Editor */}
           <Col span={12}>
-            <Card title="实时协作编辑器" size="small">
+            <Card title="Real-time Collaborative Editor" size="small">
               <div
                 ref={editorRef}
                 style={editorStyle}
-                placeholder="在此输入内容，支持多窗口实时同步监控..."
+                placeholder="Enter content here, supports multi-window real-time sync monitoring..."
               />
 
               <div style={{ marginTop: '12px', padding: '8px', backgroundColor: '#f6f8fa', borderRadius: '4px', fontSize: '12px' }}>
                 <Row gutter={8}>
                   <Col span={12}>
                     <Space size="small">
-                      <strong>连接:</strong>
-                      <Tag color={provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? 'green' : 'red'} size="small">
-                        {provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? '已连接' : '未连接'}
+                      <strong>Connection:</strong>
+                      <Tag color={isConnected ? 'green' : 'red'} size="small">
+                        {isConnected ? 'Connected' : 'Disconnected'}
                       </Tag>
                     </Space>
                   </Col>
@@ -447,33 +448,33 @@ const YjsEditorWithMonitoring = forwardRef(({
                     {performanceData && (
                       <Space size="small">
                         <SyncOutlined style={{ color: '#1890ff' }} />
-                        <span>窗口: {performanceData.totalWindows}</span>
-                        <span>待处理: {performanceData.pendingOperations}</span>
+                        <span>Windows: {performanceData.totalWindows}</span>
+                        <span>Pending: {performanceData.pendingOperations}</span>
                       </Space>
                     )}
                   </Col>
                 </Row>
                 <div style={{ marginTop: '4px', fontSize: '11px', color: '#666' }}>
-                  文档ID: {docId}
+                  Document ID: {docId}
                   {performanceData && (
-                    <span style={{ marginLeft: '8px' }}>窗口ID: {performanceData.windowId.slice(-8)}</span>
+                    <span style={{ marginLeft: '8px' }}>Window ID: {performanceData.windowId.slice(-8)}</span>
                   )}
                 </div>
               </div>
             </Card>
           </Col>
 
-          {/* 右侧：性能监控 */}
+          {/* Right: Performance Monitor */}
           <Col span={12}>
-            <Card title="实时性能数据" size="small">
+            <Card title="Real-time Performance Data" size="small">
               {performanceData ? (
                 <div>
-                  {/* 核心指标 */}
+                  {/* Core Metrics */}
                   <Row gutter={8} style={{ marginBottom: 16 }}>
                     <Col span={12}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
-                          title="实时CRDT延迟"
+                          title="Real-time CRDT Latency"
                           value={performanceData.avgLatency}
                           suffix="ms"
                           precision={1}
@@ -488,14 +489,14 @@ const YjsEditorWithMonitoring = forwardRef(({
                           {getLatencyLevel(performanceData.avgLatency)}
                         </Tag>
                         <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
-                          基于最近 {performanceData.recentLatencySamples} 个样本
+                          Based on recent {performanceData.recentLatencySamples} samples
                         </div>
                       </Card>
                     </Col>
                     <Col span={12}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
-                          title="实时P95延迟"
+                          title="Real-time P95 Latency"
                           value={performanceData.p95Latency}
                           suffix="ms"
                           precision={1}
@@ -510,95 +511,95 @@ const YjsEditorWithMonitoring = forwardRef(({
                           {getLatencyLevel(performanceData.p95Latency)}
                         </Tag>
                         <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
-                          动态计算，实时更新
+                          Dynamically calculated, real-time updates
                         </div>
                       </Card>
                     </Col>
                   </Row>
 
-                  {/* 操作统计 */}
+                  {/* Operation Statistics */}
                   <Row gutter={8} style={{ marginBottom: 16 }}>
                     <Col span={8}>
                       <Statistic
-                        title="文档更新"
+                        title="Document Updates"
                         value={performanceData.documentUpdates}
-                        suffix="次"
+                        suffix="times"
                         valueStyle={{ fontSize: '14px' }}
                         prefix={<EditOutlined />}
                       />
                     </Col>
                     <Col span={8}>
                       <Statistic
-                        title="键盘输入"
+                        title="Keystrokes"
                         value={performanceData.keystrokes}
-                        suffix="次"
+                        suffix="times"
                         valueStyle={{ fontSize: '14px' }}
                         prefix={<DashboardOutlined />}
                       />
                     </Col>
                     <Col span={8}>
                       <Statistic
-                        title="总样本"
+                        title="Total Samples"
                         value={performanceData.latencySamples}
-                        suffix="个"
+                        suffix=""
                         valueStyle={{ fontSize: '14px' }}
                         prefix={<CheckCircleOutlined />}
                       />
                     </Col>
                   </Row>
 
-                  {/* 多窗口同步状态 */}
+                  {/* Multi-window Sync Status */}
                   <div style={{ marginBottom: 16, padding: '8px', backgroundColor: '#e6f7ff', borderRadius: '4px', border: '1px solid #91d5ff' }}>
                     <Row gutter={16}>
                       <Col span={8}>
                         <Space size="small">
                           <GlobalOutlined style={{ color: '#1890ff' }} />
-                          <span><strong>窗口数:</strong> {performanceData.totalWindows}</span>
+                          <span><strong>Windows:</strong> {performanceData.totalWindows}</span>
                         </Space>
                       </Col>
                       <Col span={8}>
                         <Space size="small">
                           <ClockCircleOutlined style={{ color: '#52c41a' }} />
-                          <span><strong>最近样本:</strong> {performanceData.recentLatencySamples}</span>
+                          <span><strong>Recent Samples:</strong> {performanceData.recentLatencySamples}</span>
                         </Space>
                       </Col>
                       <Col span={8}>
                         <Space size="small">
                           <SyncOutlined style={{ color: '#fa8c16' }} />
-                          <span><strong>待处理:</strong> {performanceData.pendingOperations}</span>
+                          <span><strong>Pending:</strong> {performanceData.pendingOperations}</span>
                         </Space>
                       </Col>
                     </Row>
                   </div>
 
-                  {/* 网络统计 */}
+                  {/* Network Statistics */}
                   <div style={{ marginBottom: 16, fontSize: '12px' }}>
-                    <strong>网络传输：</strong>
+                    <strong>Network Transfer:</strong>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-                      <span>发送: {(performanceData.sentBytes / 1024).toFixed(2)} KB</span>
-                      <span>接收: {(performanceData.receivedBytes / 1024).toFixed(2)} KB</span>
-                      <span>带宽: {performanceData.bandwidthKBps.toFixed(2)} KB/s</span>
+                      <span>Sent: {(performanceData.sentBytes / 1024).toFixed(2)} KB</span>
+                      <span>Received: {(performanceData.receivedBytes / 1024).toFixed(2)} KB</span>
+                      <span>Bandwidth: {performanceData.bandwidthKBps.toFixed(2)} KB/s</span>
                     </div>
                     {performanceData.avgNetworkLatency > 0 && (
                       <div style={{ marginTop: '4px', color: '#666' }}>
-                        网络延迟: {performanceData.avgNetworkLatency.toFixed(1)}ms
+                        Network Latency: {performanceData.avgNetworkLatency.toFixed(1)}ms
                       </div>
                     )}
                   </div>
 
-                  {/* 监控状态 */}
+                  {/* Monitoring Status */}
                   <div style={{ marginBottom: 16 }}>
                     <Space size="small">
-                      <Tag color="green">监控中</Tag>
-                      <span>时长: {performanceData.monitoringDuration.toFixed(1)}s</span>
-                      <Tag color="blue">实时同步</Tag>
+                      <Tag color="green">Monitoring</Tag>
+                      <span>Duration: {performanceData.monitoringDuration.toFixed(1)}s</span>
+                      <Tag color="blue">Real-time Sync</Tag>
                     </Space>
                   </div>
 
-                  {/* 延迟历史表格 */}
+                  {/* Latency History Table */}
                   {latencyHistory.length > 0 && (
                     <div>
-                      <strong>延迟历史：</strong>
+                      <strong>Latency History:</strong>
                       <Table
                         dataSource={latencyHistory.slice(-6)}
                         columns={latencyColumns}
@@ -614,16 +615,16 @@ const YjsEditorWithMonitoring = forwardRef(({
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   {isMonitoring ? (
                     <div>
-                      <div style={{ fontSize: '16px', color: '#666' }}>等待性能数据...</div>
+                      <div style={{ fontSize: '16px', color: '#666' }}>Waiting for performance data...</div>
                       <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                        请在左侧编辑器中输入内容
+                        Please input content in the editor on the left
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ fontSize: '16px', color: '#666' }}>点击"开始监控"开始收集数据</div>
+                      <div style={{ fontSize: '16px', color: '#666' }}>Click "Start Monitoring" to begin collecting data</div>
                       <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                        多窗口同步版本：实时P95计算，数据自动合并
+                        Multi-window Sync Version: Real-time P95 calculation, automatic data merging
                       </div>
                     </div>
                   )}
@@ -633,51 +634,51 @@ const YjsEditorWithMonitoring = forwardRef(({
           </Col>
         </Row>
 
-        {/* 详细统计 */}
+        {/* Detailed Statistics */}
         {performanceData && (
-          <Card title="详细统计信息" size="small" style={{ marginTop: 16 }}>
+          <Card title="Detailed Statistics" size="small" style={{ marginTop: 16 }}>
             <Row gutter={16}>
               <Col span={4}>
                 <Statistic
-                  title="更新频率"
+                  title="Update Rate"
                   value={performanceData.updatesPerSecond}
-                  suffix="次/秒"
+                  suffix="ops/s"
                   precision={2}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="平均更新大小"
+                  title="Average Update Size"
                   value={performanceData.avgUpdateSize}
-                  suffix="字节"
+                  suffix="bytes"
                   precision={0}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="输入频率"
+                  title="Input Rate"
                   value={performanceData.keystrokesPerSecond}
-                  suffix="次/秒"
+                  suffix="keys/s"
                   precision={2}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="活跃用户"
+                  title="Active Users"
                   value={performanceData.activeCollaborators}
                   valueStyle={{ color: '#1890ff' }}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="同步窗口"
+                  title="Sync Windows"
                   value={performanceData.totalWindows}
                   valueStyle={{ color: '#52c41a' }}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="网络样本"
+                  title="Network Samples"
                   value={performanceData.networkLatencySamples}
                   valueStyle={{ color: '#fa8c16' }}
                 />

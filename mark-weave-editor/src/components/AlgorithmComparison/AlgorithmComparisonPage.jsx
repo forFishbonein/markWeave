@@ -205,13 +205,13 @@ const AlgorithmComparisonPage = () => {
   const handleStartComparison = () => {
     setIsComparing(true);
     setComparisonHistory([]);
-    message.success('🚀 开始算法性能对比！请在两个编辑器中进行操作');
+    message.success('🚀 Algorithm performance comparison started! Please operate in both editors');
   };
 
   // 停止对比
   const handleStopComparison = () => {
     setIsComparing(false);
-    message.info('⏹️ 已停止算法性能对比');
+    message.info('⏹️ Algorithm performance comparison stopped');
   };
 
   // 重置所有数据
@@ -226,13 +226,13 @@ const AlgorithmComparisonPage = () => {
     setOtMetrics(null);
     setComparisonData(null);
     setComparisonHistory([]);
-    message.success('🔄 已重置所有对比数据');
+    message.success('🔄 All comparison data has been reset');
   };
 
   // 导出对比数据
   const handleExportComparison = () => {
     if (!comparisonData) {
-      message.error('没有可导出的对比数据');
+      message.error('No comparison data available for export');
       return;
     }
 
@@ -268,7 +268,7 @@ const AlgorithmComparisonPage = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    message.success('📊 算法对比数据已导出');
+    message.success('📊 Algorithm comparison data exported');
   };
 
   // 计算总体胜者
@@ -296,37 +296,37 @@ const AlgorithmComparisonPage = () => {
   // 获取胜者标签
   const getWinnerTag = (winner) => {
     switch (winner) {
-      case 'crdt': return <Tag color="green">CRDT 胜出</Tag>;
-      case 'ot': return <Tag color="blue">OT 胜出</Tag>;
-      default: return <Tag color="gold">平局</Tag>;
+      case 'crdt': return <Tag color="green">CRDT Wins</Tag>;
+      case 'ot': return <Tag color="blue">OT Wins</Tag>;
+      default: return <Tag color="gold">Tie</Tag>;
     }
   };
 
   // 对比历史表格列
   const historyColumns = [
     {
-      title: '时间',
+      title: 'Time',
       dataIndex: 'timestamp',
       key: 'timestamp',
       render: (timestamp) => new Date(timestamp).toLocaleTimeString(),
       width: 80
     },
     {
-      title: 'CRDT延迟',
+      title: 'CRDT Latency',
       dataIndex: 'crdtLatency',
       key: 'crdtLatency',
       render: (latency) => `${latency.toFixed(1)}ms`,
       width: 90
     },
     {
-      title: 'OT延迟',
+      title: 'OT Latency',
       dataIndex: 'otLatency',
       key: 'otLatency',
       render: (latency) => `${latency.toFixed(1)}ms`,
       width: 90
     },
     {
-      title: '延迟胜者',
+      title: 'Latency Winner',
       key: 'latencyWinner',
       render: (_, record) => {
         const winner = getWinner(record.crdtLatency, record.otLatency, 'lower');
@@ -335,13 +335,13 @@ const AlgorithmComparisonPage = () => {
       width: 90
     },
     {
-      title: 'CRDT操作',
+      title: 'CRDT Ops',
       dataIndex: 'crdtOps',
       key: 'crdtOps',
       width: 80
     },
     {
-      title: 'OT操作',
+      title: 'OT Ops',
       dataIndex: 'otOps',
       key: 'otOps',
       width: 80
@@ -354,8 +354,8 @@ const AlgorithmComparisonPage = () => {
         title={
           <Space>
             <FieldTimeOutlined />
-            <span>CRDT vs OT 算法性能对比</span>
-            <Tag color="purple">实时对比分析</Tag>
+            <span>CRDT vs OT Algorithm Performance Comparison</span>
+            <Tag color="purple">Real-time Analysis</Tag>
           </Space>
         }
         extra={
@@ -366,40 +366,40 @@ const AlgorithmComparisonPage = () => {
               onClick={isComparing ? handleStopComparison : handleStartComparison}
               size="large"
             >
-              {isComparing ? '停止对比' : '开始对比'}
+              {isComparing ? 'Stop Comparison' : 'Start Comparison'}
             </Button>
             <Button
               icon={<ReloadOutlined />}
               onClick={handleResetAll}
               disabled={isComparing}
             >
-              重置全部
+              Reset All
             </Button>
             <Button
               icon={<DownloadOutlined />}
               onClick={handleExportComparison}
               disabled={!comparisonData}
             >
-              导出对比
+              Export Data
             </Button>
             <Button
               icon={<GlobalOutlined />}
               onClick={() => {
                 window.open(window.location.href, '_blank', 'width=1200,height=800');
-                message.success('✅ 新窗口已打开！可进行多窗口协作对比测试');
+                message.success('✅ New window opened! You can now perform multi-window collaboration testing');
               }}
               type="primary"
               ghost
             >
-              多窗口测试
+              Multi-window Test
             </Button>
           </Space>
         }
       >
-        {/* 对比说明 */}
+        {/* Comparison description */}
         <Alert
-          message="🔬 算法性能实时对比"
-          description="在同一页面中并排对比Yjs CRDT和ShareDB OT算法的性能表现，包括延迟、吞吐量、带宽使用等关键指标。支持多窗口协作测试。"
+          message="🔬 Real-time Algorithm Performance Comparison"
+          description="Compare the performance of Yjs CRDT and ShareDB OT algorithms side by side, including key metrics such as latency, throughput, and bandwidth usage. Supports multi-window collaboration testing."
           type="info"
           showIcon
           style={{ marginBottom: 16 }}
@@ -407,22 +407,22 @@ const AlgorithmComparisonPage = () => {
 
         {isComparing && (
           <Alert
-            message="⚡ 对比进行中"
-            description="请在下方两个编辑器中进行操作，系统将实时对比两种算法的性能表现。"
+            message="⚡ Comparison in Progress"
+            description="Please operate in both editors below, the system will compare the performance of both algorithms in real-time."
             type="success"
             showIcon
             style={{ marginBottom: 16 }}
           />
         )}
 
-        {/* 实时对比结果 */}
+        {/* Real-time comparison results */}
         {comparisonData && (
           <Card
             title={
               <Space>
                 <TrophyOutlined />
-                <span>实时对比结果</span>
-                <Tag color="gold">总体胜者: {calculateOverallWinner(comparisonData).toUpperCase()}</Tag>
+                <span>Real-time Comparison Results</span>
+                <Tag color="gold">Overall Winner: {calculateOverallWinner(comparisonData).toUpperCase()}</Tag>
               </Space>
             }
             size="small"
@@ -432,7 +432,7 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="平均延迟对比"
+                    title="Average Latency Comparison"
                     value={`${comparisonData.latency.crdt.toFixed(1)} vs ${comparisonData.latency.ot.toFixed(1)}`}
                     suffix="ms"
                     valueStyle={{ color: getWinnerColor(comparisonData.latency.winner) }}
@@ -444,7 +444,7 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="P95延迟对比"
+                    title="P95 Latency Comparison"
                     value={`${comparisonData.p95Latency.crdt.toFixed(1)} vs ${comparisonData.p95Latency.ot.toFixed(1)}`}
                     suffix="ms"
                     valueStyle={{ color: getWinnerColor(comparisonData.p95Latency.winner) }}
@@ -456,7 +456,7 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="吞吐量对比"
+                    title="Throughput Comparison"
                     value={`${comparisonData.throughput.crdt.toFixed(1)} vs ${comparisonData.throughput.ot.toFixed(1)}`}
                     suffix="ops/s"
                     valueStyle={{ color: getWinnerColor(comparisonData.throughput.winner) }}
@@ -471,7 +471,7 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="带宽使用对比"
+                    title="Bandwidth Usage Comparison"
                     value={`${(comparisonData.bandwidth.crdt / 1024).toFixed(1)} vs ${(comparisonData.bandwidth.ot / 1024).toFixed(1)}`}
                     suffix="KB/s"
                     valueStyle={{ color: getWinnerColor(comparisonData.bandwidth.winner) }}
@@ -483,9 +483,8 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="活跃用户对比"
+                    title="Active Users Comparison"
                     value={`${comparisonData.users.crdt} vs ${comparisonData.users.ot}`}
-                    suffix="个"
                     valueStyle={{ color: getWinnerColor(comparisonData.users.winner) }}
                     prefix={<GlobalOutlined />}
                   />
@@ -495,9 +494,8 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="操作总数对比"
+                    title="Total Operations Comparison"
                     value={`${comparisonData.operations.crdt} vs ${comparisonData.operations.ot}`}
-                    suffix="次"
                     valueStyle={{ color: getWinnerColor(comparisonData.operations.winner) }}
                     prefix={<DashboardOutlined />}
                   />
@@ -506,12 +504,12 @@ const AlgorithmComparisonPage = () => {
               </Col>
             </Row>
 
-            {/* 🔥 新增：扩展指标对比 */}
+            {/* Extended metrics comparison */}
             <Row gutter={16} style={{ marginTop: 16 }}>
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="网络延迟对比"
+                    title="Network Latency Comparison"
                     value={`${comparisonData.networkLatency.crdt.toFixed(1)} vs ${comparisonData.networkLatency.ot.toFixed(1)}`}
                     suffix="ms"
                     valueStyle={{ color: getWinnerColor(comparisonData.networkLatency.winner) }}
@@ -523,9 +521,8 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="键盘输入对比"
+                    title="Keystrokes Comparison"
                     value={`${comparisonData.keystrokes.crdt} vs ${comparisonData.keystrokes.ot}`}
-                    suffix="次"
                     valueStyle={{ color: getWinnerColor(comparisonData.keystrokes.winner) }}
                     prefix={<ExperimentOutlined />}
                   />
@@ -535,9 +532,8 @@ const AlgorithmComparisonPage = () => {
               <Col span={8}>
                 <Card size="small" style={{ textAlign: 'center' }}>
                   <Statistic
-                    title="数据样本对比"
+                    title="Data Samples Comparison"
                     value={`${comparisonData.dataQuality.crdt.latencySamples} vs ${comparisonData.dataQuality.ot.latencySamples}`}
-                    suffix="个"
                     valueStyle={{
                       color: getWinnerColor(
                         getWinner(
@@ -560,42 +556,40 @@ const AlgorithmComparisonPage = () => {
               </Col>
             </Row>
 
-            {/* 🔥 新增：数据质量状态 */}
+            {/* Data quality status */}
             <Row gutter={16} style={{ marginTop: 16 }}>
               <Col span={12}>
-                <Card size="small" title="CRDT 数据质量" style={{ backgroundColor: '#f6ffed' }}>
+                <Card size="small" title="CRDT Data Quality" style={{ backgroundColor: '#f6ffed' }}>
                   <div style={{ fontSize: '12px' }}>
-                    <div>📊 延迟样本: {comparisonData.dataQuality.crdt.latencySamples} 个</div>
-                    <div>🔄 最近样本: {comparisonData.dataQuality.crdt.recentSamples} 个</div>
-                    <div>🌐 网络样本: {comparisonData.dataQuality.crdt.networkSamples} 个</div>
-                    <div>⏱️ 监控时长: {comparisonData.dataQuality.crdt.monitoringDuration.toFixed(1)}s</div>
-                    <div>🔗 连接状态: {comparisonData.dataQuality.crdt.isConnected ? '✅ 已连接' : '❌ 未连接'}</div>
-                    {/* 🔥 新增：数据质量指标 */}
+                    <div>📊 Latency Samples: {comparisonData.dataQuality.crdt.latencySamples}</div>
+                    <div>🔄 Recent Samples: {comparisonData.dataQuality.crdt.recentSamples}</div>
+                    <div>🌐 Network Samples: {comparisonData.dataQuality.crdt.networkSamples}</div>
+                    <div>⏱️ Monitoring Duration: {comparisonData.dataQuality.crdt.monitoringDuration.toFixed(1)}s</div>
+                    <div>🔗 Connection Status: {comparisonData.dataQuality.crdt.isConnected ? '✅ Connected' : '❌ Disconnected'}</div>
                     {crdtMetrics?.dataQuality && (
                       <>
-                        <div>🎯 计算方法: {crdtMetrics.dataQuality.calculationMethod}</div>
-                        <div>📈 置信度: {crdtMetrics.dataQuality.confidence}</div>
-                        <div>⏰ 时间窗口: {crdtMetrics.dataQuality.timeWindow / 1000}s</div>
+                        <div>🎯 Calculation Method: {crdtMetrics.dataQuality.calculationMethod}</div>
+                        <div>📈 Confidence: {crdtMetrics.dataQuality.confidence}</div>
+                        <div>⏰ Time Window: {crdtMetrics.dataQuality.timeWindow / 1000}s</div>
                       </>
                     )}
                   </div>
                 </Card>
               </Col>
               <Col span={12}>
-                <Card size="small" title="OT 数据质量" style={{ backgroundColor: '#f0f8ff' }}>
+                <Card size="small" title="OT Data Quality" style={{ backgroundColor: '#f0f8ff' }}>
                   <div style={{ fontSize: '12px' }}>
-                    <div>📊 延迟样本: {comparisonData.dataQuality.ot.latencySamples} 个</div>
-                    <div>🔄 最近样本: {comparisonData.dataQuality.ot.recentSamples} 个</div>
-                    <div>🌐 网络样本: {comparisonData.dataQuality.ot.networkSamples} 个</div>
-                    <div>⏱️ 监控时长: {comparisonData.dataQuality.ot.monitoringDuration.toFixed(1)}s</div>
-                    <div>🔗 连接状态: {comparisonData.dataQuality.ot.isConnected ? '✅ 已连接' : '❌ 未连接'}</div>
-                    <div>🎯 真实数据: {comparisonData.dataQuality.ot.hasRealData ? '✅ 真实' : '⚠️ 模拟'}</div>
-                    {/* 🔥 新增：数据质量指标 */}
+                    <div>📊 Latency Samples: {comparisonData.dataQuality.ot.latencySamples}</div>
+                    <div>🔄 Recent Samples: {comparisonData.dataQuality.ot.recentSamples}</div>
+                    <div>🌐 Network Samples: {comparisonData.dataQuality.ot.networkSamples}</div>
+                    <div>⏱️ Monitoring Duration: {comparisonData.dataQuality.ot.monitoringDuration.toFixed(1)}s</div>
+                    <div>🔗 Connection Status: {comparisonData.dataQuality.ot.isConnected ? '✅ Connected' : '❌ Disconnected'}</div>
+                    <div>🎯 Real Data: {comparisonData.dataQuality.ot.hasRealData ? '✅ Real' : '⚠️ Simulated'}</div>
                     {otMetrics?.dataQuality && (
                       <>
-                        <div>🎯 计算方法: {otMetrics.dataQuality.calculationMethod}</div>
-                        <div>📈 置信度: {otMetrics.dataQuality.confidence}</div>
-                        <div>⏰ 时间窗口: {otMetrics.dataQuality.timeWindow / 1000}s</div>
+                        <div>🎯 Calculation Method: {otMetrics.dataQuality.calculationMethod}</div>
+                        <div>📈 Confidence: {otMetrics.dataQuality.confidence}</div>
+                        <div>⏰ Time Window: {otMetrics.dataQuality.timeWindow / 1000}s</div>
                       </>
                     )}
                   </div>
@@ -605,15 +599,15 @@ const AlgorithmComparisonPage = () => {
           </Card>
         )}
 
-        {/* 并排编辑器对比 */}
+        {/* Side-by-side editor comparison */}
         <Row gutter={16}>
           <Col span={12}>
             <Card
               title={
                 <Space>
                   <FireOutlined style={{ color: '#52c41a' }} />
-                  <span>Yjs CRDT 算法</span>
-                  <Tag color="green">去中心化</Tag>
+                  <span>Yjs CRDT Algorithm</span>
+                  <Tag color="green">Decentralized</Tag>
                 </Space>
               }
               size="small"
@@ -622,7 +616,7 @@ const AlgorithmComparisonPage = () => {
               <YjsEditorWithMonitoring
                 ref={crdtRef}
                 docId="crdt-performance-test-doc"
-                title="CRDT 性能测试"
+                title="CRDT Performance Test"
                 showMetrics={false}
                 onMetricsUpdate={setCrdtMetrics}
               />
@@ -633,8 +627,8 @@ const AlgorithmComparisonPage = () => {
               title={
                 <Space>
                   <SwapOutlined style={{ color: '#1890ff' }} />
-                  <span>ShareDB OT 算法</span>
-                  <Tag color="blue">中心化</Tag>
+                  <span>ShareDB OT Algorithm</span>
+                  <Tag color="blue">Centralized</Tag>
                 </Space>
               }
               size="small"
@@ -644,7 +638,7 @@ const AlgorithmComparisonPage = () => {
                 ref={otRef}
                 docId="ot-performance-test-doc"
                 collection="documents"
-                title="OT 性能测试"
+                title="OT Performance Test"
                 showMetrics={false}
                 onMetricsUpdate={setOtMetrics}
               />
@@ -652,14 +646,14 @@ const AlgorithmComparisonPage = () => {
           </Col>
         </Row>
 
-        {/* 对比历史 */}
+        {/* Comparison history */}
         {comparisonHistory.length > 0 && (
           <Card
             title={
               <Space>
                 <BarChartOutlined />
-                <span>对比历史记录</span>
-                <Tag color="purple">最近 {comparisonHistory.length} 个数据点</Tag>
+                <span>Comparison History</span>
+                <Tag color="purple">Last {comparisonHistory.length} Data Points</Tag>
               </Space>
             }
             size="small"
@@ -675,19 +669,19 @@ const AlgorithmComparisonPage = () => {
           </Card>
         )}
 
-        {/* 测试指南 */}
+        {/* Testing guide */}
         {!isComparing && (
           <Card
-            title="📖 对比测试指南"
+            title="📖 Comparison Testing Guide"
             size="small"
             style={{ marginTop: 16 }}
           >
             <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
-              <p><strong>1. 开始对比：</strong>点击"开始对比"按钮启动实时性能监控</p>
-              <p><strong>2. 单窗口测试：</strong>在左右两个编辑器中分别输入内容，观察性能差异</p>
-              <p><strong>3. 多窗口测试：</strong>点击"多窗口测试"打开新窗口，进行协作编辑对比</p>
-              <p><strong>4. 数据分析：</strong>实时查看延迟、吞吐量、带宽等关键指标对比</p>
-              <p><strong>5. 导出数据：</strong>点击"导出对比"保存完整的对比数据用于学术分析</p>
+              <p><strong>1. Start Comparison:</strong> Click "Start Comparison" button to begin real-time performance monitoring</p>
+              <p><strong>2. Single Window Test:</strong> Input content in both editors to observe performance differences</p>
+              <p><strong>3. Multi-window Test:</strong> Click "Multi-window Test" to open new windows for collaborative editing comparison</p>
+              <p><strong>4. Data Analysis:</strong> View real-time comparisons of key metrics including latency, throughput, and bandwidth</p>
+              <p><strong>5. Export Data:</strong> Click "Export Data" to save complete comparison data for academic analysis</p>
             </div>
           </Card>
         )}

@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-06 15:55:51
+ * @LastEditTime: 2025-07-07 03:10:48
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -14,7 +14,7 @@ import { EditorView } from "prosemirror-view";
 import { WebsocketProvider } from "y-websocket";
 import { UndoManager } from "yjs";
 
-import { ydoc, ychars, yformatOps } from "../crdt";
+import { ydoc, ychars, yformatOps, resetYDoc } from "../crdt";
 import {
   convertCRDTToProseMirrorDoc,
   loadInitialData,
@@ -32,14 +32,19 @@ export function useYjsEditor(docId, editorRef) {
   const [editorView, setEditorView] = useState(null);
   const [awareness, setAwareness] = useState(null);
   const [provider, setProvider] = useState(null);
-  const { user: authUser } = useAuth(); // 获取真实登录用户
+  const [isConnected, setIsConnected] = useState(false); // Add connection status state
+  const { user: authUser } = useAuth();
 
   console.log("当前文档ID:", docId);
   useEffect(() => {
+    // 为每个文档创建独立的 Y.Doc，彻底避免跨文档数据污染
+    console.log("🔄 为文档", docId, "创建新的 Y.Doc");
+    const newYDoc = resetYDoc();
+
     const wsProvider = new WebsocketProvider(
       "ws://localhost:1234",
       docId,
-      ydoc
+      newYDoc
     );
     setProvider(wsProvider);
     // 设置用户状态保持时间，避免过快清理
@@ -92,6 +97,7 @@ export function useYjsEditor(docId, editorRef) {
     // WebSocket状态监听
     wsProvider.on("status", (event) => {
       console.log("🔌 WebSocket状态:", event.status);
+      setIsConnected(event.status === "connected"); // Update connection status
       if (event.status === "connected") {
         console.log("✅ WebSocket已连接");
         // WebSocket连接后重新设置用户信息并强制同步
@@ -103,7 +109,7 @@ export function useYjsEditor(docId, editorRef) {
           aw.setLocalStateField("forceSync", Date.now());
 
           // 发送一个空的文档更新来触发同步
-          ydoc.transact(() => {
+          newYDoc.transact(() => {
             // 这会触发WebSocket同步
           });
         }, 200);
@@ -158,7 +164,7 @@ export function useYjsEditor(docId, editorRef) {
       // 注意：不使用 ySyncPlugin！我们自己管理 CRDT 同步
       // 初始化一个空的 ProseMirror 文档（可以先从 CRDT 中生成，如果为空则会自动填充空格）
       const initialDoc = convertCRDTToProseMirrorDoc();
-      console.log("initialDoc：", initialDoc, ydoc);
+      console.log("initialDoc：", initialDoc, newYDoc);
       const state = EditorState.create({
         schema,
         doc: initialDoc,
@@ -300,12 +306,16 @@ export function useYjsEditor(docId, editorRef) {
 
       viewRef.current?.destroy();
       viewRef.current = null;
-      ydoc.off("update");
+      newYDoc.off("update");
       wsProvider.destroy();
       window.removeEventListener("beforeunload", handleBeforeUnload);
       // clearInterval(intervalId);
+      if (wsProvider) {
+        wsProvider.disconnect();
+        setIsConnected(false); // Reset connection status on cleanup
+      }
     };
   }, [docId, authUser]); // 添加authUser依赖
 
-  return [editorView, awareness, provider];
+  return [editorView, awareness, provider, isConnected]; // Add isConnected to return values
 }

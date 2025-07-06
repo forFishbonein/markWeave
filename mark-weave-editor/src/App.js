@@ -47,11 +47,11 @@ function App() {
             <Route path='/home' element={<Home />} />
             <Route path='/editor/:id' element={<EditorPage />} />
             <Route
-              path='/performance-lab'
+              path='/performance-lab-crdt'
               element={<YjsEditorWithMonitoring />}
             />
             <Route
-              path='/algorithm-comparison'
+              path='/performance-lab-ot'
               element={<OTEditorWithMonitoring />}
             />
             <Route

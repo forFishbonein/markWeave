@@ -82,7 +82,7 @@ const GlobalHeader = () => {
         <Button
           type="text"
           icon={<BarChartOutlined />}
-          onClick={() => navigate('/performance-lab')}
+          onClick={() => navigate('/performance-lab-crdt')}
           style={{
             color: '#52c41a',
             fontWeight: 500,
@@ -103,7 +103,7 @@ const GlobalHeader = () => {
         <Button
           type="text"
           icon={<SwapOutlined />}
-          onClick={() => navigate('/algorithm-comparison')}
+          onClick={() => navigate('/performance-lab-ot')}
           style={{
             color: '#fa8c16',
             fontWeight: 500,
