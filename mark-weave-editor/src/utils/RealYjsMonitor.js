@@ -12,8 +12,10 @@ class RealYjsMonitor {
   constructor() {
     this.isMonitoring = false;
     this.startTime = null;
-    this.windowId = `window_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+    this.windowId = `window_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
     // 性能数据
     this.metrics = {
       documentUpdates: 0,
@@ -26,11 +28,11 @@ class RealYjsMonitor {
       collaborators: new Map(),
       awarenessChanges: [],
       operationLatencies: [],
-      networkLatencies: []
+      networkLatencies: [],
     };
-    
+
     this.pendingOperations = [];
-    
+
     // 绑定方法
     this.handleDocumentUpdate = this.handleDocumentUpdate.bind(this);
     this.handleAwarenessChange = this.handleAwarenessChange.bind(this);
@@ -44,7 +46,7 @@ class RealYjsMonitor {
    */
   startMonitoring(ydoc, awareness, provider) {
     if (this.isMonitoring) {
-      console.warn('监控已经在运行中');
+      console.warn("监控已经在运行中");
       return;
     }
 
@@ -58,29 +60,29 @@ class RealYjsMonitor {
 
     // 监听文档更新
     if (ydoc) {
-      ydoc.on('update', this.handleDocumentUpdate);
-      console.log('✅ 已监听文档更新事件');
+      ydoc.on("update", this.handleDocumentUpdate);
+      console.log("✅ 已监听文档更新事件");
     }
 
     // 监听awareness变化
     if (awareness) {
-      awareness.on('change', this.handleAwarenessChange);
-      console.log('✅ 已监听awareness变化事件');
+      awareness.on("change", this.handleAwarenessChange);
+      console.log("✅ 已监听awareness变化事件");
     }
 
     // 监听WebSocket状态
     if (provider) {
-      provider.on('status', this.handleProviderStatus);
-      console.log('✅ 已监听WebSocket状态事件');
+      provider.on("status", this.handleProviderStatus);
+      console.log("✅ 已监听WebSocket状态事件");
     }
 
     // 监听键盘输入
-    document.addEventListener('keydown', this.handleKeydown);
-    console.log('✅ 已监听键盘输入事件');
+    document.addEventListener("keydown", this.handleKeydown);
+    console.log("✅ 已监听键盘输入事件");
 
     // 🔧 新增：监听localStorage变化，实现多窗口数据同步
-    window.addEventListener('storage', this.handleStorageChange);
-    console.log('✅ 已监听多窗口数据同步');
+    window.addEventListener("storage", this.handleStorageChange);
+    console.log("✅ 已监听多窗口数据同步");
 
     // 拦截WebSocket来监控网络数据
     this.interceptWebSocket();
@@ -97,7 +99,7 @@ class RealYjsMonitor {
       if (this.isMonitoring) {
         this.syncDataToStorage();
       }
-    }, 500); // 每500ms同步一次数据
+    }, 250); // 🔥 优化：每250ms同步一次数据，更快响应
   }
 
   /**
@@ -114,19 +116,22 @@ class RealYjsMonitor {
         networkLatencies: this.metrics.networkLatencies.slice(-20),
         collaborators: Array.from(this.metrics.collaborators.entries()),
         totalUpdateSize: this.metrics.totalUpdateSize,
-        networkEvents: this.metrics.networkEvents.slice(-100)
+        networkEvents: this.metrics.networkEvents.slice(-100),
       },
       pendingOperations: this.pendingOperations.length,
-      isMonitoring: this.isMonitoring
+      isMonitoring: this.isMonitoring,
     };
 
     try {
-      localStorage.setItem(`yjs_monitor_${this.windowId}`, JSON.stringify(syncData));
-      
+      localStorage.setItem(
+        `yjs_monitor_${this.windowId}`,
+        JSON.stringify(syncData)
+      );
+
       // 触发其他窗口更新
-      localStorage.setItem('yjs_monitor_sync_trigger', Date.now().toString());
+      localStorage.setItem("yjs_monitor_sync_trigger", Date.now().toString());
     } catch (e) {
-      console.warn('无法同步数据到localStorage:', e);
+      console.warn("无法同步数据到localStorage:", e);
     }
   }
 
@@ -134,7 +139,7 @@ class RealYjsMonitor {
    * 🔧 新增：处理localStorage变化
    */
   handleStorageChange(event) {
-    if (event.key === 'yjs_monitor_sync_trigger') {
+    if (event.key === "yjs_monitor_sync_trigger") {
       // 其他窗口有数据更新，合并数据
       this.mergeDataFromOtherWindows();
     }
@@ -145,18 +150,23 @@ class RealYjsMonitor {
    */
   mergeDataFromOtherWindows() {
     const allWindowData = [];
-    
+
     // 收集所有窗口的数据
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('yjs_monitor_') && key !== `yjs_monitor_${this.windowId}`) {
+      if (
+        key &&
+        key.startsWith("yjs_monitor_") &&
+        key !== `yjs_monitor_${this.windowId}`
+      ) {
         try {
           const data = JSON.parse(localStorage.getItem(key));
-          if (data && Date.now() - data.timestamp < 10000) { // 10秒内的数据才有效
+          if (data && Date.now() - data.timestamp < 10000) {
+            // 10秒内的数据才有效
             allWindowData.push(data);
           }
         } catch (e) {
-          console.warn('解析其他窗口数据失败:', e);
+          console.warn("解析其他窗口数据失败:", e);
         }
       }
     }
@@ -164,24 +174,27 @@ class RealYjsMonitor {
     // 合并延迟数据
     const allLatencies = [...this.metrics.operationLatencies];
     const allNetworkLatencies = [...this.metrics.networkLatencies];
-    
-    allWindowData.forEach(windowData => {
+
+    allWindowData.forEach((windowData) => {
       if (windowData.metrics) {
         allLatencies.push(...(windowData.metrics.operationLatencies || []));
-        allNetworkLatencies.push(...(windowData.metrics.networkLatencies || []));
+        allNetworkLatencies.push(
+          ...(windowData.metrics.networkLatencies || [])
+        );
       }
     });
 
     // 去重并排序
     const uniqueLatencies = this.deduplicateLatencies(allLatencies);
-    const uniqueNetworkLatencies = this.deduplicateLatencies(allNetworkLatencies);
+    const uniqueNetworkLatencies =
+      this.deduplicateLatencies(allNetworkLatencies);
 
     // 更新合并后的数据（但不覆盖本窗口的原始数据）
     this.mergedMetrics = {
       operationLatencies: uniqueLatencies.slice(-200), // 保持最近200个
       networkLatencies: uniqueNetworkLatencies.slice(-100),
       totalWindows: allWindowData.length + 1,
-      lastMergeTime: Date.now()
+      lastMergeTime: Date.now(),
     };
   }
 
@@ -190,12 +203,14 @@ class RealYjsMonitor {
    */
   deduplicateLatencies(latencies) {
     const seen = new Set();
-    return latencies.filter(item => {
-      const key = `${item.timestamp}_${item.latency}_${item.updateSize}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }).sort((a, b) => a.timestamp - b.timestamp);
+    return latencies
+      .filter((item) => {
+        const key = `${item.timestamp}_${item.latency}_${item.updateSize}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => a.timestamp - b.timestamp);
   }
 
   /**
@@ -205,21 +220,21 @@ class RealYjsMonitor {
     if (!this.isMonitoring) return;
 
     this.isMonitoring = false;
-    
+
     // 移除事件监听
     if (this.ydoc) {
-      this.ydoc.off('update', this.handleDocumentUpdate);
+      this.ydoc.off("update", this.handleDocumentUpdate);
     }
     if (this.awareness) {
-      this.awareness.off('change', this.handleAwarenessChange);
+      this.awareness.off("change", this.handleAwarenessChange);
     }
     if (this.provider) {
-      this.provider.off('status', this.handleProviderStatus);
+      this.provider.off("status", this.handleProviderStatus);
     }
-    
-    document.removeEventListener('keydown', this.handleKeydown);
-    window.removeEventListener('storage', this.handleStorageChange);
-    
+
+    document.removeEventListener("keydown", this.handleKeydown);
+    window.removeEventListener("storage", this.handleStorageChange);
+
     // 清理同步定时器
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
@@ -229,10 +244,10 @@ class RealYjsMonitor {
     try {
       localStorage.removeItem(`yjs_monitor_${this.windowId}`);
     } catch (e) {
-      console.warn('清理localStorage失败:', e);
+      console.warn("清理localStorage失败:", e);
     }
-    
-    console.log('⏹️ 已停止Yjs性能监控');
+
+    console.log("⏹️ 已停止Yjs性能监控");
   }
 
   /**
@@ -241,17 +256,17 @@ class RealYjsMonitor {
   handleDocumentUpdate(update, origin) {
     const timestamp = performance.now();
     const updateSize = update.length;
-    
+
     this.metrics.documentUpdates++;
     this.metrics.totalUpdateSize += updateSize;
     this.metrics.updateTimes.push(timestamp);
-    
+
     // 查找匹配的操作
     const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
-    
+
     if (matchedOperation) {
       const latency = timestamp - matchedOperation.timestamp;
-      
+
       // 只记录合理的延迟值
       if (latency >= 1 && latency <= 2000) {
         const latencyRecord = {
@@ -261,16 +276,22 @@ class RealYjsMonitor {
           origin,
           operationType: matchedOperation.key,
           operationId: matchedOperation.id,
-          windowId: this.windowId
+          windowId: this.windowId,
         };
-        
+
         this.metrics.operationLatencies.push(latencyRecord);
-        
-        console.log(`📊 CRDT延迟: ${latency.toFixed(1)}ms, 操作: ${matchedOperation.key}, 大小: ${updateSize}字节`);
+
+        console.log(
+          `📊 CRDT延迟: ${latency.toFixed(1)}ms, 操作: ${
+            matchedOperation.key
+          }, 大小: ${updateSize}字节`
+        );
       }
     }
-    
-    console.log(`📝 文档更新 #${this.metrics.documentUpdates}, 大小: ${updateSize}字节, 来源: ${origin}`);
+
+    console.log(
+      `📝 文档更新 #${this.metrics.documentUpdates}, 大小: ${updateSize}字节, 来源: ${origin}`
+    );
   }
 
   /**
@@ -278,27 +299,27 @@ class RealYjsMonitor {
    */
   findAndRemoveMatchingOperation(updateTimestamp) {
     if (this.pendingOperations.length === 0) return null;
-    
+
     const timeWindow = 1000;
     const cutoffTime = updateTimestamp - timeWindow;
-    
+
     const validOperations = this.pendingOperations.filter(
-      op => op.timestamp > cutoffTime
+      (op) => op.timestamp > cutoffTime
     );
-    
+
     if (validOperations.length === 0) {
       this.pendingOperations = this.pendingOperations.filter(
-        op => op.timestamp > cutoffTime
+        (op) => op.timestamp > cutoffTime
       );
       return null;
     }
-    
+
     const matchedOp = validOperations[validOperations.length - 1];
-    
+
     this.pendingOperations = this.pendingOperations.filter(
-      op => op.id !== matchedOp.id
+      (op) => op.id !== matchedOp.id
     );
-    
+
     return matchedOp;
   }
 
@@ -307,23 +328,27 @@ class RealYjsMonitor {
    */
   handleAwarenessChange(changes) {
     const timestamp = performance.now();
-    
-    changes.added.forEach(clientId => {
+
+    changes.added.forEach((clientId) => {
       const state = this.awareness.getStates().get(clientId);
       if (state?.user) {
         this.metrics.collaborators.set(clientId, {
           user: state.user,
-          joinTime: timestamp
+          joinTime: timestamp,
         });
         console.log(`👥 用户加入: ${state.user.name || clientId}`);
       }
     });
 
-    changes.removed.forEach(clientId => {
+    changes.removed.forEach((clientId) => {
       const collaborator = this.metrics.collaborators.get(clientId);
       if (collaborator) {
         const sessionDuration = timestamp - collaborator.joinTime;
-        console.log(`👋 用户离开: ${collaborator.user.name || clientId}, 会话时长: ${sessionDuration.toFixed(0)}ms`);
+        console.log(
+          `👋 用户离开: ${
+            collaborator.user.name || clientId
+          }, 会话时长: ${sessionDuration.toFixed(0)}ms`
+        );
         this.metrics.collaborators.delete(clientId);
       }
     });
@@ -333,7 +358,7 @@ class RealYjsMonitor {
       added: changes.added.length,
       updated: changes.updated.length,
       removed: changes.removed.length,
-      totalUsers: this.awareness.getStates().size
+      totalUsers: this.awareness.getStates().size,
     });
   }
 
@@ -341,13 +366,18 @@ class RealYjsMonitor {
    * 处理键盘输入
    */
   handleKeydown(event) {
-    if (event.target.closest('[contenteditable]') || event.target.closest('.ProseMirror')) {
+    if (
+      event.target.closest("[contenteditable]") ||
+      event.target.closest(".ProseMirror")
+    ) {
       const timestamp = performance.now();
-      
+
       this.metrics.keystrokes++;
-      
-      const operationId = `op_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
+      const operationId = `op_${timestamp}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+
       const operation = {
         id: operationId,
         timestamp,
@@ -356,20 +386,22 @@ class RealYjsMonitor {
         ctrlKey: event.ctrlKey,
         shiftKey: event.shiftKey,
         altKey: event.altKey,
-        windowId: this.windowId
+        windowId: this.windowId,
       };
-      
+
       this.metrics.userOperations.push(operation);
-      
+
       if (this.isPrintableKey(event.key)) {
         this.pendingOperations.push(operation);
-        
+
         const cutoffTime = timestamp - 5000;
         this.pendingOperations = this.pendingOperations.filter(
-          op => op.timestamp > cutoffTime
+          (op) => op.timestamp > cutoffTime
         );
-        
-        console.log(`⌨️ 记录操作: ${event.key}, 待处理队列: ${this.pendingOperations.length}`);
+
+        console.log(
+          `⌨️ 记录操作: ${event.key}, 待处理队列: ${this.pendingOperations.length}`
+        );
       }
     }
   }
@@ -378,11 +410,13 @@ class RealYjsMonitor {
    * 判断是否为可打印字符
    */
   isPrintableKey(key) {
-    return key.length === 1 || 
-           key === 'Enter' || 
-           key === 'Space' || 
-           key === 'Backspace' || 
-           key === 'Delete';
+    return (
+      key.length === 1 ||
+      key === "Enter" ||
+      key === "Space" ||
+      key === "Backspace" ||
+      key === "Delete"
+    );
   }
 
   /**
@@ -390,15 +424,15 @@ class RealYjsMonitor {
    */
   handleProviderStatus(event) {
     const timestamp = performance.now();
-    
+
     this.metrics.connectionEvents.push({
       timestamp,
-      status: event.status
+      status: event.status,
     });
-    
+
     console.log(`🔌 WebSocket状态: ${event.status}`);
-    
-    if (event.status === 'connected') {
+
+    if (event.status === "connected") {
       this.startPingTest();
     }
   }
@@ -409,34 +443,34 @@ class RealYjsMonitor {
   interceptWebSocket() {
     if (this.provider && this.provider.ws) {
       const ws = this.provider.ws;
-      
+
       const originalSend = ws.send.bind(ws);
       ws.send = (data) => {
         const timestamp = performance.now();
         const size = data.length || data.byteLength || 0;
-        
+
         this.metrics.networkEvents.push({
-          type: 'send',
+          type: "send",
           timestamp,
           size,
-          windowId: this.windowId
+          windowId: this.windowId,
         });
-        
+
         console.log(`📤 发送数据: ${size}字节`);
         return originalSend(data);
       };
 
-      ws.addEventListener('message', (event) => {
+      ws.addEventListener("message", (event) => {
         const timestamp = performance.now();
         const size = event.data.length || event.data.byteLength || 0;
-        
+
         this.metrics.networkEvents.push({
-          type: 'receive',
+          type: "receive",
           timestamp,
           size,
-          windowId: this.windowId
+          windowId: this.windowId,
         });
-        
+
         console.log(`📥 接收数据: ${size}字节`);
       });
     }
@@ -447,44 +481,54 @@ class RealYjsMonitor {
    */
   startPingTest() {
     if (!this.provider || !this.provider.ws) return;
-    
+
     const pingInterval = setInterval(() => {
-      if (!this.isMonitoring || !this.provider.ws || this.provider.ws.readyState !== WebSocket.OPEN) {
+      if (
+        !this.isMonitoring ||
+        !this.provider.ws ||
+        this.provider.ws.readyState !== WebSocket.OPEN
+      ) {
         clearInterval(pingInterval);
         return;
       }
-      
+
       const startTime = performance.now();
       const pingId = Math.random().toString(36).substr(2, 9);
-      
-      this.awareness.setLocalStateField('ping', { id: pingId, timestamp: startTime });
-      
+
+      this.awareness.setLocalStateField("ping", {
+        id: pingId,
+        timestamp: startTime,
+      });
+
       const handlePong = (changes) => {
         const states = this.awareness.getStates();
         states.forEach((state, clientId) => {
-          if (state.ping && state.ping.id === pingId && clientId !== this.awareness.clientID) {
+          if (
+            state.ping &&
+            state.ping.id === pingId &&
+            clientId !== this.awareness.clientID
+          ) {
             const endTime = performance.now();
             const latency = endTime - startTime;
-            
+
             this.metrics.networkLatencies.push({
               latency,
               timestamp: endTime,
               clientId,
-              windowId: this.windowId
+              windowId: this.windowId,
             });
-            
+
             console.log(`🏓 网络延迟: ${latency.toFixed(1)}ms`);
-            this.awareness.off('change', handlePong);
+            this.awareness.off("change", handlePong);
           }
         });
       };
-      
-      this.awareness.on('change', handlePong);
-      
+
+      this.awareness.on("change", handlePong);
+
       setTimeout(() => {
-        this.awareness.off('change', handlePong);
+        this.awareness.off("change", handlePong);
       }, 5000);
-      
     }, 5000);
   }
 
@@ -500,88 +544,161 @@ class RealYjsMonitor {
     const monitoringDuration = (now - this.startTime) / 1000;
 
     // 🔧 使用合并后的数据进行计算
-    const allLatencies = this.mergedMetrics ? 
-      this.mergedMetrics.operationLatencies.map(l => l.latency) : 
-      this.metrics.operationLatencies.map(l => l.latency);
+    const allLatencies = this.mergedMetrics
+      ? this.mergedMetrics.operationLatencies.map((l) => l.latency)
+      : this.metrics.operationLatencies.map((l) => l.latency);
 
-    const allNetworkLatencies = this.mergedMetrics ? 
-      this.mergedMetrics.networkLatencies.map(l => l.latency) : 
-      this.metrics.networkLatencies.map(l => l.latency);
+    const allNetworkLatencies = this.mergedMetrics
+      ? this.mergedMetrics.networkLatencies.map((l) => l.latency)
+      : this.metrics.networkLatencies.map((l) => l.latency);
 
-    // 🔧 计算最近的延迟（最近10秒）
-    const recentWindow = 10000;
+    // 🔥 优化：缩短时间窗口为4秒，提升响应速度
+    const recentWindow = 4000; // 从10000ms改为4000ms
     const recentTime = now - recentWindow;
-    
-    const recentLatencies = (this.mergedMetrics ? 
-      this.mergedMetrics.operationLatencies : 
-      this.metrics.operationLatencies)
-      .filter(l => l.timestamp > recentTime)
-      .map(l => l.latency);
 
-    // 🔧 实时P95计算（基于最近数据）
-    const latenciesToUse = recentLatencies.length > 5 ? recentLatencies : allLatencies;
-    const avgLatency = latenciesToUse.length > 0 
-      ? latenciesToUse.reduce((a, b) => a + b, 0) / latenciesToUse.length 
-      : 0;
-    
-    const sortedLatencies = [...latenciesToUse].sort((a, b) => a - b);
-    const p95Latency = sortedLatencies.length > 0 
-      ? sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] || 0
-      : 0;
+    const recentLatencies = (
+      this.mergedMetrics
+        ? this.mergedMetrics.operationLatencies
+        : this.metrics.operationLatencies
+    )
+      .filter((l) => l.timestamp > recentTime)
+      .map((l) => l.latency);
 
-    const avgNetworkLatency = allNetworkLatencies.length > 0 
-      ? allNetworkLatencies.reduce((a, b) => a + b, 0) / allNetworkLatencies.length 
-      : 0;
+    // 🔥 优化：分层P95计算策略
+    let latenciesToUse, p95Latency, avgLatency;
+
+    if (recentLatencies.length >= 12) {
+      // 最近数据充足：使用最近4秒的数据
+      latenciesToUse = recentLatencies;
+      console.log(
+        `📊 [CRDT] 使用最近4秒数据计算P95: ${latenciesToUse.length}个样本`
+      );
+    } else if (allLatencies.length >= 20) {
+      // 历史数据充足：使用全部数据
+      latenciesToUse = allLatencies;
+      console.log(
+        `📊 [CRDT] 使用全部历史数据计算P95: ${latenciesToUse.length}个样本`
+      );
+    } else if (allLatencies.length >= 6) {
+      // 数据较少：使用全部数据，但降低置信度
+      latenciesToUse = allLatencies;
+      console.log(
+        `📊 [CRDT] 使用少量数据计算P95: ${latenciesToUse.length}个样本（置信度较低）`
+      );
+    } else {
+      // 数据不足：使用平均值作为P95估算
+      latenciesToUse = allLatencies;
+      console.log(
+        `📊 [CRDT] 数据不足，使用平均值估算P95: ${latenciesToUse.length}个样本`
+      );
+    }
+
+    if (latenciesToUse.length > 0) {
+      avgLatency =
+        latenciesToUse.reduce((a, b) => a + b, 0) / latenciesToUse.length;
+
+      if (latenciesToUse.length >= 6) {
+        const sortedLatencies = [...latenciesToUse].sort((a, b) => a - b);
+        p95Latency =
+          sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] || 0;
+      } else {
+        // 样本不足时，使用平均值 * 1.5 作为P95估算
+        p95Latency = avgLatency * 1.5;
+      }
+    } else {
+      avgLatency = 0;
+      p95Latency = 0;
+    }
+
+    const avgNetworkLatency =
+      allNetworkLatencies.length > 0
+        ? allNetworkLatencies.reduce((a, b) => a + b, 0) /
+          allNetworkLatencies.length
+        : 0;
 
     // 计算带宽
-    const sentBytes = this.metrics.networkEvents.filter(e => e.type === 'send').reduce((sum, e) => sum + e.size, 0);
-    const receivedBytes = this.metrics.networkEvents.filter(e => e.type === 'receive').reduce((sum, e) => sum + e.size, 0);
+    const sentBytes = this.metrics.networkEvents
+      .filter((e) => e.type === "send")
+      .reduce((sum, e) => sum + e.size, 0);
+    const receivedBytes = this.metrics.networkEvents
+      .filter((e) => e.type === "receive")
+      .reduce((sum, e) => sum + e.size, 0);
 
     return {
       // 基本信息
       monitoringDuration,
-      isConnected: this.provider && this.provider.ws && this.provider.ws.readyState === WebSocket.OPEN,
+      isConnected:
+        this.provider &&
+        this.provider.ws &&
+        this.provider.ws.readyState === WebSocket.OPEN,
       windowId: this.windowId,
       totalWindows: this.mergedMetrics ? this.mergedMetrics.totalWindows : 1,
-      
+
       // 文档操作统计
       documentUpdates: this.metrics.documentUpdates,
       totalUpdateSize: this.metrics.totalUpdateSize,
       updatesPerSecond: this.metrics.documentUpdates / monitoringDuration,
-      avgUpdateSize: this.metrics.documentUpdates > 0 ? this.metrics.totalUpdateSize / this.metrics.documentUpdates : 0,
-      
+      avgUpdateSize:
+        this.metrics.documentUpdates > 0
+          ? this.metrics.totalUpdateSize / this.metrics.documentUpdates
+          : 0,
+
       // 用户操作统计
       keystrokes: this.metrics.keystrokes,
       keystrokesPerSecond: this.metrics.keystrokes / monitoringDuration,
       pendingOperations: this.pendingOperations.length,
-      
-      // 🔧 修复：实时延迟统计
+
+      // 🔥 优化：实时延迟统计
       avgLatency,
       p95Latency,
       avgNetworkLatency,
       latencySamples: allLatencies.length,
       recentLatencySamples: recentLatencies.length,
       networkLatencySamples: allNetworkLatencies.length,
-      
+
+      // 🔥 新增：数据质量指标
+      dataQuality: {
+        timeWindow: recentWindow,
+        minSamples: 12,
+        calculationMethod:
+          recentLatencies.length >= 12
+            ? "recent"
+            : allLatencies.length >= 20
+            ? "historical"
+            : allLatencies.length >= 6
+            ? "limited"
+            : "estimated",
+        confidence:
+          recentLatencies.length >= 12
+            ? "high"
+            : allLatencies.length >= 20
+            ? "medium"
+            : "low",
+      },
+
       // 网络统计
       sentBytes,
       receivedBytes,
       totalBytes: sentBytes + receivedBytes,
       bandwidthKBps: (sentBytes + receivedBytes) / 1024 / monitoringDuration,
-      
+
       // 协作统计
       activeCollaborators: this.metrics.collaborators.size,
       totalAwarenessChanges: this.metrics.awarenessChanges.length,
-      
+
       // 原始数据
       rawData: {
-        operationLatencies: this.mergedMetrics ? this.mergedMetrics.operationLatencies : this.metrics.operationLatencies,
-        networkLatencies: this.mergedMetrics ? this.mergedMetrics.networkLatencies : this.metrics.networkLatencies,
+        operationLatencies: this.mergedMetrics
+          ? this.mergedMetrics.operationLatencies
+          : this.metrics.operationLatencies,
+        networkLatencies: this.mergedMetrics
+          ? this.mergedMetrics.networkLatencies
+          : this.metrics.networkLatencies,
         networkEvents: this.metrics.networkEvents,
         awarenessChanges: this.metrics.awarenessChanges,
         userOperations: this.metrics.userOperations,
-        pendingOperations: this.pendingOperations
-      }
+        pendingOperations: this.pendingOperations,
+      },
     };
   }
 
@@ -593,12 +710,12 @@ class RealYjsMonitor {
     if (!stats) return null;
 
     return {
-      algorithm: 'CRDT-Yjs',
+      algorithm: "CRDT-Yjs",
       timestamp: new Date().toISOString(),
       testDuration: stats.monitoringDuration,
       windowId: stats.windowId,
       totalWindows: stats.totalWindows,
-      
+
       performance: {
         averageLatency: stats.avgLatency,
         p95Latency: stats.p95Latency,
@@ -606,9 +723,9 @@ class RealYjsMonitor {
         throughput: stats.updatesPerSecond,
         bandwidthEfficiency: stats.bandwidthKBps,
         totalOperations: stats.documentUpdates,
-        userInteractions: stats.keystrokes
+        userInteractions: stats.keystrokes,
       },
-      
+
       detailed: {
         documentUpdates: stats.documentUpdates,
         totalUpdateSize: stats.totalUpdateSize,
@@ -617,18 +734,18 @@ class RealYjsMonitor {
         receivedBytes: stats.receivedBytes,
         activeCollaborators: stats.activeCollaborators,
         awarenessChanges: stats.totalAwarenessChanges,
-        pendingOperations: stats.pendingOperations
+        pendingOperations: stats.pendingOperations,
       },
-      
+
       dataIntegrity: {
         latencySamples: stats.latencySamples,
         recentLatencySamples: stats.recentLatencySamples,
         networkLatencySamples: stats.networkLatencySamples,
         networkEvents: stats.rawData.networkEvents.length,
-        userOperations: stats.rawData.userOperations.length
+        userOperations: stats.rawData.userOperations.length,
       },
-      
-      rawData: stats.rawData
+
+      rawData: stats.rawData,
     };
   }
 
@@ -647,21 +764,21 @@ class RealYjsMonitor {
       collaborators: new Map(),
       awarenessChanges: [],
       operationLatencies: [],
-      networkLatencies: []
+      networkLatencies: [],
     };
-    
+
     this.pendingOperations = [];
     this.mergedMetrics = null;
     this.startTime = performance.now();
-    
+
     // 清理localStorage
     try {
       localStorage.removeItem(`yjs_monitor_${this.windowId}`);
     } catch (e) {
-      console.warn('清理localStorage失败:', e);
+      console.warn("清理localStorage失败:", e);
     }
-    
-    console.log('🔄 性能监控数据已重置');
+
+    console.log("🔄 性能监控数据已重置");
   }
 }
 

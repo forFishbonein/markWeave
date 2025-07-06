@@ -263,6 +263,80 @@
   border-color: #2563eb !important;
 }
 
+/* 性能分析工具栏样式 */
+.performance-toolbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 32px 0;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.performance-toolbar-title {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.performance-toolbar-buttons {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.performance-btn {
+  height: 48px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) !important;
+  flex: 1;
+  min-width: 160px;
+}
+
+.performance-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+}
+
+.crdt-btn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%) !important;
+  color: white !important;
+}
+
+.crdt-btn:hover {
+  background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%) !important;
+  color: white !important;
+}
+
+.ot-btn {
+  background: linear-gradient(135deg, #fa8c16 0%, #ffa940 100%) !important;
+  color: white !important;
+}
+
+.ot-btn:hover {
+  background: linear-gradient(135deg, #d46b08 0%, #fa8c16 100%) !important;
+  color: white !important;
+}
+
+.comparison-btn {
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%) !important;
+  color: white !important;
+}
+
+.comparison-btn:hover {
+  background: linear-gradient(135deg, #531dab 0%, #722ed1 100%) !important;
+  color: white !important;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
   .home-content {
@@ -289,5 +363,19 @@
   .create-team-btn {
     height: 48px;
     font-size: 15px;
+  }
+
+  .performance-toolbar {
+    padding: 20px;
+    margin: 24px 0;
+  }
+
+  .performance-toolbar-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .performance-btn {
+    min-width: 100% !important;
   }
 }

@@ -5,7 +5,7 @@
  * @Description: 集成编辑器和多窗口同步的真实性能监控面板
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { Row, Col, Card, Button, Space, Statistic, Progress, Table, Tag, Alert, message } from 'antd';
 import {
   EditOutlined,
@@ -28,7 +28,12 @@ import { useYjsEditor } from '../../hooks/useYjsEditor';
 import RealYjsMonitor from '../../utils/RealYjsMonitor';
 import { ydoc } from '../../crdt';
 
-const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
+const YjsEditorWithMonitoring = forwardRef(({
+  docId = 'crdt-performance-test-doc',
+  title = null,
+  showMetrics = true,
+  onMetricsUpdate = null
+}, ref) => {
   const editorRef = useRef(null);
   const [editorView, awareness, provider] = useYjsEditor(docId, editorRef);
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -37,6 +42,11 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
 
   const monitorRef = useRef(null);
   const refreshTimer = useRef(null);
+
+  // 暴露重置方法给父组件
+  useImperativeHandle(ref, () => ({
+    resetMetrics: handleReset
+  }));
 
   // 初始化监控器
   useEffect(() => {
@@ -62,6 +72,55 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
         if (stats) {
           setPerformanceData(stats);
 
+          // 通知父组件指标更新 - 🔥 统一指标格式
+          if (onMetricsUpdate) {
+            onMetricsUpdate({
+              // 基本操作指标
+              operationsCount: stats.documentUpdates || 0,
+              avgLatency: stats.avgLatency || 0,
+              p95Latency: stats.p95Latency || 0,
+
+              // 网络传输指标
+              bytesSent: stats.sentBytes || 0,
+              bytesReceived: stats.receivedBytes || 0,
+
+              // 协作用户指标
+              activeUsers: stats.totalWindows || 0,
+
+              // 🔥 修复：统一计算方式
+              opsPerSecond: stats.updatesPerSecond || 0,  // 使用已计算的值
+              bytesPerSecond: (stats.bandwidthKBps || 0) * 1024,  // 转换为字节/秒
+
+              // 额外指标
+              keystrokes: stats.keystrokes || 0,
+              keystrokesPerSecond: stats.keystrokesPerSecond || 0,
+              pendingOperations: stats.pendingOperations || 0,
+              totalUpdateSize: stats.totalUpdateSize || 0,
+              avgUpdateSize: stats.avgUpdateSize || 0,
+
+              // 网络延迟指标
+              avgNetworkLatency: stats.avgNetworkLatency || 0,
+              networkLatencySamples: stats.networkLatencySamples || 0,
+
+              // 监控状态
+              monitoringDuration: stats.monitoringDuration || 0,
+              isConnected: stats.isConnected || false,
+              windowId: stats.windowId || '',
+
+              // 数据样本统计
+              latencySamples: stats.latencySamples || 0,
+              recentLatencySamples: stats.recentLatencySamples || 0,
+
+              // 协作统计
+              activeCollaborators: stats.activeCollaborators || 0,
+              totalAwarenessChanges: stats.totalAwarenessChanges || 0,
+
+              // 数据源标识
+              algorithm: 'CRDT',
+              dataSource: 'yjs-real-monitoring'
+            });
+          }
+
           // 更新延迟历史 - 只在有新数据时更新
           if (stats.recentLatencySamples > 0) {
             setLatencyHistory(prev => {
@@ -78,7 +137,7 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
             });
           }
         }
-      }, 500); // 每500ms刷新一次，更实时
+      }, 400); // 🔧 优化：每400ms刷新一次，与4秒P95窗口形成10倍合理关系
     } else {
       if (refreshTimer.current) {
         clearInterval(refreshTimer.current);
@@ -227,6 +286,69 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
     }
   ];
 
+  // 如果showMetrics为false，只显示编辑器部分
+  if (!showMetrics) {
+    return (
+      <div style={{ padding: '12px' }}>
+        <Card title="CRDT协作编辑器" size="small">
+          <div style={{ marginBottom: '12px' }}>
+            <Space>
+              <Button
+                type={isMonitoring ? "default" : "primary"}
+                icon={isMonitoring ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                onClick={isMonitoring ? handleStopMonitoring : handleStartMonitoring}
+                size="small"
+              >
+                {isMonitoring ? '停止监控' : '开始监控'}
+              </Button>
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={handleReset}
+                disabled={isMonitoring}
+                size="small"
+              >
+                重置
+              </Button>
+              <Tag color={provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? 'green' : 'red'} size="small">
+                {provider && provider.ws && provider.ws.readyState === WebSocket.OPEN ? '已连接' : '未连接'}
+              </Tag>
+              {performanceData && (
+                <Tag color="blue" size="small">
+                  延迟: {performanceData.avgLatency.toFixed(1)}ms
+                </Tag>
+              )}
+            </Space>
+          </div>
+
+          <div
+            ref={editorRef}
+            style={editorStyle}
+            placeholder="在此输入内容进行CRDT性能测试..."
+          />
+
+          <div style={{ marginTop: '8px', padding: '6px', backgroundColor: '#f6f8fa', borderRadius: '4px', fontSize: '11px' }}>
+            <Row gutter={8}>
+              <Col span={12}>
+                <Space size="small">
+                  <strong>文档:</strong>
+                  <span>{docId}</span>
+                </Space>
+              </Col>
+              <Col span={12}>
+                {performanceData && (
+                  <Space size="small">
+                    <span>操作: {performanceData.documentUpdates}</span>
+                    <span>窗口: {performanceData.totalWindows}</span>
+                  </Space>
+                )}
+              </Col>
+            </Row>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <Card
@@ -293,7 +415,7 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
 
         {!isMonitoring && (
           <Alert
-            message="�� 多窗口测试指南"
+            message="多窗口测试指南"
             description="1. 点击'开始监控' → 2. 点击'打开新窗口' → 3. 在两个窗口中同时编辑 → 4. 观察实时同步的性能数据"
             type="warning"
             showIcon
@@ -566,6 +688,6 @@ const YjsEditorWithMonitoring = ({ docId = 'performance-test-doc' }) => {
       </Card>
     </div>
   );
-};
+});
 
 export default YjsEditorWithMonitoring;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card, List, Modal, Input, message, Spin, Form, Empty, Divider, Alert } from 'antd';
-import { PlusOutlined, TeamOutlined, UserOutlined, ExperimentOutlined } from '@ant-design/icons';
+import { PlusOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../../services/api';
 import './Home.css';
@@ -76,6 +76,8 @@ const Home = () => {
           <p className="home-subtitle">Manage your collaborative teams and start efficient document editing</p>
         </div>
 
+
+
         <div className="home-actions">
           <Button
             type="primary"
@@ -86,39 +88,9 @@ const Home = () => {
           >
             Create Team
           </Button>
-          <Button
-            size="large"
-            icon={<ExperimentOutlined />}
-            onClick={() => navigate('/performance-lab')}
-            className="performance-lab-btn"
-            style={{
-              marginLeft: 12,
-              backgroundColor: '#52c41a',
-              borderColor: '#52c41a',
-              color: 'white'
-            }}
-          >
-            性能实验室
-          </Button>
         </div>
 
-        {/* 性能实验室说明 */}
-        <Alert
-          message="🔬 Yjs CRDT 性能实验室"
-          description="专为学术研究设计的真实性能监控系统，收集Yjs CRDT算法的实际性能数据，包括网络延迟、协作冲突、用户操作等指标。"
-          type="info"
-          showIcon
-          style={{ marginBottom: 24 }}
-          action={
-            <Button
-              size="small"
-              type="primary"
-              onClick={() => navigate('/performance-lab')}
-            >
-              立即体验
-            </Button>
-          }
-        />
+
 
         {teams.length === 0 ? (
           <div className="empty-state">

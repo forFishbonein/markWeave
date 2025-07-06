@@ -14,17 +14,13 @@ import Home from "./components/Home/Home";
 import TeamLayout from "./components/Team/TeamLayout";
 import DocumentList from "./components/Documents/DocumentList";
 import EditorPage from "./components/EditorPage/EditorPage";
-import YjsEditorWithMonitoring from "./components/EditorPage/YjsEditorWithMonitoring";
+import YjsEditorWithMonitoring from "./components/AlgorithmComparison/YjsEditorWithMonitoring";
+import OTEditorWithMonitoring from "./components/AlgorithmComparison/OTEditorWithMonitoring";
+import AlgorithmComparisonPage from "./components/AlgorithmComparison/AlgorithmComparisonPage";
 import MemberList from "./components/Members/MemberList";
 import TeamSettings from "./components/Settings/TeamSettings";
 import GlobalHeader from "./components/GlobalHeader";
 import InvitePage from "./components/Invite/InvitePage";
-// import { WebsocketProvider } from "y-websocket";
-// import { ydoc } from "./components/CRDT";
-
-// 1️⃣ 连接 WebSocket
-// const provider = new WebsocketProvider("ws://localhost:1234", "room1", ydoc);
-// provider.on("status", (event) => console.log("WebSocket 状态:", event.status));
 
 const AppLayout = () => (
   <Layout style={{ minHeight: "100vh" }}>
@@ -53,6 +49,14 @@ function App() {
             <Route
               path='/performance-lab'
               element={<YjsEditorWithMonitoring />}
+            />
+            <Route
+              path='/algorithm-comparison'
+              element={<OTEditorWithMonitoring />}
+            />
+            <Route
+              path='/algorithm-comparison-lab'
+              element={<AlgorithmComparisonPage />}
             />
             <Route path='/team/:teamId/*' element={<TeamLayout />}>
               <Route path='documents' element={<DocumentList />} />

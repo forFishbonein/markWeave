@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-06-23 02:31:10
+ * @LastEditTime: 2025-07-07 02:38:43
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -26,6 +26,7 @@ import dotenv from "dotenv";
 
 import apiRoutes from "./routes/index.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
+import OTServer from "./services/otServer.js";
 
 dotenv.config();
 
@@ -162,6 +163,37 @@ app.get("/api/initial", async (req, res) => {
   }
 });
 
+// OT性能指标API
+app.get("/api/ot/metrics", (req, res) => {
+  if (otServer) {
+    const metrics = otServer.getPerformanceMetrics();
+    res.json({
+      success: true,
+      data: metrics,
+    });
+  } else {
+    res.status(503).json({
+      success: false,
+      message: "OT服务器未启动",
+    });
+  }
+});
+
+app.post("/api/ot/metrics/reset", (req, res) => {
+  if (otServer) {
+    otServer.resetMetrics();
+    res.json({
+      success: true,
+      message: "OT性能指标已重置",
+    });
+  } else {
+    res.status(503).json({
+      success: false,
+      message: "OT服务器未启动",
+    });
+  }
+});
+
 // 错误处理中间件
 app.use(errorHandler);
 
@@ -227,16 +259,49 @@ wss.on("connection", async (ws, req) => {
     console.log("🔌 WebSocket connection:", roomName);
 
     const ydoc = await getYDoc(roomName);
-    setupWSConnection(ws, req, { gc: true, doc: ydoc });
+
+    // 🔥 禁用 y-websocket 的内置持久化，避免创建 o_documents 集合
+    // 我们使用自己的 persistence.js 进行持久化到 docs 集合
+    setupWSConnection(ws, req, {
+      gc: true,
+      doc: ydoc,
+      // 禁用内置持久化机制
+      persistence: {
+        provider: null,
+        bindState: () => {},
+        writeState: () => {},
+      },
+    });
+
+    console.log(
+      "✅ WebSocket 连接已建立，使用自定义持久化 (禁用 o_documents 集合创建)"
+    );
   } catch (error) {
     console.error("❌ WebSocket connection error:", error);
     ws.close();
   }
 });
 
+// 初始化OT服务器
+let otServer = null;
+
+async function initializeOTServer() {
+  try {
+    otServer = new OTServer();
+    await otServer.initialize();
+    otServer.startWebSocketServer(1235); // OT服务器运行在1235端口
+    console.log("✅ OT服务器启动成功");
+  } catch (error) {
+    console.error("❌ OT服务器启动失败:", error);
+  }
+}
+
 const PORT = process.env.PORT || 1234;
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 WebSocket server available at ws://localhost:${PORT}`);
   console.log(`🌐 API server available at http://localhost:${PORT}/api`);
+
+  // 启动OT服务器
+  await initializeOTServer();
 });
