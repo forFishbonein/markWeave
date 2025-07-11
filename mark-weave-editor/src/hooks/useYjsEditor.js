@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:44:09
+ * @LastEditTime: 2025-07-12 02:23:11
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -16,6 +16,7 @@ import { UndoManager } from "yjs";
 import * as Y from "yjs";
 
 import { ydoc, ychars, yformatOps, resetYDoc } from "../crdt";
+
 import {
   convertCRDTToProseMirrorDoc,
   loadInitialData,
@@ -27,6 +28,10 @@ import { createKeymap } from "../plugins/keymap"; // ← 注意引用
 import { insertChar, insertText, deleteChars } from "../crdt/crdtActions";
 import { cursorPlugin, createDecorations } from "../old/cursor-plugin";
 import { useAuth } from "../contexts/AuthContext";
+
+// 统一读取属性，兼容普通对象与 Y.Map
+const getProp = (obj, key) =>
+  typeof obj?.get === "function" ? obj.get(key) : obj[key];
 
 export function useYjsEditor(docId, editorRef) {
   const viewRef = useRef(null);
@@ -177,13 +182,13 @@ export function useYjsEditor(docId, editorRef) {
 
       // 监听awareness变化 - 实时同步
       wsProvider.awareness.on("change", (changes) => {
-        console.log("👥 Awareness状态变化:", {
-          added: changes.added,
-          updated: changes.updated,
-          removed: changes.removed,
-          totalUsers: Array.from(wsProvider.awareness.getStates().values())
-            .length,
-        });
+        // console.log("👥 Awareness状态变化:", {
+        //   added: changes.added,
+        //   updated: changes.updated,
+        //   removed: changes.removed,
+        //   totalUsers: Array.from(wsProvider.awareness.getStates().values())
+        //     .length,
+        // });
 
         // 强制触发awareness状态更新
         if (changes.added.length > 0 || changes.removed.length > 0) {
@@ -210,7 +215,7 @@ export function useYjsEditor(docId, editorRef) {
           state,
           dispatchTransaction(tr) {
             if (!viewRef.current) return;
-            console.log("📝 监听到 ProseMirror 变更:", tr);
+            // console.log("📝 监听到 ProseMirror 变更:", tr);
             try {
               if (tr.getMeta("fromSync")) {
                 // console.log("🚀 fromSync newState:", newState);
@@ -222,7 +227,7 @@ export function useYjsEditor(docId, editorRef) {
 
               // 应用用户输入到当前 state
               let newState = viewRef.current.state.apply(tr);
-              console.log("🚀newState", newState);
+              // console.log("🚀newState", newState);
               viewRef.current.updateState(newState);
               // 处理每个 transaction 中的步骤
               tr.steps.forEach((step) => {
@@ -235,10 +240,15 @@ export function useYjsEditor(docId, editorRef) {
                   let afterId = null;
                   if (insertPos > 1) {
                     const chars = ychars.toArray();
-                    console.log("222222", chars);
-                    const charIndex = insertPos - 2; // -2 因为 ProseMirror 是 1-based，ychars 是 0-based
-                    if (charIndex >= 0 && charIndex < chars.length) {
-                      afterId = chars[charIndex].opId; // 找到插入点前的字符 ID
+                    let visIdx = 0;
+                    const targetVis = insertPos - 2;
+                    for (const c of chars) {
+                      if (getProp(c, "deleted")) continue;
+                      if (visIdx === targetVis) {
+                        afterId = getProp(c, "opId");
+                        break;
+                      }
+                      visIdx += 1;
                     }
                   }
                   console.log(`📝 afterId: ${afterId}`);

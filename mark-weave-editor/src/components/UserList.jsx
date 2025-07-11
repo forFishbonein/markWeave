@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-03 02:09:21
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-02 03:15:31
+ * @LastEditTime: 2025-07-12 02:22:15
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -57,7 +57,7 @@ const UserList = ({ awareness }) => {
     const updateUserList = () => {
       try {
         const states = Array.from(awareness.getStates().values());
-        console.log("📊 原始awareness状态数量:", states.length);
+        // console.log("📊 原始awareness状态数量:", states.length);
 
         // 获取有效的用户信息
         let userList = states
@@ -66,12 +66,12 @@ const UserList = ({ awareness }) => {
           })
           .map((state) => state.user);
 
-        console.log("📋 过滤后用户:", userList.map(u => ({ name: u.name, userId: u.userId })));
+        // console.log("📋 过滤后用户:", userList.map(u => ({ name: u.name, userId: u.userId })));
 
         // 去重
         userList = deduplicateUsers(userList);
 
-        console.log("✅ 最终用户列表:", userList.map(u => u.name));
+        // console.log("✅ 最终用户列表:", userList.map(u => u.name));
         setUsers(userList);
       } catch (error) {
         console.error("❌ 更新用户列表出错:", error);

@@ -8,14 +8,23 @@
  * @Descripttion:
  */
 // src/crdt/crdtActions.js
-import { ydoc, ychars, yformatOps } from "./index"; // ychars, yformatOps 都从统一出口导入
+import { ydoc, ychars, yformatOps } from "./index";
+import * as Y from "yjs";
+
+// 🔧 统一获取属性，兼容普通对象与 Y.Map
+function getProp(obj, key) {
+  return typeof obj?.get === "function" ? obj.get(key) : obj[key];
+}
 
 // 2️⃣ 插入字符
 export function insertChar(afterId, ch) {
   const opId = `${Date.now()}@client`;
   // num += 1;
   // const opId = `${num}@client`;
-  const newChar = { opId, ch, deleted: false };
+  const newChar = new Y.Map();
+  newChar.set("opId", opId);
+  newChar.set("ch", ch);
+  newChar.set("deleted", false);
   console.log("📝 插入字符:", newChar); // 🚀 打印看看是否执行了
   console.log("📝 afterId:", afterId);
   // const index = afterId
@@ -23,9 +32,19 @@ export function insertChar(afterId, ch) {
   //   : 0;
   let index;
   if (afterId) {
-    index = ychars.toArray().findIndex((c) => c.opId === afterId) + 1;
+    index =
+      ychars.toArray().findIndex((c) => getProp(c, "opId") === afterId) + 1;
   } else {
-    index = ychars.length; // ✅ 统一默认行为：插入到末尾
+    // 找到最后一个未删除字符的位置后插入；若都删光，则插到0
+    const arr = ychars.toArray();
+    let lastVisibleIdx = -1;
+    for (let i = arr.length - 1; i >= 0; i--) {
+      if (!getProp(arr[i], "deleted")) {
+        lastVisibleIdx = i;
+        break;
+      }
+    }
+    index = lastVisibleIdx + 1; // 可能为0
   }
   console.log(`📝 插入字符 "${ch}" 在索引 ${index}`);
   ychars.insert(index, [newChar]);
@@ -46,15 +65,28 @@ export function insertText(afterId, text) {
     const opId = `${Date.now()}_${localCounter}@client`;
     localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
 
-    const newChar = { opId, ch, deleted: false };
+    const newChar = new Y.Map();
+    newChar.set("opId", opId);
+    newChar.set("ch", ch);
+    newChar.set("deleted", false);
 
     // 计算插入位置
     let index;
     const currentArray = ychars.toArray();
     if (currentAfterId) {
-      index = currentArray.findIndex((c) => c.opId === currentAfterId) + 1;
+      index =
+        currentArray.findIndex((c) => getProp(c, "opId") === currentAfterId) +
+        1;
     } else {
-      index = currentArray.length; // 默认插入到数组末尾
+      // 末尾默认插入到最后一个可见字符之后
+      let lastVis = -1;
+      for (let i = currentArray.length - 1; i >= 0; i--) {
+        if (!getProp(currentArray[i], "deleted")) {
+          lastVis = i;
+          break;
+        }
+      }
+      index = lastVis + 1;
     }
 
     // 插入当前字符操作
@@ -70,21 +102,39 @@ export function insertText(afterId, text) {
 }
 
 export function deleteChars(from, to) {
-  const chars = ychars.toArray();
-
-  // 计算起始索引（ProseMirror 位置是 1-based，ychars 是 0-based）
-  const startIndex = from - 1;
-  const count = to - from; // 删除的字符数量
-
-  if (startIndex >= 0 && count > 0 && startIndex + count <= chars.length) {
-    console.log(`🗑️ 批量删除 ${count} 个字符，从索引 ${startIndex} 开始`);
-
-    ychars.delete(startIndex, count); // 一次性删除多个字符
-
-    console.log("✅ deleteChars ychars 现在的内容:", ychars.toArray());
-  } else {
-    console.warn("⚠️ 删除操作超出范围，未执行", { from, to, chars });
+  // ProseMirror 采用 1-based，删除区间 [from, to)（end 不含）
+  const startVis = from - 1;
+  const endVis = to - 1;
+  if (startVis < 0 || endVis < startVis) {
+    console.warn("⚠️ deleteChars 参数非法", { from, to });
+    return;
   }
+
+  let visIdx = 0;
+  let count = 0;
+  ychars.forEach((char, idx) => {
+    const isMap = typeof char?.get === "function";
+    const deletedFlag = isMap ? char.get("deleted") : char.deleted;
+    if (deletedFlag) return;
+
+    if (visIdx >= startVis && visIdx < endVis) {
+      if (!isMap) {
+        // 旧 JSON 对象 → 迁移为 Y.Map
+        const newM = new Y.Map();
+        newM.set("opId", char.opId);
+        newM.set("ch", char.ch);
+        newM.set("deleted", true);
+        ychars.delete(idx, 1);
+        ychars.insert(idx, [newM]);
+      } else {
+        char.set("deleted", true);
+      }
+      count += 1;
+    }
+    if (!deletedFlag) visIdx += 1;
+  });
+
+  console.log(`🗑️ deleteChars 逻辑删除 ${count} 个字符`, { from, to });
 }
 
 // 4️⃣ 添加格式（加粗）

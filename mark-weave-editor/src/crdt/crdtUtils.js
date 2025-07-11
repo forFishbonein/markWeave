@@ -3,13 +3,17 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:41:49
+ * @LastEditTime: 2025-07-12 02:39:39
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
 // src/crdt/crdtUtils.js
 import { schema } from "../plugins/schema"; // 也可从 Editor 文件中拆分出来
 import { ychars, yformatOps } from "./index";
+
+// 统一获取属性，兼容普通对象与 Y.Map
+const getProp = (obj, key) =>
+  typeof obj?.get === "function" ? obj.get(key) : obj[key];
 
 /**
  * 将 CRDT 中的 ychars、yformatOps 转换为 ProseMirror 的 doc node
@@ -18,12 +22,14 @@ import { ychars, yformatOps } from "./index";
 export function convertCRDTToProseMirrorDoc(docId) {
   console.log(
     "🔥 convertCRDTToProseMirrorDoc 被调用：",
+    "yformatOps",
     yformatOps.toArray(),
+    "ychars",
     ychars.toArray(),
     yformatOps.toArray().length,
     ychars.toArray().length
   );
-  // tODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到set Timeout 里面执行就可以很轻松解决了！
+  // TODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到set Timeout 里面执行就可以很轻松解决了！
   //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
   setTimeout(() => {
     //  alert(111);
@@ -40,7 +46,10 @@ export function convertCRDTToProseMirrorDoc(docId) {
   const paragraphContent = ychars
     .toArray()
     .map((char) => {
-      if (char.deleted) return null;
+      if (getProp(char, "deleted")) return null;
+
+      const chVal = getProp(char, "ch");
+      if (!chVal) return null; // 跳过空字符
 
       // 按 markType 分组
       const markOpsByType = {};
@@ -83,8 +92,8 @@ export function convertCRDTToProseMirrorDoc(docId) {
         }
       }
 
-      if (char.ch === "") return null;
-      return schema.text(char.ch, effectiveMarks);
+      if (chVal === "") return null;
+      return schema.text(chVal, effectiveMarks);
     })
     .filter((node) => node !== null);
 
