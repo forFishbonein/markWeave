@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:27
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:27:25
+ * @LastEditTime: 2025-07-12 03:59:48
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -35,16 +35,7 @@ export function insertChar(afterId, ch) {
     index =
       ychars.toArray().findIndex((c) => getProp(c, "opId") === afterId) + 1;
   } else {
-    // 找到最后一个未删除字符的位置后插入；若都删光，则插到0
-    const arr = ychars.toArray();
-    let lastVisibleIdx = -1;
-    for (let i = arr.length - 1; i >= 0; i--) {
-      if (!getProp(arr[i], "deleted")) {
-        lastVisibleIdx = i;
-        break;
-      }
-    }
-    index = lastVisibleIdx + 1; // 可能为0
+    index = 0; // 默认插到开头，保持旧行为，确保并发 insert 收敛
   }
   console.log(`📝 插入字符 "${ch}" 在索引 ${index}`);
   ychars.insert(index, [newChar]);
@@ -78,15 +69,7 @@ export function insertText(afterId, text) {
         currentArray.findIndex((c) => getProp(c, "opId") === currentAfterId) +
         1;
     } else {
-      // 末尾默认插入到最后一个可见字符之后
-      let lastVis = -1;
-      for (let i = currentArray.length - 1; i >= 0; i--) {
-        if (!getProp(currentArray[i], "deleted")) {
-          lastVis = i;
-          break;
-        }
-      }
-      index = lastVis + 1;
+      index = 0; // prepend when no afterId specified
     }
 
     // 插入当前字符操作
@@ -110,29 +93,48 @@ export function deleteChars(from, to) {
     return;
   }
 
+  // 获取当前时刻的快照
+  const snapshot = ychars.toArray();
   let visIdx = 0;
   let count = 0;
-  ychars.forEach((char, idx) => {
-    const isMap = typeof char?.get === "function";
-    const deletedFlag = isMap ? char.get("deleted") : char.deleted;
-    if (deletedFlag) return;
+  const toDelete = [];
 
+  // 首先找出要删除的字符索引
+  for (let i = 0; i < snapshot.length; i++) {
+    const char = snapshot[i];
+    const isMap = typeof char?.get === "function";
+    const isDel = isMap ? char.get("deleted") : char.deleted;
+    
+    // 跳过已删除的字符（墓碑），不计入可见索引
+    if (isDel) continue;
+
+    // 检查当前可见字符是否在删除范围内
     if (visIdx >= startVis && visIdx < endVis) {
-      if (!isMap) {
-        // 旧 JSON 对象 → 迁移为 Y.Map
-        const newM = new Y.Map();
-        newM.set("opId", char.opId);
-        newM.set("ch", char.ch);
-        newM.set("deleted", true);
-        ychars.delete(idx, 1);
-        ychars.insert(idx, [newM]);
-      } else {
-        char.set("deleted", true);
-      }
-      count += 1;
+      toDelete.push(i);
     }
-    if (!deletedFlag) visIdx += 1;
-  });
+    
+    visIdx += 1;
+  }
+
+  // 然后从后往前删除，避免索引变化
+  for (let i = toDelete.length - 1; i >= 0; i--) {
+    const idx = toDelete[i];
+    const char = snapshot[idx];
+    const isMap = typeof char?.get === "function";
+    
+    if (isMap) {
+      char.set("deleted", true);
+    } else {
+      // 对于普通对象，需要转换为Y.Map
+      const m = new Y.Map();
+      m.set("opId", char.opId);
+      m.set("ch", char.ch);
+      m.set("deleted", true);
+      ychars.delete(idx, 1);
+      ychars.insert(idx, [m]);
+    }
+    count += 1;
+  }
 
   console.log(`🗑️ deleteChars 逻辑删除 ${count} 个字符`, { from, to });
 }
@@ -236,6 +238,77 @@ export function removeLink(startId, endId, boundaryType = "before") {
   yformatOps.push([markOp]);
   console.log("🔄 Link removeMark:", yformatOps.toArray());
 }
+
+// 🔧 新增辅助函数：将可见索引转换为字符的opId
+export function getVisibleCharOpId(visibleIndex) {
+  const chars = ychars.toArray();
+  let visibleCount = 0;
+  
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i];
+    const isDeleted = typeof char?.get === "function" ? char.get("deleted") : char.deleted;
+    
+    // 跳过已删除的字符（墓碑）
+    if (isDeleted) continue;
+    
+    // 找到对应的可见字符
+    if (visibleCount === visibleIndex) {
+      return typeof char?.get === "function" ? char.get("opId") : char.opId;
+    }
+    
+    visibleCount++;
+  }
+  
+  return null; // 索引超出范围
+}
+
+// 🔧 批量获取可见字符的opId范围
+export function getVisibleCharOpIds(fromIndex, toIndex) {
+  const chars = ychars.toArray();
+  let visibleCount = 0;
+  const result = { startId: null, endId: null };
+  
+  console.log(`🔍 getVisibleCharOpIds 查找范围: [${fromIndex}, ${toIndex})`);
+  console.log(`🔍 当前CRDT字符数组长度: ${chars.length}`);
+  
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i];
+    const isDeleted = typeof char?.get === "function" ? char.get("deleted") : char.deleted;
+    const opId = typeof char?.get === "function" ? char.get("opId") : char.opId;
+    const ch = typeof char?.get === "function" ? char.get("ch") : char.ch;
+    
+    // 跳过已删除的字符（墓碑）
+    if (isDeleted) {
+      console.log(`🔍 跳过已删除字符: ${ch} (opId: ${opId})`);
+      continue;
+    }
+    
+    console.log(`🔍 可见字符 ${visibleCount}: ${ch} (opId: ${opId})`);
+    
+    // 查找起始位置
+    if (visibleCount === fromIndex) {
+      result.startId = opId;
+      console.log(`✅ 找到起始位置 ${fromIndex}: opId=${opId}`);
+    }
+    
+    // 查找结束位置 (toIndex现在是inclusive的)
+    if (visibleCount === toIndex) {
+      result.endId = opId;
+      console.log(`✅ 找到结束位置 ${toIndex}: opId=${opId}`);
+    }
+    
+    visibleCount++;
+    
+    // 如果已经找到了起始和结束位置，可以提前退出
+    if (result.startId && result.endId) {
+      break;
+    }
+  }
+  
+  console.log(`🔍 最终结果: startId=${result.startId}, endId=${result.endId}`);
+  return result;
+}
+
 // 5️⃣ 监听变更
 // ychars.observe(() => console.log("字符变更:", ychars.toArray()));
 // yformatOps.observe(() => console.log("格式变更:", yformatOps.toArray()));

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>删除后格式化修复测试</title>
+</head>
+<body>
+    <h1>删除后格式化修复测试</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        // 简单的测试函数
+        function log(msg) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<div>${msg}</div>`;
+            console.log(msg);
+        }
+        
+        log('🔥 测试页面加载成功！');
+        log('✅ 可以通过浏览器控制台查看详细的调试信息');
+        log('📝 建议步骤：');
+        log('1. 输入文本：hello world');
+        log('2. 删除中间部分：lo wo');
+        log('3. 选择剩余字符并加粗');
+        log('4. 查看控制台中的调试信息');
+    </script>
+</body>
+</html>

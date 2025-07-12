@@ -10,6 +10,19 @@
 // src/crdt/index.js
 import * as Y from "yjs";
 
+// 🔧 兼容旧代码：让 Y.Map 实例可直接通过 .opId/.ch/.deleted 访问字段
+["opId", "ch", "deleted"].forEach((k) => {
+  if (!Object.getOwnPropertyDescriptor(Y.Map.prototype, k)) {
+    Object.defineProperty(Y.Map.prototype, k, {
+      get() {
+        return this.get(k);
+      },
+      set(v) {
+        this.set(k, v);
+      },
+    });
+  }
+});
 // 使用 let 以便在切换文档时重新创建
 export let ydoc = new Y.Doc();
 export let ychars = ydoc.getArray("chars");

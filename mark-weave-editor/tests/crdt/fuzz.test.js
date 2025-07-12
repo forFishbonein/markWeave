@@ -24,6 +24,7 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [0, 1, 2].map((i) => makeClient(i));
 
+          // 执行所有操作，但不立即同步
           operations.forEach((op) => {
             const target = clients[op.client];
             const len = target.ychars.length;
@@ -34,14 +35,20 @@ describe("CRDT 随机并发一致性", () => {
               const idx = op.pos % len;
               target.deleteChars(idx + 1, idx + 2);
             }
+          });
 
-            // 将该客户端的 diff 广播给其他人
-            const diff = target.encode();
-            clients.forEach((c, idx) => {
-              if (idx !== op.client) c.apply(diff);
+          // 批量同步：每个客户端将状态广播给其他所有客户端
+          const updates = clients.map(c => c.encode());
+          
+          clients.forEach((client, i) => {
+            updates.forEach((update, j) => {
+              if (i !== j) {
+                client.apply(update);
+              }
             });
           });
 
+          // 验证最终一致性
           const snapshot = clients[0].snapshot();
           expect(clients[1].snapshot()).toBe(snapshot);
           expect(clients[2].snapshot()).toBe(snapshot);

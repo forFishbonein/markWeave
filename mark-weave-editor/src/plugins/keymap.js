@@ -17,8 +17,8 @@ import {
   removeEm,
   addLink,
   removeLink,
+  getVisibleCharOpIds,
 } from "../crdt/crdtActions";
-import { ychars } from "../crdt";
 import { markActive } from "./utils";
 // 定义快捷键，仅处理斜体和加粗等常规操作
 // 这里把 undoManager 作为参数
@@ -34,12 +34,8 @@ export function createKeymap(undoManager) {
         console.warn("⚠️ 不能在空选区加粗！");
         return false;
       }
-      const chars = ychars.toArray();
-      // 获取选区开始和结束对应的 opId
-      const startId = chars[from - 1]?.opId || null;
-      const endId =
-        chars[to - 1]?.opId ||
-        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+      // ✅ 使用正确的可见索引转换方法
+      const { startId, endId } = getVisibleCharOpIds(from - 1, to);
       console.log(`🔵 触发 Bold 操作, startId: ${startId}, endId: ${endId}`);
       // if (startId && endId) {
       //   // 这里你可以根据一些判断条件来决定是添加 bold 还是取消 bold，
@@ -78,11 +74,8 @@ export function createKeymap(undoManager) {
         console.warn("⚠️ 不能在空选区斜体！");
         return false;
       }
-      const chars = ychars.toArray();
-      const startId = chars[from - 1]?.opId || null;
-      const endId =
-        chars[to - 1]?.opId ||
-        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+      // ✅ 使用正确的可见索引转换方法
+      const { startId, endId } = getVisibleCharOpIds(from - 1, to);
       console.log(`🔵 触发 Italic 操作, startId: ${startId}, endId: ${endId}`);
       // 判断是否在文档末尾
       const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
@@ -112,12 +105,8 @@ export function createKeymap(undoManager) {
         if (!href) return false;
       }
 
-      const chars = ychars.toArray();
-      // 获取选区开始和结束对应的 opId（注意 ProseMirror 位置是 1-based，而 ychars 是 0-based）
-      const startId = chars[from - 1]?.opId || null;
-      const endId =
-        chars[to - 1]?.opId ||
-        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+      // ✅ 使用正确的可见索引转换方法
+      const { startId, endId } = getVisibleCharOpIds(from - 1, to);
       console.log(`🔵 Link 操作, startId: ${startId}, endId: ${endId}`);
       // 判断是否在文档末尾
       const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！

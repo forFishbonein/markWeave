@@ -17,8 +17,7 @@ import "./editer.css";
 import { v4 as uuidv4 } from "uuid";
 import { toggleMark } from "prosemirror-commands";
 import { schema } from "../../plugins/schema";
-import { addBold, removeBold, addEm, removeEm } from "../../crdt/crdtActions";
-import { ychars } from "../../crdt";
+import { addBold, removeBold, addEm, removeEm, getVisibleCharOpIds } from "../../crdt/crdtActions";
 import { markActive } from "../../plugins/utils";
 
 // 接收docId作为props
@@ -50,13 +49,11 @@ export default function Editor({ docId }) {
         return;
       }
 
-      const chars = ychars.toArray();
-      // 获取选区开始和结束对应的 opId
-      const startId = chars[from - 1]?.opId || null;
-      const endId = chars[to - 1]?.opId ||
-        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+      // ✅ 使用正确的可见索引转换方法
+      // ProseMirror使用1-based索引，我们需要转换为0-based
+      const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
-      console.log(`🔵 Bold按钮操作, startId: ${startId}, endId: ${endId}`);
+      console.log(`🔵 Bold按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
 
       // 判断是否在文档末尾
       const isAtEnd = to === state.doc.content.size - 1;
@@ -88,12 +85,11 @@ export default function Editor({ docId }) {
         return;
       }
 
-      const chars = ychars.toArray();
-      const startId = chars[from - 1]?.opId || null;
-      const endId = chars[to - 1]?.opId ||
-        (chars.length > 0 ? chars[chars.length - 1]?.opId : null);
+      // ✅ 使用正确的可见索引转换方法
+      // ProseMirror使用1-based索引，我们需要转换为0-based
+      const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
-      console.log(`🔵 Italic按钮操作, startId: ${startId}, endId: ${endId}`);
+      console.log(`🔵 Italic按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
 
       // 判断是否在文档末尾
       const isAtEnd = to === state.doc.content.size - 1;
