@@ -50,22 +50,20 @@ export default function Editor({ docId }) {
       }
 
       // ✅ 使用正确的可见索引转换方法
-      // ProseMirror使用1-based索引，我们需要转换为0-based
+      // ProseMirror使用1-based索引[from, to)，转换为0-based [from-1, to-1)
       const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
       console.log(`🔵 Bold按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
 
-      // 判断是否在文档末尾
-      const isAtEnd = to === state.doc.content.size - 1;
-      const boundaryType = isAtEnd ? "after" : "before";
-
       // 使用辅助函数判断当前选区是否已经是 bold
       if (markActive(state, schema.marks.bold)) {
         console.log("🔵 当前选区已经加粗，调用 removeBold");
-        removeBold(startId, endId, boundaryType);
+        // removeBold时使用"before"避免多取消一个字符
+        removeBold(startId, endId, "before");
       } else {
         console.log("🔵 当前选区未加粗，调用 addBold");
-        addBold(startId, endId, boundaryType);
+        // addBold时使用"after"确保包含选区内的所有字符
+        addBold(startId, endId, "after");
       }
 
       // 调用ProseMirror操作更新UI
@@ -86,21 +84,19 @@ export default function Editor({ docId }) {
       }
 
       // ✅ 使用正确的可见索引转换方法
-      // ProseMirror使用1-based索引，我们需要转换为0-based
+      // ProseMirror使用1-based索引[from, to)，转换为0-based [from-1, to-1)
       const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
       console.log(`🔵 Italic按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
 
-      // 判断是否在文档末尾
-      const isAtEnd = to === state.doc.content.size - 1;
-      const boundaryType = isAtEnd ? "after" : "before";
-
       if (markActive(state, schema.marks.em)) {
         console.log("🔵 当前选区已经斜体，调用 removeEm");
-        removeEm(startId, endId, boundaryType);
+        // removeEm时使用"before"避免多取消一个字符
+        removeEm(startId, endId, "before");
       } else {
         console.log("🔵 当前选区未斜体，调用 addEm");
-        addEm(startId, endId, boundaryType);
+        // addEm时使用"after"确保包含选区内的所有字符
+        addEm(startId, endId, "after");
       }
 
       // 调用ProseMirror操作更新UI

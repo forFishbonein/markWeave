@@ -19,9 +19,9 @@ export function createDecorations(state, awareness) {
 
     const { pos, color, name } = userState.cursor;
 
-    console.log(
-      `🎯 创建光标装饰 - 用户: ${name}, 位置: ${pos}, 颜色: ${color}`
-    );
+    // console.log(
+    //   `🎯 创建光标装饰 - 用户: ${name}, 位置: ${pos}, 颜色: ${color}`
+    // );
 
     // **确保 pos 在合法范围内**
     const docSize = state.doc.content.size;

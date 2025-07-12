@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:59:57
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:41:30
+ * @LastEditTime: 2025-07-13 02:26:23
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -49,20 +49,21 @@ export function syncToProseMirror(view, docId) {
       console.log("文档内容相同，跳过 dispatch");
       return;
     }
+    // TODO 这里输出的是最有参考价值的！
     console.log(
-      "📝 newDoc:",
-      newDoc.toJSON(),
-      JSON.stringify(newDoc.toJSON(), null, 2)
+      "📝 the newDoc (from generated paragraph):",
+      newDoc.toJSON()
+      // JSON.stringify(newDoc.toJSON(), null, 2)
     ); // 🚀 检查 newDoc 的内容
 
     const tr = view.state.tr;
-    console.log(
-      "🔍 替换前的文档内容:",
-      view.state.doc.toJSON(),
-      view.state.doc.content.size,
-      view.state.tr,
-      newDoc.content
-    ); // 🚀 看看 ProseMirror 现在的状态
+    // console.log(
+    //   "🔍 替换前的文档内容:",
+    //   view.state.doc.toJSON(),
+    //   view.state.doc.content.size,
+    //   view.state.tr,
+    //   newDoc.content
+    // ); // 🚀 看看 ProseMirror 现在的状态
     // console.log("🔍 新的文档内容:", newDoc.content.content[0]);
 
     tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
@@ -70,11 +71,10 @@ export function syncToProseMirror(view, docId) {
     // 设置 meta 表示此交易来自 CRDT 同步
     tr.setMeta("fromSync", true);
 
-    console.log("🔍 替换后的 Transaction:", tr);
+    // console.log("🔍 替换后的 Transaction:", tr);
     // if (tr.curSelectionFor !== 0) {
     view.dispatch(tr);
-    console.log("最新的ydoc", ydoc);
-
+    // console.log("最新的ydoc", ydoc);
     // }
   }, 50);
 

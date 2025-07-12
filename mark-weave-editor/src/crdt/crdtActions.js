@@ -291,10 +291,10 @@ export function getVisibleCharOpIds(fromIndex, toIndex) {
       console.log(`✅ 找到起始位置 ${fromIndex}: opId=${opId}`);
     }
     
-    // 查找结束位置 (toIndex现在是inclusive的)
-    if (visibleCount === toIndex) {
+    // 查找结束位置 (toIndex是exclusive的，所以要-1)
+    if (visibleCount === toIndex - 1) {
       result.endId = opId;
-      console.log(`✅ 找到结束位置 ${toIndex}: opId=${opId}`);
+      console.log(`✅ 找到结束位置 ${toIndex - 1}: opId=${opId}`);
     }
     
     visibleCount++;

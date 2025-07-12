@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 02:23:11
+ * @LastEditTime: 2025-07-13 02:28:46
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -112,7 +112,7 @@ export function useYjsEditor(docId, editorRef) {
           // 强制触发awareness同步 - 这是关键！
           setTimeout(() => {
             aw.setLocalStateField("trigger", Date.now());
-            console.log("🔄 强制触发awareness同步");
+            // console.log("🔄 强制触发awareness同步");
           }, 100);
         } else {
           const fallbackUser = {
@@ -127,7 +127,7 @@ export function useYjsEditor(docId, editorRef) {
           // 同样强制触发同步
           setTimeout(() => {
             aw.setLocalStateField("trigger", Date.now());
-            console.log("🔄 强制触发awareness同步(访客)");
+            // console.log("🔄 强制触发awareness同步(访客)");
           }, 100);
         }
       };
@@ -137,13 +137,13 @@ export function useYjsEditor(docId, editorRef) {
         console.log("🔌 WebSocket状态:", event.status);
         setIsConnected(event.status === "connected"); // Update connection status
         if (event.status === "connected") {
-          console.log("✅ WebSocket已连接");
+          // console.log("✅ WebSocket已连接");
           // WebSocket连接后重新设置用户信息并强制同步
           setUserInfo();
 
           // 额外的强制同步措施
           setTimeout(() => {
-            console.log("🚀 WebSocket连接后强制同步用户状态");
+            // console.log("🚀 WebSocket连接后强制同步用户状态");
             aw.setLocalStateField("forceSync", Date.now());
 
             // 发送一个空的文档更新来触发同步
@@ -162,7 +162,8 @@ export function useYjsEditor(docId, editorRef) {
         if (aw.getLocalState().user) {
           // 更新时间戳触发awareness变化
           aw.setLocalStateField("lastSeen", Date.now());
-          console.log("⏰ 定期同步用户在线状态");
+          // TODO
+          // console.log("⏰ 定期同步用户在线状态");
         }
       }, 3000); // 每3秒同步一次
 
