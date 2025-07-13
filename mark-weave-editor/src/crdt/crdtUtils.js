@@ -9,7 +9,7 @@
  */
 // src/crdt/crdtUtils.js
 import { schema } from "../plugins/schema"; // 也可从 Editor 文件中拆分出来
-import { ychars, yformatOps } from "./index";
+import { getYChars, getYFormatOps } from "./index";
 
 // 统一获取属性，兼容普通对象与 Y.Map
 const getProp = (obj, key) =>
@@ -20,6 +20,9 @@ const getProp = (obj, key) =>
  */
 // 自定义函数：从 CRDT 数据生成 ProseMirror 文档
 export function convertCRDTToProseMirrorDoc(docId) {
+  const ychars = getYChars();
+  const yformatOps = getYFormatOps();
+  
   console.log("🔥 convertCRDTToProseMirrorDoc 被调用");
   console.log(
     "the newest yformatOps: ",
@@ -144,6 +147,9 @@ export function isCharWithinMark(char, op) {
 }
 // 如果有其他导出，比如 loadInitialData、undoManager，也可以放在这里
 export async function loadInitialData(docId) {
+  const ychars = getYChars();
+  const yformatOps = getYFormatOps();
+  
   //先等 ws 数据放进来，在这里才可以获得最新的数据，然后我们看有没有数据，没有数据再去获取
   if (ychars.toArray().length === 0 && yformatOps.toArray().length === 0) {
     try {

@@ -9,12 +9,13 @@
  */
 import debounce from "lodash.debounce";
 import { convertCRDTToProseMirrorDoc } from "./crdtUtils";
-import { ydoc } from "./index";
+import { getYDoc } from "./index";
 import * as Y from "yjs";
 import { Buffer } from "buffer";
 // 同步 CRDT 数据到 ProseMirror：完全依靠 ydoc 的更新事件，也就是说利用 ydoc.on("update") 来触发更新
 export function syncToProseMirror(view, docId) {
   const updateEditor = debounce(() => {
+    const ydoc = getYDoc();
     const newDoc = convertCRDTToProseMirrorDoc();
     const update = Y.encodeStateAsUpdate(ydoc); // Uint8Array
     const updateB64 = Buffer.from(update).toString("base64");
@@ -79,6 +80,7 @@ export function syncToProseMirror(view, docId) {
   }, 50);
 
   // 监听整个 ydoc 的更新，以及 ychars 和 yformatOps 的深层变化
+  const ydoc = getYDoc();
   ydoc.on("update", updateEditor);
   // ychars.observeDeep(updateEditor); //如果远程增加了字符，会触发这个
   // yformatOps.observeDeep(updateEditor); //如果远程增加了操作符，会触发这个

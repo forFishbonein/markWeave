@@ -31,6 +31,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:crdt": "jest --runInBand --verbose",
+    "test:concurrent": "npm run test:crdt -- --testNamePattern=\"并发插入完整测试套件\"",
+    "test:concurrent:save": "node save-concurrent-tests.js",
     "eject": "react-scripts eject"
   },
   "devDependencies": {

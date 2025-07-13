@@ -16,27 +16,38 @@ const jestIsolate =
  * 且每个客户端拥有自身独立的 Y.Doc（通过 jest.isolateModules + resetYDoc）。
  */
 module.exports = function makeClient(id) {
-  let crdtIndex;
-  let crdtActions;
+  // 为每个客户端创建独立的模块实例
+  let ydoc, ychars;
+  let insertChar, insertText, deleteChars;
+  let addBold, removeBold, addEm, removeEm, addLink, removeLink;
 
   jestIsolate(() => {
-    crdtIndex = require("../../src/crdt"); // index.js，含 ydoc/ychars/resetYDoc
-    crdtActions = require("../../src/crdt/crdtActions");
-    crdtIndex.resetYDoc(); // 保证干净
+    // 清除模块缓存以获得独立的实例
+    delete require.cache[require.resolve("../../src/crdt/index.cjs")];
+    delete require.cache[require.resolve("../../src/crdt/crdtActions.cjs")];
+    
+    const crdtIndex = require("../../src/crdt/index.cjs");
+    const { createCRDTActions } = require("../../src/crdt/crdtActions.cjs");
+    
+    // 重置Y.Doc以确保独立性
+    const { ydoc: newYdoc, ychars: newYchars, yformatOps: newYformatOps } = crdtIndex.resetYDoc();
+    
+    ydoc = newYdoc;
+    ychars = newYchars;
+    
+    // 使用工厂函数创建绑定到特定Y.Doc的操作函数
+    const actions = createCRDTActions(newYchars, newYformatOps);
+    
+    insertChar = actions.insertChar;
+    insertText = actions.insertText;
+    deleteChars = actions.deleteChars;
+    addBold = actions.addBold;
+    removeBold = actions.removeBold;
+    addEm = actions.addEm;
+    removeEm = actions.removeEm;
+    addLink = actions.addLink;
+    removeLink = actions.removeLink;
   });
-
-  const { ydoc, ychars } = crdtIndex;
-  const {
-    insertChar,
-    insertText,
-    deleteChars,
-    addBold,
-    removeBold,
-    addEm,
-    removeEm,
-    addLink,
-    removeLink,
-  } = crdtActions;
 
   return {
     id,

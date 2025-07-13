@@ -15,7 +15,7 @@ import { WebsocketProvider } from "y-websocket";
 import { UndoManager } from "yjs";
 import * as Y from "yjs";
 
-import { ydoc, ychars, yformatOps, resetYDoc } from "../crdt";
+import { ydoc, ychars, yformatOps, resetYDoc, getYDoc } from "../crdt";
 
 import {
   convertCRDTToProseMirrorDoc,
@@ -53,7 +53,8 @@ export function useYjsEditor(docId, editorRef) {
 
     // 为每个文档创建独立的 Y.Doc，彻底避免跨文档数据污染
     console.log("🔄 为文档", docId, "创建新的 Y.Doc");
-    const newYDoc = resetYDoc();
+    resetYDoc();
+    const newYDoc = getYDoc(); // 使用 getter 获取实际的 Y.Doc 实例
 
     const fetchInitialState = async () => {
       try {
@@ -78,6 +79,11 @@ export function useYjsEditor(docId, editorRef) {
     // 先同步一次数据库里最新的完整状态
     fetchInitialState().finally(() => {
       // 然后再连接 WebSocket，避免重复增量
+      console.log("🔍 Debug: newYDoc instance:", newYDoc);
+      console.log("🔍 Debug: newYDoc type:", typeof newYDoc);
+      console.log("🔍 Debug: newYDoc.on exists:", typeof newYDoc?.on);
+      console.log("🔍 Debug: newYDoc constructor:", newYDoc?.constructor?.name);
+      
       const wsProvider = new WebsocketProvider(
         "ws://localhost:1234",
         docId,
