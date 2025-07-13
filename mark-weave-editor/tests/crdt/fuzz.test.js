@@ -1,5 +1,5 @@
 console.log("\n" + "=".repeat(80));
-console.log("🎲 CRDT 随机模糊测试套件 - fuzz.test.js");
+console.log("🎲 CRDT Randomized Fuzz Test Suite - fuzz.test.js");
 console.log("=".repeat(80));
 
 // ------------------------------------------------------------

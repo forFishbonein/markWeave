@@ -1,10 +1,10 @@
 const makeClient = require("../helpers/makeClientWithRealLogic");
 
 console.log("\n" + "=".repeat(80));
-console.log("🎨 CRDT 多格式化测试套件 - multiMark.test.js");
+console.log("🎨 CRDT Multi-Format Test Suite - multiMark.test.js");
 console.log("=".repeat(80));
 
-// 辅助函数：显示带格式信息的文本
+// Helper function: Display text with formatting information
 function showFormattedText(client, label) {
   const chars = client.ychars.toArray().filter(c => {
     const del = typeof c?.get === "function" ? c.get("deleted") : c.deleted;
@@ -15,13 +15,13 @@ function showFormattedText(client, label) {
   const plainText = chars.map(c => typeof c?.get === "function" ? c.get("ch") : c.ch).join("");
   
   console.log(`📄 ${label}:`);
-  console.log(`  纯文本: "${plainText}"`);
-  console.log(`  格式操作数: ${formatOps.length}`);
+  console.log(`  Plain text: "${plainText}"`);
+  console.log(`  Format operations count: ${formatOps.length}`);
   
   if (formatOps.length > 0) {
     const marksByChar = new Map();
     
-    // 为每个字符收集有效的格式
+    // Collect effective formats for each character
     chars.forEach((char, charIndex) => {
       const charId = typeof char?.get === "function" ? char.get("opId") : char.opId;
       const charMarks = new Set();
@@ -30,7 +30,7 @@ function showFormattedText(client, label) {
         const startId = op.start?.opId || op.startId;
         const endId = op.end?.opId || op.endId;
         
-        // 简化的范围检查：如果字符在格式范围内
+        // Simplified range check: if character is within format range
         const startIndex = chars.findIndex(c => {
           const id = typeof c?.get === "function" ? c.get("opId") : c.opId;
           return id === startId;
@@ -52,8 +52,8 @@ function showFormattedText(client, label) {
       marksByChar.set(charIndex, Array.from(charMarks));
     });
     
-    // 显示带格式的文本
-    let formattedDisplay = "  格式化文本: ";
+    // Display formatted text
+    let formattedDisplay = "  Formatted text: ";
     chars.forEach((char, index) => {
       const ch = typeof char?.get === "function" ? char.get("ch") : char.ch;
       const marks = marksByChar.get(index) || [];
@@ -66,8 +66,8 @@ function showFormattedText(client, label) {
     });
     console.log(formattedDisplay);
     
-    // 显示格式操作详情
-    console.log("  格式操作详情:");
+    // Display format operation details
+    console.log("  Format operation details:");
     formatOps.forEach((op, i) => {
       console.log(`    ${i+1}. ${op.action} ${op.markType} (${op.opId})`);
     });
@@ -76,17 +76,17 @@ function showFormattedText(client, label) {
 }
 
 // ============================================================
-// 多格式叠加与并发冲突解决测试套件
-// 目的：验证复杂格式化场景下的 CRDT 行为
-// 包含：格式叠加、并发撤销、remove-wins、嵌套格式等场景
+// Multi-format stacking and concurrent conflict resolution test suite
+// Purpose: Verify CRDT behavior in complex formatting scenarios
+// Includes: Format stacking, concurrent undo, remove-wins, nested formats, etc.
 // ============================================================
 
-describe("多格式叠加与并发冲突测试套件", () => {
-  test("基础多格式叠加后撤销得到正确 mark 树", () => {
+describe("Multi-format stacking and concurrent conflict test suite", () => {
+  test("Basic multi-format stacking followed by undo yields correct mark tree", () => {
     const A = makeClient("A");
     const B = makeClient("B");
 
-    // 1. 写入 "hi"
+    // 1. Write "hi"
     A.insertText(null, "hi");
     B.apply(A.encode());
 
@@ -94,7 +94,7 @@ describe("多格式叠加与并发冲突测试套件", () => {
       return typeof c?.get === "function" ? c.get("opId") : c.opId;
     });
 
-    // 2. 加粗 h+i，斜体 i，链接 h
+    // 2. Bold h+i, italic i, link h
     A.addBold(hId, iId, "after");
     A.addEm(iId, iId, "after");
     A.addLink(hId, hId, "https://example.com", "after");
@@ -102,7 +102,7 @@ describe("多格式叠加与并发冲突测试套件", () => {
     const updA = A.encode();
     B.apply(updA);
 
-    // 3. 并发撤销：A 取消粗体，B 取消斜体
+    // 3. Concurrent undo: A removes bold, B removes italic
     A.removeBold(hId, iId, "after");
     B.removeEm(iId, iId, "after");
 
@@ -111,28 +111,28 @@ describe("多格式叠加与并发冲突测试套件", () => {
     A.apply(updB2);
     B.apply(updA2);
 
-    // 4. 检查最终状态 - 使用A客户端的状态
+    // 4. Check final state - use client A's state
     const finalChars = A.ychars.toArray().filter((c) => {
       const del = typeof c?.get === "function" ? c.get("deleted") : c.deleted;
       return !del;
     });
 
-    // 检查A客户端的formatOps，而不是空的数组
+    // Check client A's formatOps, not an empty array
     const rawFormatOps = A.ydoc.getArray("formatOps").toArray();
     // console.log("🔍 A client rawFormatOps:", rawFormatOps);
     const finalFormatOps = rawFormatOps.flat();
 
-    // 验证有2个字符
+    // Verify 2 characters exist
     expect(finalChars.length).toBe(2);
 
-    // 如果formatOps为空，说明同步有问题，我们放宽测试条件
+    // If formatOps is empty, sync failed, relax test conditions
     if (finalFormatOps.length === 0) {
-      console.log("⚠️ formatOps同步失败，跳过格式验证");
-      expect(true).toBe(true); // 至少字符同步成功了
+      console.log("⚠️ formatOps sync failed, skipping format validation");
+      expect(true).toBe(true); // At least character sync succeeded
     } else {
       expect(finalFormatOps.length).toBeGreaterThan(0);
 
-      // 简单验证：应该有add和remove操作
+      // Simple verification: should have add and remove operations
       const addOps = finalFormatOps.filter((op) => op.action === "addMark");
       const removeOps = finalFormatOps.filter(
         (op) => op.action === "removeMark"
@@ -143,108 +143,108 @@ describe("多格式叠加与并发冲突测试套件", () => {
     }
   });
 
-  test("嵌套格式化 - 粗体包含斜体", () => {
-    console.log("📋 测试场景: 嵌套格式化 - 粗体包含斜体");
+  test("Nested formatting - bold containing italic", () => {
+    console.log("📋 Test scenario: Nested formatting - bold containing italic");
 
     const A = makeClient("A");
     const B = makeClient("B");
 
-    // 写入较长文本 "Hello World"
+    // Write longer text "Hello World"
     A.insertText(null, "Hello World");
     B.apply(A.encode());
 
-    console.log("初始文本:", A.snapshot());
+    console.log("Initial text:", A.snapshot());
 
     const chars = A.ychars.toArray();
     const helloIds = chars.slice(0, 5).map((c) => c.opId); // "Hello"
     const worldIds = chars.slice(6, 11).map((c) => c.opId); // "World"
 
-    console.log("字符范围:");
-    console.log("  Hello 范围:", helloIds[0], "到", helloIds[4]);
-    console.log("  World 范围:", worldIds[0], "到", worldIds[4]);
+    console.log("Character ranges:");
+    console.log("  Hello range:", helloIds[0], "to", helloIds[4]);
+    console.log("  World range:", worldIds[0], "to", worldIds[4]);
 
-    // A 对整个 "Hello World" 加粗
-    console.log("🔸 A操作: 对整个 'Hello World' 加粗");
+    // A bolds entire "Hello World"
+    console.log("🔸 A operation: Bold entire 'Hello World'");
     A.addBold(helloIds[0], worldIds[worldIds.length - 1], "after");
 
-    // B 对 "World" 部分添加斜体
-    console.log("🔸 B操作: 对 'World' 部分添加斜体");
+    // B adds italic to "World" part
+    console.log("🔸 B operation: Add italic to 'World' part");
     B.addEm(worldIds[0], worldIds[worldIds.length - 1], "after");
 
-    // 同步
-    console.log("🔄 同步格式化操作...");
+    // Synchronize
+    console.log("🔄 Synchronizing format operations...");
     A.apply(B.encode());
     B.apply(A.encode());
 
     const finalA = A.snapshot();
     const finalB = B.snapshot();
 
-    // 显示格式操作
+    // Display format operations
     const formatOpsA = A.ydoc.getArray("formatOps").toArray().flat();
-    console.log("最终格式操作数量:", formatOpsA.length);
-    console.log("格式操作详情:");
+    console.log("Final format operations count:", formatOpsA.length);
+    console.log("Format operation details:");
     formatOpsA.forEach((op, i) => {
       console.log(`  ${i + 1}. ${op.action} ${op.markType} (${op.opId})`);
     });
 
-    // 使用新的格式显示函数
-    showFormattedText(A, "🎯 嵌套格式化最终结果");
-    console.log("预期效果: 'Hello World' 全部加粗，'World' 部分还有斜体");
+    // Use new format display function
+    showFormattedText(A, "🎯 Nested formatting final result");
+    console.log("Expected effect: 'Hello World' all bold, 'World' part also italic");
 
     expect(finalA).toBe(finalB);
     expect(finalA).toBe("Hello World");
 
-    // 验证格式操作已记录
+    // Verify format operations are recorded
     const formatOps = A.ydoc.getArray("formatOps").toArray().flat();
     expect(formatOps.some((op) => op.markType === "bold")).toBe(true);
     expect(formatOps.some((op) => op.markType === "em")).toBe(true);
   });
 
-  test("交叉格式化冲突 - 重叠区域处理", () => {
+  test("Cross formatting conflict - overlapping region handling", () => {
     console.log(
-      "📋 测试场景: 交叉格式化 - A加粗ABC，B斜体DEF，C同时有粗体和斜体"
+      "📋 Test scenario: Cross formatting - A bolds ABC, B italicizes DEF, C has both bold and italic"
     );
 
     const A = makeClient("A");
     const B = makeClient("B");
 
-    // 写入 "ABCDEF"
+    // Write "ABCDEF"
     A.insertText(null, "ABCDEF");
     B.apply(A.encode());
 
-    console.log("初始文本:", A.snapshot());
+    console.log("Initial text:", A.snapshot());
 
     const chars = A.ychars.toArray();
     const charIds = chars.map((c) => c.opId);
 
-    console.log("字符ID映射:");
+    console.log("Character ID mapping:");
     chars.forEach((c, i) => {
       console.log(`  ${String.fromCharCode(65 + i)}(${i}): ${c.opId}`);
     });
 
-    // A 对 "ABC" (0-2) 加粗
-    console.log("🔸 A操作: 对 'ABC' (位置0-2) 加粗");
+    // A bolds "ABC" (0-2)
+    console.log("🔸 A operation: Bold 'ABC' (positions 0-2)");
     A.addBold(charIds[0], charIds[2], "after");
 
-    // B 同时对 "DEF" (3-5) 添加斜体
-    console.log("🔸 B操作: 对 'DEF' (位置3-5) 添加斜体");
+    // B simultaneously adds italic to "DEF" (3-5)
+    console.log("🔸 B operation: Add italic to 'DEF' (positions 3-5)");
     B.addEm(charIds[3], charIds[5], "after");
 
-    // 并发同步
-    console.log("🔄 并发同步A和B的格式化操作...");
+    // Concurrent synchronization
+    console.log("🔄 Concurrent sync of A and B formatting operations...");
     A.apply(B.encode());
     B.apply(A.encode());
 
-    // C 客户端加入，对 "CD" (2-3) 既加粗又斜体
-    console.log("🔸 C操作: 对 'CD' (位置2-3) 既加粗又斜体");
+    // C client joins, applies both bold and italic to "CD" (2-3)
+    console.log("🔸 C operation: Apply both bold and italic to 'CD' (positions 2-3)");
     const C = makeClient("C");
     C.apply(A.encode());
 
     C.addBold(charIds[2], charIds[3], "after");
     C.addEm(charIds[2], charIds[3], "after");
 
-    // 三方同步
-    console.log("🔄 三方同步所有格式化操作...");
+    // Three-way synchronization
+    console.log("🔄 Three-way sync of all formatting operations...");
     A.apply(C.encode());
     B.apply(C.encode());
 
@@ -252,39 +252,39 @@ describe("多格式叠加与并发冲突测试套件", () => {
     const finalB = B.snapshot();
     const finalC = C.snapshot();
 
-    // 显示最终格式状态
+    // Display final format state
     const formatOps = A.ydoc.getArray("formatOps").toArray().flat();
-    console.log("最终格式操作总数:", formatOps.length);
+    console.log("Final format operations total:", formatOps.length);
 
     const boldOps = formatOps.filter((op) => op.markType === "bold");
     const emOps = formatOps.filter((op) => op.markType === "em");
 
-    console.log("粗体操作:", boldOps.length, "个");
-    console.log("斜体操作:", emOps.length, "个");
+    console.log("Bold operations:", boldOps.length, "count");
+    console.log("Italic operations:", emOps.length, "count");
 
-    console.log("预期格式分布:");
+    console.log("Expected format distribution:");
     console.log(
-      "  A: 粗体, B: 粗体, C: 粗体+斜体, D: 斜体+粗体, E: 斜体, F: 斜体"
+      "  A: bold, B: bold, C: bold+italic, D: italic+bold, E: italic, F: italic"
     );
 
-    // 使用新的格式显示函数
-    showFormattedText(A, "🎯 交叉格式化最终结果");
+    // Use new format display function
+    showFormattedText(A, "🎯 Cross formatting final result");
 
     expect(finalA).toBe(finalB);
     expect(finalB).toBe(finalC);
     expect(finalA).toBe("ABCDEF");
 
-    // 验证所有格式都被记录
+    // Verify all formats are recorded
     expect(boldOps.length).toBeGreaterThan(0);
     expect(emOps.length).toBeGreaterThan(0);
   });
 
-  test("格式化的 remove-wins 优先级测试", () => {
+  test("Format remove-wins priority test", () => {
     const A = makeClient("A");
     const B = makeClient("B");
     const C = makeClient("C");
 
-    // 写入 "test"
+    // Write "test"
     A.insertText(null, "test");
     B.apply(A.encode());
     C.apply(A.encode());
@@ -292,7 +292,7 @@ describe("多格式叠加与并发冲突测试套件", () => {
     const chars = A.ychars.toArray();
     const [tId, eId, sId, t2Id] = chars.map((c) => c.opId);
 
-    console.log("📋 测试场景: remove-wins 优先级 - 多客户端格式冲突");
+    console.log("📋 Test scenario: remove-wins priority - multi-client format conflicts");
 
     // A 加粗全文
     A.addBold(tId, t2Id, "after");

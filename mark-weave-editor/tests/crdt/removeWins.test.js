@@ -1,7 +1,7 @@
 const makeClient = require("../helpers/makeClientWithRealLogic");
 
 console.log("\n" + "=".repeat(80));
-console.log("🔄 CRDT 冲突解决测试套件 - removeWins.test.js");
+console.log("🔄 CRDT Conflict Resolution Test Suite - removeWins.test.js");
 console.log("=".repeat(80));
 
 // ------------------------------------------------------------

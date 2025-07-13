@@ -1,5 +1,5 @@
 console.log("\n" + "=".repeat(80));
-console.log("🎯 CRDT 确定性测试套件 - deterministic.test.js");
+console.log("🎯 CRDT Deterministic Test Suite - deterministic.test.js");
 console.log("=".repeat(80));
 
 // ------------------------------------------------------------
