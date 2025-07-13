@@ -67,17 +67,17 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // 验证一致性
     expect(finalA).toBe(finalB);
-    
+
     // 验证所有字符都存在（顺序可能因CRDT行为而不同）
     expect(finalA).toContain("s");
-    expect(finalA).toContain("t"); 
+    expect(finalA).toContain("t");
     expect(finalA).toContain("a");
     expect(finalA).toContain("r");
     expect(finalA).toContain("E");
     expect(finalA).toContain("N");
     expect(finalA).toContain("D");
-    
-    console.log("最后字符插入结果:", finalA);
+
+    // console.log("最后字符插入结果:", finalA);
   });
 
   test("链式插入：连续在同一位置插入多个字符", () => {
@@ -90,16 +90,16 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // B 在 'a' 后连续插入多个字符
     const aCharId = B.ychars.toArray()[0].opId;
-    
+
     B.insertChar(aCharId, "1");
     A.apply(B.encode());
-    
+
     // 获取刚插入字符的 ID 继续插入
-    const char1Id = B.ychars.toArray().find(c => c.ch === "1").opId;
+    const char1Id = B.ychars.toArray().find((c) => c.ch === "1").opId;
     B.insertChar(char1Id, "2");
     A.apply(B.encode());
 
-    const char2Id = B.ychars.toArray().find(c => c.ch === "2").opId;
+    const char2Id = B.ychars.toArray().find((c) => c.ch === "2").opId;
     B.insertChar(char2Id, "3");
     A.apply(B.encode());
 
@@ -108,14 +108,14 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // 验证一致性
     expect(finalA).toBe(finalB);
-    
+
     // 验证所有字符都存在（顺序可能因CRDT时间戳而不同）
     expect(finalA).toContain("a");
     expect(finalA).toContain("1");
     expect(finalA).toContain("2");
     expect(finalA).toContain("3");
     expect(finalA).toContain("c");
-    
+
     console.log("链式插入结果:", finalA);
   });
 
@@ -128,7 +128,7 @@ describe("afterId 定位逻辑测试套件", () => {
     B.apply(A.encode());
 
     // B 在 'c' 后插入 "X"
-    const cChar = B.ychars.toArray().find(c => c.ch === "c");
+    const cChar = B.ychars.toArray().find((c) => c.ch === "c");
     B.insertChar(cChar.opId, "X");
 
     // 同步
@@ -153,7 +153,7 @@ describe("afterId 定位逻辑测试套件", () => {
     console.log("删除后状态:", A.snapshot()); // 应该是 "ac"
 
     // B 在原来 'a' 的位置后插入 'X'
-    const aChar = B.ychars.toArray().find(c => c.ch === "a" && !c.deleted);
+    const aChar = B.ychars.toArray().find((c) => c.ch === "a" && !c.deleted);
     B.insertChar(aChar.opId, "X");
 
     // 同步
@@ -173,7 +173,7 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // B 尝试使用无效的 afterId
     const invalidId = "999999@invalid";
-    
+
     // 这应该不会崩溃，而是有合理的fallback行为
     expect(() => {
       B.insertChar(invalidId, "X");
@@ -181,7 +181,7 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // 同步并检查结果合理性
     A.apply(B.encode());
-    
+
     const result = A.snapshot();
     expect(result).toBe(B.snapshot());
     expect(result).toContain("X");
@@ -197,7 +197,7 @@ describe("afterId 定位逻辑测试套件", () => {
     B.apply(A.encode());
 
     // 获取 's' 字符的 ID
-    const sCharId = A.ychars.toArray().find(c => c.ch === "s").opId;
+    const sCharId = A.ychars.toArray().find((c) => c.ch === "s").opId;
 
     // 并发插入：A和B同时在 's' 后插入不同字符
     A.insertChar(sCharId, "A");
@@ -219,7 +219,7 @@ describe("afterId 定位逻辑测试套件", () => {
     expect(finalA).toContain("t");
     expect(finalA).toContain("a");
     expect(finalA).toContain("r");
-    
+
     console.log("并发插入结果:", finalA);
   });
 
@@ -232,7 +232,7 @@ describe("afterId 定位逻辑测试套件", () => {
     B.apply(A.encode());
 
     // B 在空格后插入 "Beautiful "
-    const spaceChar = B.ychars.toArray().find(c => c.ch === " ");
+    const spaceChar = B.ychars.toArray().find((c) => c.ch === " ");
     B.insertText(spaceChar.opId, "Beautiful ");
 
     // 同步
@@ -243,15 +243,15 @@ describe("afterId 定位逻辑测试套件", () => {
 
     // 验证一致性
     expect(finalA).toBe(finalB);
-    
+
     // 验证所有预期的文本内容都存在（顺序可能混乱）
     expect(finalA).toContain("H");
     expect(finalA).toContain("e");
-    expect(finalA).toContain("l"); 
+    expect(finalA).toContain("l");
     expect(finalA).toContain("o");
     expect(finalA).toContain("Beautiful");
     expect(finalA).toContain("World");
-    
+
     console.log("多字符插入结果:", finalA);
   });
 

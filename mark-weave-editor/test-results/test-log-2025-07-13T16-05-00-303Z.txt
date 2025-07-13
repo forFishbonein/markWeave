@@ -1,17 +1,40 @@
-# 并发插入完整测试套件结果
+CRDT测试结果报告
+生成时间: 2025/7/14 00:05:00
+====================================
 
-**测试时间**: 2025/7/13 18:41:38  
-**测试文件**: `tests/crdt/concurrent.test.js`  
-**测试命令**: `npm run test:crdt -- --testNamePattern="并发插入完整测试套件"`
-
----
-
-## 测试输出
-
-```
 
 > mark-weave-editor@0.1.0 test:crdt
-> jest --runInBand --verbose --testNamePattern=并发插入完整测试套件
+> jest --runInBand --verbose
+
+  console.log
+    --- CRDT 基准结果 ---
+
+      at Object.log (tests/crdt/benchmark.test.js:49:11)
+
+  console.log
+    总操作数: 300
+
+      at Object.log (tests/crdt/benchmark.test.js:50:11)
+
+  console.log
+    耗时 (ms): 275.49
+
+      at Object.log (tests/crdt/benchmark.test.js:51:11)
+
+  console.log
+    操作 / 毫秒: 1.09
+
+      at Object.log (tests/crdt/benchmark.test.js:52:11)
+
+  console.log
+    最终文本长度: 146
+
+      at Object.log (tests/crdt/benchmark.test.js:53:11)
+
+  console.log
+    文本前 120 字符: nzqfpzglldzfssdrgrmykjdkweonyrjjyqldviruxxibtvplbtuaeecckjbpjljylwpqoyitpfyykmmbpsfarmdlqctppatnowkyensecbzrvgzdtnuiksyw
+
+      at Object.log (tests/crdt/benchmark.test.js:54:11)
 
   console.log
     📋 测试场景: 两客户端在文档开头同时插入不同字符
@@ -24,17 +47,17 @@
       at Object.log (tests/crdt/concurrent.test.js:48:13)
 
   console.log
-    A插入字符 "A" opId: 1752403299705@client
+    A插入字符 "A" opId: 1752422702074@client
 
       at Object.log (tests/crdt/concurrent.test.js:58:13)
 
   console.log
-    B插入字符 "B" opId: 1752403299706@client
+    B插入字符 "B" opId: 1752422702075@client
 
       at Object.log (tests/crdt/concurrent.test.js:59:13)
 
   console.log
-    🎯 最终结果: "helloAB"
+    🎯 最终结果: "helloBA"
 
       at Object.log (tests/crdt/concurrent.test.js:68:13)
 
@@ -45,43 +68,43 @@
       at log (tests/crdt/concurrent.test.js:11:13)
 
   console.log
-    [0] "h" → opId: 1752403299691_0@client (时间戳: 1752403299691_0)
+    [0] "h" → opId: 1752422702069_0@client (时间戳: 1752422702069_0)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [1] "e" → opId: 1752403299692_1@client (时间戳: 1752403299692_1)
+    [1] "e" → opId: 1752422702069_1@client (时间戳: 1752422702069_1)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [2] "l" → opId: 1752403299692_2@client (时间戳: 1752403299692_2)
+    [2] "l" → opId: 1752422702070_2@client (时间戳: 1752422702070_2)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [3] "l" → opId: 1752403299692_3@client (时间戳: 1752403299692_3)
+    [3] "l" → opId: 1752422702070_3@client (时间戳: 1752422702070_3)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [4] "o" → opId: 1752403299692_4@client (时间戳: 1752403299692_4)
+    [4] "o" → opId: 1752422702070_4@client (时间戳: 1752422702070_4)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [5] "A" → opId: 1752403299705@client (时间戳: 1752403299705)
+    [5] "B" → opId: 1752422702075@client (时间戳: 1752422702075)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [6] "B" → opId: 1752403299706@client (时间戳: 1752403299706)
+    [6] "A" → opId: 1752422702074@client (时间戳: 1752422702074)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
@@ -112,55 +135,55 @@
       at Object.log (tests/crdt/concurrent.test.js:94:15)
 
   console.log
-      [0] "s" opId:1752403299716_0@client
+      [0] "s" opId:1752422702080_0@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [1] "t" opId:1752403299716_1@client
+      [1] "t" opId:1752422702080_1@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [2] "a" opId:1752403299716_2@client
+      [2] "a" opId:1752422702080_2@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [3] "r" opId:1752403299716_3@client
+      [3] "r" opId:1752422702080_3@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [4] "t" opId:1752403299716_4@client
+      [4] "t" opId:1752422702080_4@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [5] "_" opId:1752403299716_5@client
+      [5] "_" opId:1752422702080_5@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [6] "e" opId:1752403299716_6@client
+      [6] "e" opId:1752422702080_6@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [7] "n" opId:1752403299716_7@client
+      [7] "n" opId:1752422702080_7@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
 
   console.log
-      [8] "d" opId:1752403299716_8@client
+      [8] "d" opId:1752422702080_8@client
 
       at log (tests/crdt/concurrent.test.js:98:17)
           at Array.forEach (<anonymous>)
@@ -196,55 +219,55 @@
       at Object.log (tests/crdt/concurrent.test.js:111:13)
 
   console.log
-      [0] "s" opId:1752403299716_0@client deleted:false
+      [0] "s" opId:1752422702080_0@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [1] "t" opId:1752403299716_1@client deleted:false
+      [1] "t" opId:1752422702080_1@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [2] "a" opId:1752403299716_2@client deleted:false
+      [2] "a" opId:1752422702080_2@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [3] "r" opId:1752403299716_3@client deleted:false
+      [3] "r" opId:1752422702080_3@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [4] "t" opId:1752403299716_4@client deleted:false
+      [4] "t" opId:1752422702080_4@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [5] "_" opId:1752403299716_5@client deleted:false
+      [5] "_" opId:1752422702080_5@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [6] "e" opId:1752403299716_6@client deleted:false
+      [6] "e" opId:1752422702080_6@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [7] "n" opId:1752403299716_7@client deleted:false
+      [7] "n" opId:1752422702080_7@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
 
   console.log
-      [8] "d" opId:1752403299716_8@client deleted:false
+      [8] "d" opId:1752422702080_8@client deleted:false
 
       at log (tests/crdt/concurrent.test.js:117:15)
           at Array.forEach (<anonymous>)
@@ -288,9 +311,9 @@
   console.log
     下划线字符对象: <ref *2> YMap {
       _item: <ref *1> Item {
-        id: ID { client: 1617268132, clock: 20 },
+        id: ID { client: 2642216203, clock: 20 },
         length: 1,
-        origin: ID { client: 1617268132, clock: 16 },
+        origin: ID { client: 2642216203, clock: 16 },
         left: Item {
           id: [ID],
           length: 1,
@@ -380,8 +403,8 @@
         _observers: Map(2) { 'load' => [Set], 'sync' => [Set] },
         gc: true,
         gcFilter: [Function: gcFilter],
-        clientID: 1617268132,
-        guid: 'a2b80f57-d2e3-4fea-882d-b2bbd552ae1b',
+        clientID: 2642216203,
+        guid: '8d314f1e-f035-477c-9c91-da927a565f82',
         collectionid: null,
         share: Map(2) { 'chars' => [YArray], 'formatOps' => [YArray] },
         store: StructStore {
@@ -412,7 +435,7 @@
       at Object.log (tests/crdt/concurrent.test.js:130:13)
 
   console.log
-    下划线 "_" 的opId: 1752403299716_5@client
+    下划线 "_" 的opId: 1752422702080_5@client
 
       at Object.log (tests/crdt/concurrent.test.js:131:13)
 
@@ -432,7 +455,7 @@
       at Object.log (tests/crdt/concurrent.test.js:139:13)
 
   console.log
-    🎯 最终结果: "start_XYend"
+    🎯 最终结果: "start_YXend"
 
       at Object.log (tests/crdt/concurrent.test.js:148:13)
 
@@ -462,7 +485,7 @@
       at Object.log (tests/crdt/concurrent.test.js:194:13)
 
   console.log
-    🎯 最终结果: "AAABBBbase"
+    🎯 最终结果: "BBBAAAbase"
 
       at Object.log (tests/crdt/concurrent.test.js:203:13)
 
@@ -473,61 +496,61 @@
       at log (tests/crdt/concurrent.test.js:11:13)
 
   console.log
-    [0] "A" → opId: 1752403299757_4@client (时间戳: 1752403299757_4)
+    [0] "B" → opId: 1752422702095_0@client (时间戳: 1752422702095_0)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [1] "A" → opId: 1752403299757_5@client (时间戳: 1752403299757_5)
+    [1] "B" → opId: 1752422702095_1@client (时间戳: 1752422702095_1)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [2] "A" → opId: 1752403299757_6@client (时间戳: 1752403299757_6)
+    [2] "B" → opId: 1752422702095_2@client (时间戳: 1752422702095_2)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [3] "B" → opId: 1752403299757_0@client (时间戳: 1752403299757_0)
+    [3] "A" → opId: 1752422702095_4@client (时间戳: 1752422702095_4)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [4] "B" → opId: 1752403299757_1@client (时间戳: 1752403299757_1)
+    [4] "A" → opId: 1752422702095_5@client (时间戳: 1752422702095_5)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [5] "B" → opId: 1752403299757_2@client (时间戳: 1752403299757_2)
+    [5] "A" → opId: 1752422702095_6@client (时间戳: 1752422702095_6)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [6] "b" → opId: 1752403299756_0@client (时间戳: 1752403299756_0)
+    [6] "b" → opId: 1752422702094_0@client (时间戳: 1752422702094_0)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [7] "a" → opId: 1752403299756_1@client (时间戳: 1752403299756_1)
+    [7] "a" → opId: 1752422702094_1@client (时间戳: 1752422702094_1)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [8] "s" → opId: 1752403299756_2@client (时间戳: 1752403299756_2)
+    [8] "s" → opId: 1752422702094_2@client (时间戳: 1752422702094_2)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [9] "e" → opId: 1752403299756_3@client (时间戳: 1752403299756_3)
+    [9] "e" → opId: 1752422702094_3@client (时间戳: 1752422702094_3)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
@@ -568,17 +591,17 @@
       at Object.log (tests/crdt/concurrent.test.js:255:13)
 
   console.log
-    A: start231
+    A: start123
 
       at Object.log (tests/crdt/concurrent.test.js:256:13)
 
   console.log
-    B: start231
+    B: start123
 
       at Object.log (tests/crdt/concurrent.test.js:257:13)
 
   console.log
-    C: start231
+    C: start123
 
       at Object.log (tests/crdt/concurrent.test.js:258:13)
 
@@ -589,49 +612,49 @@
       at log (tests/crdt/concurrent.test.js:11:13)
 
   console.log
-    [0] "s" → opId: 1752403299769_0@client (时间戳: 1752403299769_0)
+    [0] "s" → opId: 1752422702099_0@client (时间戳: 1752422702099_0)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [1] "t" → opId: 1752403299769_1@client (时间戳: 1752403299769_1)
+    [1] "t" → opId: 1752422702099_1@client (时间戳: 1752422702099_1)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [2] "a" → opId: 1752403299769_2@client (时间戳: 1752403299769_2)
+    [2] "a" → opId: 1752422702099_2@client (时间戳: 1752422702099_2)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [3] "r" → opId: 1752403299769_3@client (时间戳: 1752403299769_3)
+    [3] "r" → opId: 1752422702099_3@client (时间戳: 1752422702099_3)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [4] "t" → opId: 1752403299769_4@client (时间戳: 1752403299769_4)
+    [4] "t" → opId: 1752422702099_4@client (时间戳: 1752422702099_4)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [5] "2" → opId: 1752403299770@client (时间戳: 1752403299770)
+    [5] "1" → opId: 1752422702100@client (时间戳: 1752422702100)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [6] "3" → opId: 1752403299770@client (时间戳: 1752403299770)
+    [6] "2" → opId: 1752422702100@client (时间戳: 1752422702100)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [7] "1" → opId: 1752403299770@client (时间戳: 1752403299770)
+    [7] "3" → opId: 1752422702100@client (时间戳: 1752422702100)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
@@ -667,19 +690,19 @@
       at Object.log (tests/crdt/concurrent.test.js:302:13)
 
   console.log
-    🎯 最终结果: "doc_end!"
+    🎯 最终结果: "doc!_end"
 
       at Object.log (tests/crdt/concurrent.test.js:311:13)
 
   console.log
-    📝 分析结果: "doc_end!"
+    📝 分析结果: "doc!_end"
 
       at Object.log (tests/crdt/concurrent.test.js:325:13)
 
   console.log
-    ✅ 字符插入顺序合理（A先于B）
+    ✅ 字符按预期顺序插入
 
-      at Object.log (tests/crdt/concurrent.test.js:329:15)
+      at Object.log (tests/crdt/concurrent.test.js:327:15)
 
   console.log
     📋 测试场景: 混合并发操作 - A插入，B删除
@@ -718,61 +741,61 @@
       at log (tests/crdt/concurrent.test.js:11:13)
 
   console.log
-    [0] "h" → opId: 1752403299779_0@client (时间戳: 1752403299779_0)
+    [0] "h" → opId: 1752422702110_0@client (时间戳: 1752422702110_0)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [1] "e" → opId: 1752403299779_1@client (时间戳: 1752403299779_1)
+    [1] "e" → opId: 1752422702110_1@client (时间戳: 1752422702110_1)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [2] "l" → opId: 1752403299779_2@client (时间戳: 1752403299779_2)
+    [2] "l" → opId: 1752422702110_2@client (时间戳: 1752422702110_2)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [3] "l" → opId: 1752403299779_3@client (时间戳: 1752403299779_3)
+    [3] "l" → opId: 1752422702110_3@client (时间戳: 1752422702110_3)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [4] "o" → opId: 1752403299779_4@client (时间戳: 1752403299779_4)
+    [4] "o" → opId: 1752422702110_4@client (时间戳: 1752422702110_4)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [5] "o" → opId: 1752403299779_7@client (时间戳: 1752403299779_7)
+    [5] "o" → opId: 1752422702110_7@client (时间戳: 1752422702110_7)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [6] "r" → opId: 1752403299779_8@client (时间戳: 1752403299779_8)
+    [6] "r" → opId: 1752422702110_8@client (时间戳: 1752422702110_8)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [7] "l" → opId: 1752403299779_9@client (时间戳: 1752403299779_9)
+    [7] "l" → opId: 1752422702110_9@client (时间戳: 1752422702110_9)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [8] "d" → opId: 1752403299779_10@client (时间戳: 1752403299779_10)
+    [8] "d" → opId: 1752422702110_10@client (时间戳: 1752422702110_10)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    [9] "X" → opId: 1752403299779@client (时间戳: 1752403299779)
+    [9] "X" → opId: 1752422702110@client (时间戳: 1752422702110)
 
       at log (tests/crdt/concurrent.test.js:15:15)
           at Array.forEach (<anonymous>)
@@ -828,17 +851,17 @@
       at Object.log (tests/crdt/concurrent.test.js:454:13)
 
   console.log
-      开始时间: 1752403299790
+      开始时间: 1752422702117
 
       at Object.log (tests/crdt/concurrent.test.js:455:13)
 
   console.log
-      中间时间: 1752403299790 (时差: 0ms)
+      中间时间: 1752422702117 (时差: 0ms)
 
       at Object.log (tests/crdt/concurrent.test.js:456:13)
 
   console.log
-      结束时间: 1752403299790 (时差: 0ms)
+      结束时间: 1752422702117 (时差: 0ms)
 
       at Object.log (tests/crdt/concurrent.test.js:457:13)
 
@@ -848,34 +871,34 @@
       at Object.log (tests/crdt/concurrent.test.js:463:13)
 
   console.log
-      A的opId: 1752403299790@client
+      A的opId: 1752422702117@client
 
       at Object.log (tests/crdt/concurrent.test.js:464:13)
 
   console.log
-      B的opId: 1752403299790@client
+      B的opId: 1752422702117@client
 
       at Object.log (tests/crdt/concurrent.test.js:465:13)
 
   console.log
-    🔍 期望顺序: 按时间戳排序, 实际顺序: T1T2
+    🔍 期望顺序: 按时间戳排序, 实际顺序: T2T1
 
       at log (tests/crdt/concurrent.test.js:24:13)
 
   console.log
-       字符 "T1" 时间戳: 1752403299790
+       字符 "T2" 时间戳: 1752422702117
 
       at log (tests/crdt/concurrent.test.js:33:15)
           at Array.forEach (<anonymous>)
 
   console.log
-       字符 "T2" 时间戳: 1752403299790
+       字符 "T1" 时间戳: 1752422702117
 
       at log (tests/crdt/concurrent.test.js:33:15)
           at Array.forEach (<anonymous>)
 
   console.log
-    🎯 最终排序: "T1T2"
+    🎯 最终排序: "T2T1"
 
       at Object.log (tests/crdt/concurrent.test.js:474:13)
 
@@ -891,16 +914,16 @@
 
   console.log
     🔍 baseChars: [
-      { ch: 'b', opId: '1752403299793_0@client' },
-      { ch: 'a', opId: '1752403299793_1@client' },
-      { ch: 's', opId: '1752403299793_2@client' },
-      { ch: 'e', opId: '1752403299793_3@client' }
+      { ch: 'b', opId: '1752422702122_0@client' },
+      { ch: 'a', opId: '1752422702122_1@client' },
+      { ch: 's', opId: '1752422702122_2@client' },
+      { ch: 'e', opId: '1752422702122_3@client' }
     ]
 
       at Object.log (tests/crdt/concurrent.test.js:494:13)
 
   console.log
-    🔍 lastCharId: 1752403299793_3@client
+    🔍 lastCharId: 1752422702122_3@client
 
       at Object.log (tests/crdt/concurrent.test.js:503:13)
 
@@ -1020,7 +1043,7 @@
       at Object.log (tests/crdt/concurrent.test.js:670:13)
 
   console.log
-    最终文档: _4_24_0_2_2_2_0_8_2_8_0_0_2_0_0_6_2_6_0_1_2_1_0_9_2_9_0_3_2_3_0_7_2_7_0_5_2_5_0sedument
+    最终文档: _2_2_2_0_9_2_9_0_0_2_0_0_5_2_5_0_7_2_7_0_1_2_1_0_6_2_6_0_4_24_0_8_28_0_3_2_30hd_doument
 
       at Object.log (tests/crdt/concurrent.test.js:671:13)
 
@@ -1045,17 +1068,17 @@
       at Object.log (tests/crdt/concurrent.test.js:731:13)
 
   console.log
-    A: A2A1B2B1C1
+    A: A2A1C1B2B1
 
       at Object.log (tests/crdt/concurrent.test.js:732:13)
 
   console.log
-    B: A2A1B2B1C1
+    B: A2A1C1B2B1
 
       at Object.log (tests/crdt/concurrent.test.js:733:13)
 
   console.log
-    C: A2A1B2B1C1
+    C: A2A1C1B2B1
 
       at Object.log (tests/crdt/concurrent.test.js:734:13)
 
@@ -1070,7 +1093,7 @@
       at Object.log (tests/crdt/concurrent.test.js:765:15)
 
   console.log
-    🎯 相同时间戳冲突解决结果: AB
+    🎯 相同时间戳冲突解决结果: BA
 
       at Object.log (tests/crdt/concurrent.test.js:777:15)
 
@@ -1090,17 +1113,17 @@
       at Object.log (tests/crdt/concurrent.test.js:837:13)
 
   console.log
-    A收到: 1 个更新
+    A收到: 0 个更新
 
       at Object.log (tests/crdt/concurrent.test.js:838:13)
 
   console.log
-    B收到: 2 个更新
+    B收到: 1 个更新
 
       at Object.log (tests/crdt/concurrent.test.js:839:13)
 
   console.log
-    C收到: 1 个更新
+    C收到: 0 个更新
 
       at Object.log (tests/crdt/concurrent.test.js:840:13)
 
@@ -1110,17 +1133,17 @@
       at Object.log (tests/crdt/concurrent.test.js:847:13)
 
   console.log
-    A: base143
+    A: base14
 
       at Object.log (tests/crdt/concurrent.test.js:848:13)
 
   console.log
-    B: base1432
+    B: base12
 
       at Object.log (tests/crdt/concurrent.test.js:849:13)
 
   console.log
-    C: base143
+    C: base3
 
       at Object.log (tests/crdt/concurrent.test.js:850:13)
 
@@ -1130,17 +1153,17 @@
       at Object.log (tests/crdt/concurrent.test.js:863:13)
 
   console.log
-    A: base1432
+    A: base1423
 
       at Object.log (tests/crdt/concurrent.test.js:864:13)
 
   console.log
-    B: base1432
+    B: base1423
 
       at Object.log (tests/crdt/concurrent.test.js:865:13)
 
   console.log
-    C: base1432
+    C: base1423
 
       at Object.log (tests/crdt/concurrent.test.js:866:13)
 
@@ -1161,7 +1184,7 @@
           at Array.forEach (<anonymous>)
 
   console.log
-      状态: A="startCA", B="startCB", C="startC"
+      状态: A="startCA", B="startBC", C="startC"
 
       at log (tests/crdt/concurrent.test.js:933:15)
           at Array.forEach (<anonymous>)
@@ -1173,7 +1196,7 @@
           at Array.forEach (<anonymous>)
 
   console.log
-      状态: A="startCA", B="startCAB", C="startCA"
+      状态: A="startCA", B="startBCA", C="startCA"
 
       at log (tests/crdt/concurrent.test.js:933:15)
           at Array.forEach (<anonymous>)
@@ -1185,7 +1208,7 @@
           at Array.forEach (<anonymous>)
 
   console.log
-      状态: A="startCAB", B="startCAB", C="startCAB"
+      状态: A="startBCA", B="startBCA", C="startBCA"
 
       at log (tests/crdt/concurrent.test.js:933:15)
           at Array.forEach (<anonymous>)
@@ -1196,17 +1219,17 @@
       at Object.log (tests/crdt/concurrent.test.js:940:13)
 
   console.log
-    A: startCAB
+    A: startBCA
 
       at Object.log (tests/crdt/concurrent.test.js:941:13)
 
   console.log
-    B: startCAB
+    B: startBCA
 
       at Object.log (tests/crdt/concurrent.test.js:942:13)
 
   console.log
-    C: startCAB
+    C: startBCA
 
       at Object.log (tests/crdt/concurrent.test.js:943:13)
 
@@ -1358,68 +1381,249 @@
 
       at Object.log (tests/crdt/concurrent.test.js:1039:13)
 
-PASS tests/crdt/concurrent.test.js
-  并发插入完整测试套件
-    ✓ 基础并发插入 - 两客户端开头同时插入 (26 ms)
-    ✓ 中间位置并发插入 - 在指定字符后同时插入 (41 ms)
-    ✓ 多字符并发插入 - 使用insertText (12 ms)
-    ✓ 三客户端并发插入 - 复杂并发场景 (7 ms)
-    ✓ 连续并发插入 - 模拟快速输入 (3 ms)
-    ✓ 混合操作并发 - 插入+删除+格式化 (9 ms)
-    ✓ 边界情况 - 空文档并发插入 (2 ms)
-    ✓ 时间戳分析 - 验证排序规则 (4 ms)
-    ✓ 极速并发插入 - 模拟高频输入场景 (4 ms)
-    ✓ 网络分区模拟 - 部分同步场景 (9 ms)
-    ✓ 大规模并发压力测试 - 10客户端同时操作 (26 ms)
-    ✓ 乱序同步测试 - 模拟网络延迟和重排 (2 ms)
-    ✓ 冲突解决一致性 - 相同时间戳处理 (1 ms)
-    ✓ 网络丢包模拟 - 随机丢失更新 (4 ms)
-    ✓ 网络延迟模拟 - 不同延迟下的同步 (4 ms)
-    ✓ 网络重复传输模拟 - 处理重复消息 (4 ms)
-    ✓ 网络带宽限制模拟 - 批量更新优化 (6 ms)
+  console.log
+    🔍 A client rawFormatOps: [
+      {
+        opId: '1752422702220@client',
+        action: 'addMark',
+        markType: 'bold',
+        start: { type: 'before', opId: '1752422702218_0@client' },
+        end: { type: 'after', opId: '1752422702218_1@client' },
+        timestamp: 1752422702220
+      },
+      {
+        opId: '1752422702220@client',
+        action: 'addMark',
+        markType: 'em',
+        start: { type: 'before', opId: '1752422702218_1@client' },
+        end: { type: 'after', opId: '1752422702218_1@client' },
+        timestamp: 1752422702220
+      },
+      {
+        opId: '1752422702220@client',
+        action: 'addMark',
+        markType: 'link',
+        start: { type: 'before', opId: '1752422702218_0@client' },
+        end: { type: 'after', opId: '1752422702218_0@client' },
+        attrs: { href: 'https://example.com' },
+        timestamp: 1752422702220
+      },
+      {
+        opId: '1752422702220@client',
+        action: 'removeMark',
+        markType: 'bold',
+        start: { type: 'before', opId: '1752422702218_0@client' },
+        end: { type: 'after', opId: '1752422702218_1@client' },
+        timestamp: 1752422702220
+      },
+      {
+        opId: '1752422702220@client',
+        action: 'removeMark',
+        markType: 'em',
+        start: { type: 'before', opId: '1752422702218_1@client' },
+        end: { type: 'after', opId: '1752422702218_1@client' },
+        timestamp: 1752422702220
+      }
+    ]
 
-Test Suites: 7 skipped, 1 passed, 1 of 8 total
-Tests:       27 skipped, 17 passed, 44 total
-Snapshots:   0 total
-Time:        0.736 s, estimated 2 s
-Ran all test suites with tests matching "并发插入完整测试套件".
-```
+      at Object.log (tests/crdt/multiMark.test.js:47:13)
 
----
+  console.log
+    📋 测试场景: 嵌套格式化 - 粗体包含斜体
 
-## 测试分析
+      at Object.log (tests/crdt/multiMark.test.js:81:13)
 
-### 测试概览
-- 测试文件: `tests/crdt/concurrent.test.js`
-- 测试套件: 并发插入完整测试套件
-- 退出代码: 0
-- 测试状态: ✅ 通过
+  console.log
+    🎯 嵌套格式化结果: Hello World
 
-### 包含的测试用例
-从 `tests/crdt/concurrent.test.js` 中的测试：
+      at Object.log (tests/crdt/multiMark.test.js:96:13)
 
-1. **基础并发插入** - 两客户端开头同时插入
-2. **中间位置并发插入** - 在指定字符后同时插入 ✅ **核心修复验证**
-3. **多字符并发插入** - 使用insertText
-4. **三客户端并发插入** - 复杂并发场景
-5. **连续并发插入** - 模拟快速输入
-6. **混合操作并发** - 插入+删除+格式化
-7. **边界情况** - 空文档并发插入
-8. **时间戳分析** - 验证排序规则
+  console.log
+    📋 测试场景: 交叉格式化 - A加粗ABC，B斜体DEF，C同时有粗体和斜体
 
-### 关键修复验证
-✅ 字符正确插入在下划线后（修复验证）
-✅ 字符插入位置准确
-✅ 所有测试通过
+      at Object.log (tests/crdt/multiMark.test.js:118:13)
 
-### 重要结果摘要
-✅ **核心问题已修复**: 字符现在正确插入在下划线后，格式为 `start_XYend` 而不是之前错误的 `start_endXY`
+  console.log
+    🎯 交叉格式化最终结果: ABCDEF
 
-### 测试统计
-```
-Tests:       27 skipped, 17 passed, 44 total
-```
+      at Object.log (tests/crdt/multiMark.test.js:145:13)
 
-**生成时间**: 2025/7/13 18:41:40
-**源文件**: tests/crdt/concurrent.test.js
-**输出文件**: /Users/aaron/Desktop/6200 毕业论文/markWeave/mark-weave-editor/test-results/concurrent-test-2025-07-13T10-41-38.md
+  console.log
+    📋 测试场景: remove-wins 优先级 - 多客户端格式冲突
+
+      at Object.log (tests/crdt/multiMark.test.js:173:13)
+
+  console.log
+    🎯 remove-wins 最终结果: test
+
+      at Object.log (tests/crdt/multiMark.test.js:204:13)
+
+  console.log
+    格式操作统计:
+
+      at Object.log (tests/crdt/multiMark.test.js:216:13)
+
+  console.log
+    添加操作: 3
+
+      at Object.log (tests/crdt/multiMark.test.js:217:13)
+
+  console.log
+    移除操作: 1
+
+      at Object.log (tests/crdt/multiMark.test.js:218:13)
+
+  console.log
+    📋 测试场景: 链式格式化操作
+
+      at Object.log (tests/crdt/multiMark.test.js:233:13)
+
+  console.log
+    第一轮同步后: This is a complex paragraph for testing.
+
+      at Object.log (tests/crdt/multiMark.test.js:253:13)
+
+  console.log
+    🎯 链式格式化最终结果: This is a complex paragraph for testing.
+
+      at Object.log (tests/crdt/multiMark.test.js:266:13)
+
+  console.log
+    📋 测试场景: 边界格式化 - 单字符格式
+
+      at Object.log (tests/crdt/multiMark.test.js:286:13)
+
+  console.log
+    🎯 边界格式化结果: XY
+
+      at Object.log (tests/crdt/multiMark.test.js:315:13)
+
+  console.log
+    📋 测试场景: 并发格式化与文本编辑混合
+
+      at Object.log (tests/crdt/multiMark.test.js:330:13)
+
+  console.log
+    混合操作后各客户端状态:
+
+      at Object.log (tests/crdt/multiMark.test.js:351:13)
+
+  console.log
+    A (插入): eding_tit
+
+      at Object.log (tests/crdt/multiMark.test.js:352:13)
+
+  console.log
+    B (格式化): edit
+
+      at Object.log (tests/crdt/multiMark.test.js:353:13)
+
+  console.log
+    C (删除+格式化): edt
+
+      at Object.log (tests/crdt/multiMark.test.js:354:13)
+
+  console.log
+    🎯 混合场景最终结果:
+
+      at Object.log (tests/crdt/multiMark.test.js:372:13)
+
+  console.log
+    A: eding_tt
+
+      at Object.log (tests/crdt/multiMark.test.js:373:13)
+
+  console.log
+    B: eding_tt
+
+      at Object.log (tests/crdt/multiMark.test.js:374:13)
+
+  console.log
+    C: eding_tt
+
+      at Object.log (tests/crdt/multiMark.test.js:375:13)
+
+  console.log
+    🔥 convertCRDTToProseMirrorDoc 被调用
+
+      at log (src/crdt/crdtUtils.js:26:11)
+
+  console.log
+    the newest yformatOps:  []
+
+      at log (src/crdt/crdtUtils.js:27:11)
+
+  console.log
+    the newest ychars []
+
+      at log (src/crdt/crdtUtils.js:32:11)
+
+  console.log
+    ✅ Generated paragraph: []
+
+      at log (src/crdt/crdtUtils.js:105:11)
+
+  console.log
+    最后字符插入结果: sNDtartE
+
+      at Object.log (tests/crdt/afterId.test.js:80:13)
+
+  console.log
+    链式插入结果: a132c
+
+      at Object.log (tests/crdt/afterId.test.js:119:13)
+
+  console.log
+    删除后状态: ac
+
+      at Object.log (tests/crdt/afterId.test.js:153:13)
+
+  console.warn
+    ⚠️ afterId 999999@invalid 未找到，插入到开头
+
+      29 |       const afterIndex = ychars.toArray().findIndex((c) => getProp(c, "opId") === afterId);
+      30 |       if (afterIndex === -1) {
+    > 31 |         console.warn(`⚠️ afterId ${afterId} 未找到，插入到开头`);
+         |                 ^
+      32 |         index = 0;
+      33 |       } else {
+      34 |         // 在afterId后插入，直接插入在afterId+1的位置
+
+      at Object.insertChar (src/crdt/crdtActions.cjs:31:17)
+      at insertChar (tests/crdt/afterId.test.js:179:9)
+      at Object.<anonymous> (node_modules/expect/build/toThrowMatchers.js:74:11)
+      at Object.throwingMatcher [as toThrow] (node_modules/expect/build/index.js:320:21)
+      at Object.toThrow (tests/crdt/afterId.test.js:180:12)
+
+  console.log
+    并发插入结果: sBAtart
+
+      at Object.log (tests/crdt/afterId.test.js:223:13)
+
+  console.log
+    多字符插入结果: Hello Beautiful World
+
+      at Object.log (tests/crdt/afterId.test.js:255:13)
+
+  console.log
+    🔍 初始字符: [
+      { ch: 'a', opId: '1752422702409_0@client' },
+      { ch: 'b', opId: '1752422702410_1@client' },
+      { ch: 'c', opId: '1752422702410_2@client' },
+      { ch: 'd', opId: '1752422702410_3@client' },
+      { ch: 'e', opId: '1752422702410_4@client' },
+      { ch: 'f', opId: '1752422702410_5@client' }
+    ]
+
+      at Object.log (tests/crdt/deleteRange.test.js:20:11)
+
+  console.log
+    🔍 最终C1状态:
+
+      at Object.log (tests/crdt/deleteRange.test.js:39:11)
+
+  console.log
+    🔍 最终C2状态:
+
+      at Object.log (tests/crdt/deleteRange.test.js:40:11)
+

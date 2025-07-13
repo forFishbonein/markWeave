@@ -30,13 +30,14 @@ describe("并发插入完整测试套件", () => {
     });
 
     timestamps.forEach(({ char, timestamp }) => {
-      console.log(`   字符 "${char}" 时间戳: ${timestamp}`);
+      console.log(`字符 "${char}" 时间戳: ${timestamp}`);
     });
 
     return actualOrder;
   }
 
   test("基础并发插入 - 两客户端开头同时插入", () => {
+    console.log("📋 测试场景: 基础并发插入 - 两客户端开头同时插入");
     const A = makeClient("A");
     const B = makeClient("B");
 
@@ -69,7 +70,7 @@ describe("并发插入完整测试套件", () => {
 
     // 分析字符排序
     const finalChars = A.ychars.toArray();
-    analyzeOpIds(finalChars, "最终字符排序分析");
+    // analyzeOpIds(finalChars, "最终字符排序分析");
 
     // 验证一致性
     expect(finalA).toBe(finalB);
@@ -79,11 +80,12 @@ describe("并发插入完整测试套件", () => {
   });
 
   test("中间位置并发插入 - 在指定字符后同时插入", () => {
+    console.log("📋 测试场景: 中间位置并发插入 - 在指定字符后同时插入");
     const A = makeClient("A");
     const B = makeClient("B");
 
     // 基础文档 "start_end"
-    console.log("🔧 准备插入基础文档");
+    // console.log("🔧 准备插入基础文档");
     console.log("🔧 A客户端ychars初始长度:", A.ychars.toArray().length);
     A.insertText(null, "start_end");
     console.log("🔧 A插入后长度:", A.ychars.toArray().length);
@@ -95,7 +97,7 @@ describe("并发插入完整测试套件", () => {
       A.ychars.toArray().forEach((c, i) => {
         const ch = typeof c?.get === "function" ? c.get("ch") : c.ch;
         const opId = typeof c?.get === "function" ? c.get("opId") : c.opId;
-        console.log(`  [${i}] "${ch}" opId:${opId}`);
+        // console.log(`  [${i}] "${ch}" opId:${opId}`);
       });
     }
 
@@ -114,12 +116,12 @@ describe("并发插入完整测试套件", () => {
       const opId = typeof c?.get === "function" ? c.get("opId") : c.opId;
       const deleted =
         typeof c?.get === "function" ? c.get("deleted") : c.deleted;
-      console.log(`  [${index}] "${ch}" opId:${opId} deleted:${deleted}`);
+      // console.log(`  [${index}] "${ch}" opId:${opId} deleted:${deleted}`);
     });
 
     const underscoreChar = A.ychars.toArray().find((c) => {
       const ch = typeof c?.get === "function" ? c.get("ch") : c.ch;
-      console.log(`    检查字符: "${ch}" (是下划线吗: ${ch === "_"})`);
+      // console.log(`    检查字符: "${ch}" (是下划线吗: ${ch === "_"})`);
       return ch === "_";
     });
     const afterId = underscoreChar
@@ -127,7 +129,7 @@ describe("并发插入完整测试套件", () => {
         ? underscoreChar.get("opId")
         : underscoreChar.opId
       : null;
-    console.log(`下划线字符对象:`, underscoreChar);
+    // console.log(`下划线字符对象:`, underscoreChar);
     console.log(`下划线 "_" 的opId: ${afterId}`);
 
     // 在下划线后同时插入
@@ -176,6 +178,7 @@ describe("并发插入完整测试套件", () => {
   });
 
   test("多字符并发插入 - 使用insertText", () => {
+    console.log("📋 测试场景: 多字符并发插入 - 使用insertText");
     const A = makeClient("A");
     const B = makeClient("B");
 
@@ -183,7 +186,6 @@ describe("并发插入完整测试套件", () => {
     A.insertText(null, "base");
     B.apply(A.encode());
 
-    console.log("📋 测试场景: 两客户端同时插入多个字符");
     console.log("基础文档:", A.snapshot());
 
     // 多字符并发插入
@@ -204,7 +206,7 @@ describe("并发插入完整测试套件", () => {
 
     // 分析字符序列
     const finalChars = A.ychars.toArray();
-    analyzeOpIds(finalChars, "多字符插入结果分析");
+    // analyzeOpIds(finalChars, "多字符插入结果分析");
 
     // 验证
     expect(finalA).toBe(finalB);
@@ -214,6 +216,7 @@ describe("并发插入完整测试套件", () => {
   });
 
   test("三客户端并发插入 - 复杂并发场景", () => {
+    console.log("📋 测试场景: 三客户端并发插入 - 复杂并发场景");
     const A = makeClient("A");
     const B = makeClient("B");
     const C = makeClient("C");
@@ -223,7 +226,7 @@ describe("并发插入完整测试套件", () => {
     B.apply(A.encode());
     C.apply(A.encode());
 
-    console.log("📋 测试场景: 三客户端在开头同时插入");
+    // console.log("📋 测试场景: 三客户端在开头同时插入");
     console.log("基础文档:", A.snapshot());
 
     // 三方同时插入
@@ -259,7 +262,7 @@ describe("并发插入完整测试套件", () => {
 
     // 分析三方插入的排序
     const finalChars = A.ychars.toArray();
-    analyzeOpIds(finalChars, "三客户端插入排序分析");
+    // analyzeOpIds(finalChars, "三客户端插入排序分析");
 
     // 验证三方一致性
     expect(finalA).toBe(finalB);
@@ -491,15 +494,23 @@ describe("并发插入完整测试套件", () => {
     // 极速并发插入（模拟快速打字）
     const baseChars = A.ychars.toArray();
     console.log("🔍 baseChars 长度:", baseChars.length);
-    console.log("🔍 baseChars:", baseChars.map(c => ({ 
-      ch: typeof c?.get === "function" ? c.get("ch") : c.ch,
-      opId: typeof c?.get === "function" ? c.get("opId") : c.opId 
-    })));
-    
+    console.log(
+      "🔍 baseChars:",
+      baseChars.map((c) => ({
+        ch: typeof c?.get === "function" ? c.get("ch") : c.ch,
+        opId: typeof c?.get === "function" ? c.get("opId") : c.opId,
+      }))
+    );
+
     // 修复：检查数组是否为空，如果为空则使用null作为afterId
-    const lastChar = baseChars.length > 0 ? baseChars[baseChars.length - 1] : null;
-    const lastCharId = lastChar ? (typeof lastChar?.get === "function" ? lastChar.get("opId") : lastChar.opId) : null;
-    
+    const lastChar =
+      baseChars.length > 0 ? baseChars[baseChars.length - 1] : null;
+    const lastCharId = lastChar
+      ? typeof lastChar?.get === "function"
+        ? lastChar.get("opId")
+        : lastChar.opId
+      : null;
+
     console.log("🔍 lastCharId:", lastCharId);
 
     // 在很短时间内连续插入
@@ -642,7 +653,8 @@ describe("并发插入完整测试套件", () => {
           // 随机删除一些字符（如果文档足够长）
           const currentLength = client.ychars.length;
           if (currentLength > 5) {
-            const deleteStart = Math.floor(Math.random() * (currentLength - 2)) + 1;
+            const deleteStart =
+              Math.floor(Math.random() * (currentLength - 2)) + 1;
             client.deleteChars(deleteStart, deleteStart + 1);
           }
         }
@@ -653,8 +665,8 @@ describe("并发插入完整测试套件", () => {
     console.log(`执行了 ${operations.length} 个并发操作`);
 
     // 模拟网络广播：所有更新交叉同步
-    const updates = clients.map(client => client.encode());
-    
+    const updates = clients.map((client) => client.encode());
+
     clients.forEach((client, i) => {
       updates.forEach((update, j) => {
         if (i !== j) {
@@ -664,7 +676,7 @@ describe("并发插入完整测试套件", () => {
     });
 
     // 验证所有客户端最终一致
-    const finalSnapshots = clients.map(client => client.snapshot());
+    const finalSnapshots = clients.map((client) => client.snapshot());
     const firstSnapshot = finalSnapshots[0];
 
     console.log("🎯 大规模并发最终结果:");
@@ -677,8 +689,12 @@ describe("并发插入完整测试套件", () => {
     });
 
     // 验证基础内容仍然存在（部分字符可能被删除）
-    const hasSharedChars = ["s", "h", "a", "r", "e", "d"].some(char => firstSnapshot.includes(char));
-    const hasDocumentChars = ["d", "o", "c", "u", "m", "e", "n", "t"].some(char => firstSnapshot.includes(char));
+    const hasSharedChars = ["s", "h", "a", "r", "e", "d"].some((char) =>
+      firstSnapshot.includes(char)
+    );
+    const hasDocumentChars = ["d", "o", "c", "u", "m", "e", "n", "t"].some(
+      (char) => firstSnapshot.includes(char)
+    );
     expect(hasSharedChars || hasDocumentChars).toBe(true); // 至少有一些原始字符存在
   });
 
@@ -707,7 +723,7 @@ describe("并发插入完整测试套件", () => {
 
     // 模拟乱序网络传输
     console.log("模拟乱序同步...");
-    
+
     // C 先收到较晚的更新
     C.apply(update4); // A的第二次更新
     C.apply(update1); // A的第一次更新（乱序）
@@ -754,7 +770,7 @@ describe("并发插入完整测试套件", () => {
     // 尝试创建相同时间戳的冲突
     const originalNow = Date.now;
     const fixedTime = Date.now();
-    
+
     // Mock Date.now 返回相同时间戳
     Date.now = () => fixedTime;
 
@@ -802,13 +818,13 @@ describe("并发插入完整测试套件", () => {
     const operations = [];
     A.insertChar(null, "1");
     operations.push({ client: "A", update: A.encode() });
-    
+
     B.insertChar(null, "2");
     operations.push({ client: "B", update: B.encode() });
-    
+
     C.insertChar(null, "3");
     operations.push({ client: "C", update: C.encode() });
-    
+
     A.insertChar(null, "4");
     operations.push({ client: "A", update: A.encode() });
 
@@ -821,7 +837,7 @@ describe("并发插入完整测试套件", () => {
 
     operations.forEach((op, index) => {
       const dropChance = 0.5;
-      
+
       // 不向发送者发送自己的更新
       if (op.client !== "A" && Math.random() > dropChance) {
         deliveredToA.push(op);
@@ -840,9 +856,9 @@ describe("并发插入完整测试套件", () => {
     console.log("C收到:", deliveredToC.length, "个更新");
 
     // 应用未丢失的更新
-    deliveredToA.forEach(op => A.apply(op.update));
-    deliveredToB.forEach(op => B.apply(op.update));
-    deliveredToC.forEach(op => C.apply(op.update));
+    deliveredToA.forEach((op) => A.apply(op.update));
+    deliveredToB.forEach((op) => B.apply(op.update));
+    deliveredToC.forEach((op) => C.apply(op.update));
 
     console.log("丢包后状态:");
     console.log("A:", A.snapshot());
@@ -850,7 +866,7 @@ describe("并发插入完整测试套件", () => {
     console.log("C:", C.snapshot());
 
     // 网络恢复：重传所有丢失的更新
-    operations.forEach(op => {
+    operations.forEach((op) => {
       if (op.client !== "A") A.apply(op.update);
       if (op.client !== "B") B.apply(op.update);
       if (op.client !== "C") C.apply(op.update);
@@ -889,30 +905,30 @@ describe("并发插入完整测试套件", () => {
 
     // 创建操作队列
     const operationQueue = [];
-    
+
     // 生成并发操作
     A.insertChar(null, "A");
-    operationQueue.push({ 
-      update: A.encode(), 
-      from: "A", 
-      to: ["B", "C"], 
-      delay: 100 
+    operationQueue.push({
+      update: A.encode(),
+      from: "A",
+      to: ["B", "C"],
+      delay: 100,
     });
 
     B.insertChar(null, "B");
-    operationQueue.push({ 
-      update: B.encode(), 
-      from: "B", 
-      to: ["A", "C"], 
-      delay: 300 
+    operationQueue.push({
+      update: B.encode(),
+      from: "B",
+      to: ["A", "C"],
+      delay: 300,
     });
 
     C.insertChar(null, "C");
-    operationQueue.push({ 
-      update: C.encode(), 
-      from: "C", 
-      to: ["A", "B"], 
-      delay: 50 
+    operationQueue.push({
+      update: C.encode(),
+      from: "C",
+      to: ["A", "B"],
+      delay: 50,
     });
 
     // 按延迟排序模拟网络传输时间
@@ -920,17 +936,23 @@ describe("并发插入完整测试套件", () => {
 
     console.log("模拟按延迟顺序传输:");
     operationQueue.forEach((op, index) => {
-      console.log(`第${index + 1}步: ${op.from} → [${op.to.join(", ")}] (延迟${op.delay}ms)`);
-      
+      console.log(
+        `第${index + 1}步: ${op.from} → [${op.to.join(", ")}] (延迟${
+          op.delay
+        }ms)`
+      );
+
       // 应用更新到目标客户端
-      op.to.forEach(target => {
+      op.to.forEach((target) => {
         if (target === "A") A.apply(op.update);
         if (target === "B") B.apply(op.update);
         if (target === "C") C.apply(op.update);
       });
 
       // 显示当前状态
-      console.log(`  状态: A="${A.snapshot()}", B="${B.snapshot()}", C="${C.snapshot()}"`);
+      console.log(
+        `  状态: A="${A.snapshot()}", B="${B.snapshot()}", C="${C.snapshot()}"`
+      );
     });
 
     const finalA = A.snapshot();
@@ -989,7 +1011,7 @@ describe("并发插入完整测试套件", () => {
     expect(finalA).toBe(finalB);
     expect(finalA).toContain("original");
     expect(finalA).toContain("X");
-    
+
     // 验证X只出现一次
     const xCount = (finalA.match(/X/g) || []).length;
     expect(xCount).toBe(1);
@@ -1022,12 +1044,14 @@ describe("并发插入完整测试套件", () => {
 
     // 逐批应用更新
     batches.forEach((batch, batchIndex) => {
-      console.log(`传输批次 ${batchIndex + 1}/${batches.length} (${batch.length}个更新)`);
-      
-      batch.forEach(update => {
+      console.log(
+        `传输批次 ${batchIndex + 1}/${batches.length} (${batch.length}个更新)`
+      );
+
+      batch.forEach((update) => {
         B.apply(update);
       });
-      
+
       console.log(`批次${batchIndex + 1}后B状态:`, B.snapshot());
     });
 
@@ -1040,7 +1064,7 @@ describe("并发插入完整测试套件", () => {
 
     // 验证最终一致性
     expect(finalA).toBe(finalB);
-    
+
     // 验证所有数字都存在
     for (let i = 0; i < 10; i++) {
       expect(finalA).toContain(i.toString());

@@ -14,7 +14,7 @@ const { performance } = require("perf_hooks");
  */
 
 test("CRDT 基准性能", () => {
-  const OPE_PER_CLIENT = 100;
+  const OPE_PER_CLIENT = 300;
   const TOTAL_OPS = OPE_PER_CLIENT * 3;
 
   const clients = [0, 1, 2].map((i) => makeClient(i));
