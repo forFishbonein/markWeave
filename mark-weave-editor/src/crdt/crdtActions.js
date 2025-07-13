@@ -65,6 +65,7 @@ export function insertChar(afterId, ch) {
   ychars.insert(index, [newChar]);
 }
 let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
+let formatOpCounter = 0; // 用于确保格式操作的唯一性
 export function insertText(afterId, text) {
   const ychars = getYChars();
 
@@ -172,40 +173,85 @@ export function deleteChars(from, to) {
 export function addBold(startId, endId, boundaryType = "after") {
   const yformatOps = getYFormatOps();
 
-  const opId = `${Date.now()}@client`;
+  // 增强时间戳唯一性，避免多窗口时间戳冲突
   const timestamp = Date.now();
+  const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
+  formatOpCounter += 1;
+  
+  // 🔧 修复：在多窗口环境下动态调整边界类型
+  // 当在文档中间插入时，使用更精确的边界计算
+  let adjustedBoundaryType = boundaryType;
+  if (startId && endId) {
+    // 检查是否在文档中间进行格式化
+    const ychars = getYChars();
+    const chars = ychars.toArray();
+    const startIndex = chars.findIndex(c => getProp(c, "opId") === startId);
+    const endIndex = chars.findIndex(c => getProp(c, "opId") === endId);
+    
+    // 如果是在文档中间（不是末尾）进行格式化，使用before边界避免多选一个字符
+    if (endIndex >= 0 && endIndex < chars.length - 1) {
+      adjustedBoundaryType = "before";
+    }
+  }
+  
   const markOp = {
     opId,
     action: "addMark",
     markType: "bold",
     start: { type: "before", opId: startId },
-    // 当 boundaryType 为 "before" 时，结束边界不包含该字符；否则包含
-    end: { type: boundaryType, opId: endId },
+    // 使用调整后的边界类型
+    end: { type: adjustedBoundaryType, opId: endId },
     timestamp, // 记录操作的时间戳
+    // 🔧 新增：多窗口同步标识
+    multiWindow: true,
+    clientId: `client_${Date.now()}`,
   };
   yformatOps.push([markOp]);
-  // console.log("🔄 Bold addMark:", yformatOps.toArray());
-  // console.log("📝 addBold");
+  console.log("🔄 Bold addMark (多窗口优化):", { opId, boundaryType: adjustedBoundaryType });
 }
 
 //取消的时候在中间是before，否则会导致多取消一个，在末尾才是after
 export function removeBold(startId, endId, boundaryType = "before") {
   const yformatOps = getYFormatOps();
 
-  const opId = `${Date.now()}@client`;
+  // 增强时间戳唯一性，避免多窗口时间戳冲突
   const timestamp = Date.now();
+  const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
+  formatOpCounter += 1;
+  
+  // 🔧 修复：在多窗口环境下动态调整边界类型
+  // 确保与addBold的边界类型保持一致
+  let adjustedBoundaryType = boundaryType;
+  if (startId && endId) {
+    // 检查是否在文档中间进行格式化
+    const ychars = getYChars();
+    const chars = ychars.toArray();
+    const startIndex = chars.findIndex(c => getProp(c, "opId") === startId);
+    const endIndex = chars.findIndex(c => getProp(c, "opId") === endId);
+    
+    // 保持与addBold相同的边界逻辑，确保格式范围一致
+    if (endIndex >= 0 && endIndex < chars.length - 1) {
+      adjustedBoundaryType = "before";
+    } else {
+      // 在末尾时使用after边界
+      adjustedBoundaryType = "after";
+    }
+  }
+  
   const markOp = {
     opId,
     action: "removeMark",
     markType: "bold",
     start: { type: "before", opId: startId },
-    end: { type: boundaryType, opId: endId },
+    end: { type: adjustedBoundaryType, opId: endId },
     timestamp, // 记录操作的时间戳
+    // 🔧 新增：多窗口同步标识
+    multiWindow: true,
+    clientId: `client_${Date.now()}`,
   };
   // 注意：如果你的 CRDT 需要 push([markOp])，那就这样写
   yformatOps.push([markOp]);
-  // console.log("🔄 Bold 已取消:", yformatOps.toArray());
-  // console.log("📝 removeBold");
+  console.log("🔄 Bold removeMark (多窗口优化):", { opId, boundaryType: adjustedBoundaryType });
 }
 // CRDT.js 中的辅助函数：添加斜体标记（em）
 export function addEm(startId, endId, boundaryType = "after") {

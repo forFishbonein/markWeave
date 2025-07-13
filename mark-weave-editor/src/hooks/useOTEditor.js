@@ -474,8 +474,16 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         } else if (step.constructor.name === "AddMarkStep") {
           // 添加格式（如加粗、斜体等）
           const { from, to, mark } = step;
+          
+          // 🔧 修复：在多窗口环境下更精确的位置计算
+          // 确保位置基于最新的文档状态
+          const currentDoc = viewRef.current.state.doc;
+          const actualFrom = Math.max(0, Math.min(from, currentDoc.content.size));
+          const actualTo = Math.max(actualFrom, Math.min(to, currentDoc.content.size));
+          
           const deltaOps = [];
-          if (from > 0) deltaOps.push({ retain: from });
+          if (actualFrom > 0) deltaOps.push({ retain: actualFrom });
+          
           const attrs = {};
           switch (mark.type.name) {
             case "bold":
@@ -487,23 +495,49 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             default:
               break;
           }
+          
           if (Object.keys(attrs).length === 0) {
             // 不支持的格式，跳过
             return;
           }
-          deltaOps.push({ retain: to - from, attributes: attrs });
+          
+          // 🔧 新增：多窗口同步时添加操作标识
+          const retainLength = actualTo - actualFrom;
+          if (retainLength > 0) {
+            deltaOps.push({ 
+              retain: retainLength, 
+              attributes: attrs,
+              // 多窗口同步标识
+              multiWindow: true,
+              timestamp: Date.now()
+            });
+          }
+          
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 格式添加操作提交成功", op);
+            console.log("✅ [OT] 格式添加操作提交成功 (多窗口优化)", {
+              from: actualFrom,
+              to: actualTo,
+              markType: mark.type.name,
+              op
+            });
           } catch (error) {
             console.error("❌ [OT] 格式添加操作提交失败:", error);
           }
         } else if (step.constructor.name === "RemoveMarkStep") {
           // 移除格式
           const { from, to, mark } = step;
+          
+          // 🔧 修复：在多窗口环境下更精确的位置计算
+          // 确保位置基于最新的文档状态
+          const currentDoc = viewRef.current.state.doc;
+          const actualFrom = Math.max(0, Math.min(from, currentDoc.content.size));
+          const actualTo = Math.max(actualFrom, Math.min(to, currentDoc.content.size));
+          
           const deltaOps = [];
-          if (from > 0) deltaOps.push({ retain: from });
+          if (actualFrom > 0) deltaOps.push({ retain: actualFrom });
+          
           const attrs = {};
           switch (mark.type.name) {
             case "bold":
@@ -515,14 +549,32 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             default:
               break;
           }
+          
           if (Object.keys(attrs).length === 0) {
             return;
           }
-          deltaOps.push({ retain: to - from, attributes: attrs });
+          
+          // 🔧 新增：多窗口同步时添加操作标识
+          const retainLength = actualTo - actualFrom;
+          if (retainLength > 0) {
+            deltaOps.push({ 
+              retain: retainLength, 
+              attributes: attrs,
+              // 多窗口同步标识
+              multiWindow: true,
+              timestamp: Date.now()
+            });
+          }
+          
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 格式移除操作提交成功", op);
+            console.log("✅ [OT] 格式移除操作提交成功 (多窗口优化)", {
+              from: actualFrom,
+              to: actualTo,
+              markType: mark.type.name,
+              op
+            });
           } catch (error) {
             console.error("❌ [OT] 格式移除操作提交失败:", error);
           }
@@ -632,18 +684,31 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               const start = pos - op.retain;
               const end = pos;
               const { bold, italic } = op.attributes;
-              if (bold !== undefined) {
+              
+              // 🔧 修复：多窗口环境下的格式同步优化
+              // 确保位置边界正确性
+              const docSize = viewRef.current.state.doc.content.size;
+              const actualStart = Math.max(0, Math.min(start, docSize));
+              const actualEnd = Math.max(actualStart, Math.min(end, docSize));
+              
+              console.log(`🎨 [OT] 应用格式属性变化: [${actualStart}, ${actualEnd}]`, op.attributes);
+              
+              if (bold !== undefined && actualEnd > actualStart) {
                 if (bold) {
-                  tr.addMark(start, end, schema.marks.bold.create());
+                  tr.addMark(actualStart, actualEnd, schema.marks.bold.create());
+                  console.log(`✅ [OT] 添加粗体格式: [${actualStart}, ${actualEnd}]`);
                 } else {
-                  tr.removeMark(start, end, schema.marks.bold);
+                  tr.removeMark(actualStart, actualEnd, schema.marks.bold);
+                  console.log(`❌ [OT] 移除粗体格式: [${actualStart}, ${actualEnd}]`);
                 }
               }
-              if (italic !== undefined) {
+              if (italic !== undefined && actualEnd > actualStart) {
                 if (italic) {
-                  tr.addMark(start, end, schema.marks.em.create());
+                  tr.addMark(actualStart, actualEnd, schema.marks.em.create());
+                  console.log(`✅ [OT] 添加斜体格式: [${actualStart}, ${actualEnd}]`);
                 } else {
-                  tr.removeMark(start, end, schema.marks.em);
+                  tr.removeMark(actualStart, actualEnd, schema.marks.em);
+                  console.log(`❌ [OT] 移除斜体格式: [${actualStart}, ${actualEnd}]`);
                 }
               }
             }
