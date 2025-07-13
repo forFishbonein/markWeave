@@ -178,21 +178,9 @@ export function addBold(startId, endId, boundaryType = "after") {
   const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
   formatOpCounter += 1;
   
-  // 🔧 修复：在多窗口环境下动态调整边界类型
-  // 当在文档中间插入时，使用更精确的边界计算
-  let adjustedBoundaryType = boundaryType;
-  if (startId && endId) {
-    // 检查是否在文档中间进行格式化
-    const ychars = getYChars();
-    const chars = ychars.toArray();
-    const startIndex = chars.findIndex(c => getProp(c, "opId") === startId);
-    const endIndex = chars.findIndex(c => getProp(c, "opId") === endId);
-    
-    // 如果是在文档中间（不是末尾）进行格式化，使用before边界避免多选一个字符
-    if (endIndex >= 0 && endIndex < chars.length - 1) {
-      adjustedBoundaryType = "before";
-    }
-  }
+  // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
+  // 直接使用传入的boundaryType，确保格式范围准确
+  const adjustedBoundaryType = boundaryType;
   
   const markOp = {
     opId,
@@ -219,24 +207,9 @@ export function removeBold(startId, endId, boundaryType = "before") {
   const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
   formatOpCounter += 1;
   
-  // 🔧 修复：在多窗口环境下动态调整边界类型
-  // 确保与addBold的边界类型保持一致
-  let adjustedBoundaryType = boundaryType;
-  if (startId && endId) {
-    // 检查是否在文档中间进行格式化
-    const ychars = getYChars();
-    const chars = ychars.toArray();
-    const startIndex = chars.findIndex(c => getProp(c, "opId") === startId);
-    const endIndex = chars.findIndex(c => getProp(c, "opId") === endId);
-    
-    // 保持与addBold相同的边界逻辑，确保格式范围一致
-    if (endIndex >= 0 && endIndex < chars.length - 1) {
-      adjustedBoundaryType = "before";
-    } else {
-      // 在末尾时使用after边界
-      adjustedBoundaryType = "after";
-    }
-  }
+  // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
+  // 直接使用传入的boundaryType，确保格式范围准确
+  const adjustedBoundaryType = boundaryType;
   
   const markOp = {
     opId,
@@ -386,7 +359,7 @@ export function getVisibleCharOpIds(fromIndex, toIndex) {
       console.log(`✅ 找到起始位置 ${fromIndex}: opId=${opId}`);
     }
 
-    // 查找结束位置 (toIndex是exclusive的，所以要-1)
+    // 查找结束位置 (toIndex是exclusive的，所以实际要找toIndex-1的字符)
     if (visibleCount === toIndex - 1) {
       result.endId = opId;
       console.log(`✅ 找到结束位置 ${toIndex - 1}: opId=${opId}`);

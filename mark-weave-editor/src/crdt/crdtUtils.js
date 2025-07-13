@@ -119,28 +119,41 @@ export function convertCRDTToProseMirrorDoc(docId) {
 //   return op.start.opId <= char.opId && char.opId <= op.end.opId;
 // }
 export function isCharWithinMark(char, op) {
+  const ychars = getYChars();
+  const charArray = ychars.toArray();
+  
+  // 找到字符在CRDT数组中的实际位置索引
+  const charIndex = charArray.findIndex(c => getProp(c, 'opId') === getProp(char, 'opId'));
+  const startIndex = charArray.findIndex(c => getProp(c, 'opId') === op.start.opId);
+  const endIndex = charArray.findIndex(c => getProp(c, 'opId') === op.end.opId);
+  
+  // 如果找不到任何索引，返回false
+  if (charIndex === -1 || startIndex === -1 || endIndex === -1) {
+    return false;
+  }
+  
   // 如果没有显式的 type，默认 start 用 "before"，end 用 "after"
   const startType = op.start?.type || "before";
   const endType = op.end?.type || "after";
 
-  // 判断是否满足“起始”边界
+  // 判断是否满足"起始"边界
   let inStart = false;
   if (startType === "before") {
-    // “before”表示从此字符之前开始 → 包含该字符 //按 字典序 进行比较（因为字符串里面都是数字，而@client 这部分是相同的，在实际比较时，它不会影响最终结果）
-    inStart = char.opId >= op.start.opId;
+    // "before"表示从此字符之前开始 → 包含该字符
+    inStart = charIndex >= startIndex;
   } else {
-    // “after”表示从此字符之后开始 → 不包含该字符
-    inStart = char.opId > op.start.opId;
+    // "after"表示从此字符之后开始 → 不包含该字符
+    inStart = charIndex > startIndex;
   }
 
-  // 判断是否满足“结束”边界
+  // 判断是否满足"结束"边界
   let inEnd = false;
   if (endType === "before") {
-    // “before”表示在此字符之前结束 → 不包含该字符
-    inEnd = char.opId < op.end.opId;
+    // "before"表示在此字符之前结束 → 不包含该字符
+    inEnd = charIndex < endIndex;
   } else {
-    // “after”表示在此字符之后结束 → 包含该字符
-    inEnd = char.opId <= op.end.opId;
+    // "after"表示在此字符之后结束 → 包含该字符
+    inEnd = charIndex <= endIndex;
   }
 
   return inStart && inEnd;
