@@ -1,6 +1,10 @@
 const makeClient = require("../helpers/makeClientWithRealLogic");
 const { performance } = require("perf_hooks");
 
+console.log("\n" + "=".repeat(80));
+console.log("🚀 CRDT Performance Benchmark Test Suite - benchmark.test.js");
+console.log("=".repeat(80));
+
 // ------------------------------------------------------------
 // 性能基准
 // 3 个客户端 × 1000 次随机 insert/delete，同步过程中实时交换 diff。

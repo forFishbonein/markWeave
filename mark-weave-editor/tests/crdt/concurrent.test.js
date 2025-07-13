@@ -1,5 +1,9 @@
 const makeClient = require("../helpers/makeClientWithRealLogic");
 
+console.log("\n" + "=".repeat(80));
+console.log("⚡ CRDT Concurrent Operations Test Suite - concurrent.test.js");
+console.log("=".repeat(80));
+
 // ============================================================
 // 完整的并发插入测试套件
 // 目的：全面验证CRDT在各种并发场景下的行为和一致性
