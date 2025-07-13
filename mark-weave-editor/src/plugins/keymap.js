@@ -18,6 +18,7 @@ import {
   addLink,
   removeLink,
   getVisibleCharOpIds,
+  deleteChars,
 } from "../crdt/crdtActions";
 import { markActive } from "./utils";
 // 定义快捷键，仅处理斜体和加粗等常规操作
@@ -134,6 +135,45 @@ export function createKeymap(undoManager) {
       // 调用 UndoManager.redo() 重做操作
       undoManager.redo();
       return true;
+    },
+    "Backspace": (state, dispatch) => {
+      const { from, to } = state.selection;
+      
+      // 如果有选区，正常删除选区内容
+      if (from !== to) {
+        deleteChars(from, to);
+        return false; // 让ProseMirror继续处理
+      }
+      
+      // 单字符删除（光标位置）
+      if (from > 1) {
+        // 删除光标前的一个字符
+        deleteChars(from - 1, from);
+        return false; // 让ProseMirror继续处理
+      } else {
+        // 在文档开始位置，不能删除
+        return true; // 阻止ProseMirror的默认行为
+      }
+    },
+    "Delete": (state, dispatch) => {
+      const { from, to } = state.selection;
+      
+      // 如果有选区，正常删除选区内容
+      if (from !== to) {
+        deleteChars(from, to);
+        return false; // 让ProseMirror继续处理
+      }
+      
+      // 单字符删除（光标位置后）
+      const docSize = state.doc.content.size;
+      if (from < docSize) {
+        // 删除光标后的一个字符
+        deleteChars(from, from + 1);
+        return false; // 让ProseMirror继续处理
+      } else {
+        // 在文档末尾，不能删除
+        return true; // 阻止ProseMirror的默认行为
+      }
     },
   });
 }
