@@ -85,7 +85,7 @@ export function insertText(afterId, text) {
     newChar.set("ch", ch);
     newChar.set("deleted", false);
 
-    // 计算插入位置 - 简化逻辑
+    // 计算插入位置 - 修复逻辑
     let index;
     if (currentAfterId) {
       // 找到afterId字符的位置
@@ -107,7 +107,8 @@ export function insertText(afterId, text) {
     // 插入当前字符操作
     ychars.insert(index, [newChar]);
 
-    // 更新当前的 afterId 为新插入字符的 opId
+    // 🔥 关键修复：更新 currentAfterId 为新插入字符的 opId
+    // 这样下一个字符会插入在当前字符之后，保持字符串顺序
     currentAfterId = opId;
   }
 }

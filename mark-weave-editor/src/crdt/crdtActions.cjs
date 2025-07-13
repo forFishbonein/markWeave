@@ -11,7 +11,8 @@ function getProp(obj, key) {
 
 // 创建一个工厂函数，接受 ychars 和 yformatOps 作为参数
 function createCRDTActions(ychars, yformatOps) {
-  let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
+  // 让每个实例有独立的计数器，避免测试间干扰
+  let localCounter = Math.floor(Math.random() * 1000); // 随机起始值避免冲突
 
   // 2️⃣ 插入字符
   function insertChar(afterId, ch) {
@@ -239,6 +240,11 @@ function createCRDTActions(ychars, yformatOps) {
     yformatOps.push([markOp]);
   }
 
+  function resetCounters() {
+    localCounter = 0;
+    formatOpCounter = 0;
+  }
+
   return {
     insertChar,
     insertText,
@@ -248,7 +254,8 @@ function createCRDTActions(ychars, yformatOps) {
     addEm,
     removeEm,
     addLink,
-    removeLink
+    removeLink,
+    resetCounters
   };
 }
 

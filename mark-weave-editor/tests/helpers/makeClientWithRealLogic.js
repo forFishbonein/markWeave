@@ -38,6 +38,9 @@ module.exports = function makeClient(id) {
     // 使用工厂函数创建绑定到特定Y.Doc的操作函数
     const actions = createCRDTActions(newYchars, newYformatOps);
     
+    // 重置计数器确保测试隔离
+    actions.resetCounters();
+    
     insertChar = actions.insertChar;
     insertText = actions.insertText;
     deleteChars = actions.deleteChars;
