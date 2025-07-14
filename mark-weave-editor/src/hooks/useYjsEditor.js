@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-13 02:28:46
+ * @LastEditTime: 2025-07-14 23:42:03
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -83,11 +83,12 @@ export function useYjsEditor(docId, editorRef) {
       console.log("🔍 Debug: newYDoc type:", typeof newYDoc);
       console.log("🔍 Debug: newYDoc.on exists:", typeof newYDoc?.on);
       console.log("🔍 Debug: newYDoc constructor:", newYDoc?.constructor?.name);
-      
+
       const wsProvider = new WebsocketProvider(
         "ws://localhost:1234",
         docId,
-        newYDoc
+        newYDoc,
+        { disableBc: true } // 关键：禁用 BroadcastChannel，强制走 WebSocket
       );
       setProvider(wsProvider);
 

@@ -53,7 +53,10 @@ const YjsEditorWithMonitoring = forwardRef(({
     if (!monitorRef.current) {
       monitorRef.current = new RealYjsMonitor();
     }
-
+    // 自动开始监控
+    if (provider && awareness && isConnected && !isMonitoring) {
+      handleStartMonitoring();
+    }
     return () => {
       if (monitorRef.current) {
         monitorRef.current.stopMonitoring();
@@ -62,7 +65,7 @@ const YjsEditorWithMonitoring = forwardRef(({
         clearInterval(refreshTimer.current);
       }
     };
-  }, []);
+  }, [provider, awareness, isConnected]);
 
   // 监控数据刷新 - 更频繁的更新
   useEffect(() => {
@@ -155,7 +158,7 @@ const YjsEditorWithMonitoring = forwardRef(({
   const handleStartMonitoring = () => {
     // 🔥 修复：使用实际的全局ydoc而不是hook返回的
     const actualYdoc = ydoc; // 从crdt模块导入的全局ydoc
-    
+
     if (!actualYdoc || !awareness || !provider || !isConnected) {
       message.error('Editor not fully initialized or not connected, please try again later');
       return;

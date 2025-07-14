@@ -642,12 +642,16 @@ class OTPerformanceMonitor {
         ].slice(-100);
       }
 
-      // 合并真实网络字节数
+      // 合并真实网络字节数（取最大值，防止无限累加）
       if (externalData.metrics.realNetworkBytes) {
-        this.metrics.realNetworkBytes.sent +=
-          externalData.metrics.realNetworkBytes.sent || 0;
-        this.metrics.realNetworkBytes.received +=
-          externalData.metrics.realNetworkBytes.received || 0;
+        this.metrics.realNetworkBytes.sent = Math.max(
+          this.metrics.realNetworkBytes.sent,
+          externalData.metrics.realNetworkBytes.sent || 0
+        );
+        this.metrics.realNetworkBytes.received = Math.max(
+          this.metrics.realNetworkBytes.received,
+          externalData.metrics.realNetworkBytes.received || 0
+        );
       }
 
       console.log(`🔄 [OT] 已合并外部窗口数据: ${externalData.windowId}`);

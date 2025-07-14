@@ -65,12 +65,15 @@ const OTEditorWithMonitoring = forwardRef(({
   }));
 
   useEffect(() => {
-    // 当OT客户端连接成功时，初始化性能监控器
+    // OT 客户端连接成功时，初始化性能监控器
     if (otClient && isConnected && !performanceMonitorRef.current) {
       performanceMonitorRef.current = new OTPerformanceMonitor();
       console.log("✅ [OT监控] 初始化性能监控器");
     }
-
+    // 自动开始监控
+    if (otClient && isConnected && !isMonitoring) {
+      handleStartMonitoring();
+    }
     return () => {
       cleanup();
     };
