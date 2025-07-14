@@ -29,6 +29,7 @@ class OTPerformanceMonitor {
 
     // 真实操作队列 - 用于匹配用户操作和服务器响应
     this.pendingOperations = [];
+    this.pendingSyncOperations = []; // 🔥 新增：待同步操作队列（多窗口同步用）
     this.websocketMessageQueue = [];
     this.realNetworkStats = {
       messagesSent: 0,
@@ -68,6 +69,12 @@ class OTPerformanceMonitor {
     this.startTime = performance.now();
 
     console.log("🚀 [OT] 开始真实性能监控");
+    console.log(`🔑 [MULTI-WINDOW] OT客户端信息:`, {
+      windowId: this.windowId,
+      otClientConnected: !!(this.otClient && this.otClient.isConnected),
+      userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other',
+      sessionStorage: sessionStorage.length // 无痕窗口会有不同的session
+    });
 
     // 设置真实事件监听
     this.setupRealEventListeners();
@@ -293,8 +300,8 @@ class OTPerformanceMonitor {
     if (this.isPrintableKey(event.key)) {
       this.pendingOperations.push(operation);
 
-      // 清理过期操作（5秒前）
-      const cutoffTime = timestamp - 5000;
+      // 清理过期操作（1秒前，与匹配窗口保持一致）
+      const cutoffTime = timestamp - 1000;
       this.pendingOperations = this.pendingOperations.filter(
         (op) => op.timestamp > cutoffTime
       );
@@ -319,45 +326,130 @@ class OTPerformanceMonitor {
     this.metrics.totalOperationSize += operationSize;
     this.metrics.operationTimes.push(timestamp);
 
-    console.log(
-      `📄 [OT] 收到真实文档更新 #${this.metrics.operationsCount}`,
-      data
-    );
+    console.log(`📄 [OT] 文档更新事件:`, {
+      data,
+      operationSize,
+      timestamp,
+      operationsCount: this.metrics.operationsCount
+    });
 
-    // 查找匹配的用户操作
-    const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
+    // 🔥 方案A：用户感知延迟测量（与CRDT保持一致）
+    // OT的特点：需要等待服务器确认才能更新界面
+    
+    // 检查是否为本地操作的服务器确认
+    const isLocalOperationConfirm = !data || 
+      data.source === 'local' || 
+      data.source === this.windowId ||
+      !data.clientId ||
+      data.clientId === this.windowId;
 
-    if (matchedOperation) {
-      const latency = timestamp - matchedOperation.timestamp;
+    if (isLocalOperationConfirm) {
+      // 本地操作确认：尝试匹配键盘输入，测量用户感知延迟
+      const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
+      
+      if (matchedOperation) {
+        const userPerceivedLatency = timestamp - matchedOperation.timestamp;
+        
+        console.log(`⚡ [OT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`);
+        
+        // 记录用户感知延迟
+        if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 5000) { // OT可能有更高延迟
+          const latencyRecord = {
+            latency: userPerceivedLatency,
+            timestamp,
+            operationSize,
+            operationType: matchedOperation.key,
+            operationId: matchedOperation.id,
+            windowId: this.windowId,
+            source: 'user_perceived',
+            isReal: true
+          };
 
-      // 只记录合理的延迟值
-      if (latency >= 1 && latency <= 5000) {
+          this.metrics.operationLatencies.push(latencyRecord);
+
+          console.log(
+            `📊 [OT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(1)}ms, 操作: ${
+              matchedOperation.key
+            }, 数组长度: ${this.metrics.operationLatencies.length}`
+          );
+        } else {
+          console.log(`⚠️ OT用户感知延迟异常: ${userPerceivedLatency.toFixed(1)}ms，已忽略`);
+        }
+      } else {
+        // 无法匹配的本地操作（如格式化或初始化）
+        // OT中这类操作通常也需要服务器往返，所以有一定延迟
+        const estimatedLatency = 50; // 50ms估算的服务器往返时间
+        
         const latencyRecord = {
-          latency,
+          latency: estimatedLatency,
           timestamp,
           operationSize,
-          operationType: matchedOperation.key,
-          operationId: matchedOperation.id,
+          operationType: 'formatting_or_server_op',
+          operationId: `server_op_${timestamp}`,
           windowId: this.windowId,
-          isReal: true, // 标记为真实数据
+          source: 'estimated_server_latency',
+          isReal: false
+        };
+
+        this.metrics.operationLatencies.push(latencyRecord);
+        
+        console.log(`📊 [OT] 服务器操作延迟(估算): ${estimatedLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`);
+      }
+    } else {
+      // 远程操作：不影响本地用户感知延迟，不记录
+      console.log(`📥 [OT] 远程操作（不影响用户感知）:`, data);
+    }
+  }
+
+  /**
+   * 🔥 处理OT多窗口同步确认
+   */
+  handleOTMultiWindowSyncConfirmation(timestamp, operationSize, data) {
+    console.log(`🔍 [DEBUG] 处理OT多窗口同步确认:`, {
+      timestamp,
+      operationSize,
+      data,
+      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0
+    });
+
+    if (!this.pendingSyncOperations || this.pendingSyncOperations.length === 0) {
+      console.log(`⚠️ [DEBUG] 没有待同步操作，可能是纯远程操作`);
+      return;
+    }
+
+    // 🔥 简化匹配策略：使用FIFO匹配最老的待同步操作
+    const pendingOp = this.pendingSyncOperations.shift();
+    
+    console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
+    
+    if (pendingOp) {
+      const multiWindowSyncLatency = timestamp - pendingOp.timestamp;
+      
+      console.log(`📐 [DEBUG] 计算OT多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms`);
+      
+      // 记录多窗口网络同步延迟
+      if (multiWindowSyncLatency >= 1 && multiWindowSyncLatency <= 10000) { // 与CRDT保持一致
+        const latencyRecord = {
+          latency: multiWindowSyncLatency,
+          timestamp,
+          operationSize,
+          operationType: 'multi_window_sync',
+          operationId: pendingOp.id,
+          windowId: this.windowId,
+          source: 'multi_window_sync',
+          isReal: true,
+          remoteData: data
         };
 
         this.metrics.operationLatencies.push(latencyRecord);
 
         console.log(
-          `📊 [OT] 真实操作延迟: ${latency.toFixed(1)}ms, 按键: ${
-            matchedOperation.key
-          }, 大小: ${operationSize}字节`
+          `📊 [OT] 多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms, 大小: ${operationSize}字节`
         );
+        console.log(`📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`);
       } else {
-        console.log(`⚠️ [OT] 延迟异常: ${latency.toFixed(1)}ms，已忽略`);
+        console.log(`⚠️ [DEBUG] OT多窗口同步延迟异常: ${multiWindowSyncLatency.toFixed(1)}ms，已忽略`);
       }
-    } else {
-      // 没有匹配的操作，可能是来自其他客户端的操作
-      console.log(`📥 [OT] 外部操作或初始文档更新`);
-
-      // 对于外部操作，不记录延迟数据，因为我们没有发起时间
-      // 这确保了延迟数据的真实性
     }
   }
 
@@ -375,8 +467,8 @@ class OTPerformanceMonitor {
   findAndRemoveMatchingOperation(updateTimestamp) {
     if (this.pendingOperations.length === 0) return null;
 
-    // 时间窗口：3秒内的操作才可能匹配
-    const timeWindow = 3000;
+    // 时间窗口：1秒内的操作才可能匹配（与CRDT保持一致）
+    const timeWindow = 1000;
     const cutoffTime = updateTimestamp - timeWindow;
 
     // 过滤有效操作
@@ -748,6 +840,7 @@ class OTPerformanceMonitor {
     };
 
     this.pendingOperations = [];
+    this.pendingSyncOperations = []; // 🔥 清理待同步操作队列
     this.realNetworkStats = {
       messagesSent: 0,
       messagesReceived: 0,

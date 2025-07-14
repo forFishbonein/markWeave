@@ -153,16 +153,26 @@ const YjsEditorWithMonitoring = forwardRef(({
   }, [isMonitoring]);
 
   const handleStartMonitoring = () => {
-    if (!ydoc || !awareness || !provider || !isConnected) {
+    // 🔥 修复：使用实际的全局ydoc而不是hook返回的
+    const actualYdoc = ydoc; // 从crdt模块导入的全局ydoc
+    
+    if (!actualYdoc || !awareness || !provider || !isConnected) {
       message.error('Editor not fully initialized or not connected, please try again later');
       return;
     }
+
+    console.log("🔧 [DEBUG] 使用实际的ydoc:", {
+      actualYdoc: !!actualYdoc,
+      awareness: !!awareness,
+      provider: !!provider,
+      isConnected
+    });
 
     setIsMonitoring(true);
     setPerformanceData(null);
     setLatencyHistory([]);
 
-    monitorRef.current.startMonitoring(ydoc, awareness, provider);
+    monitorRef.current.startMonitoring(actualYdoc, awareness, provider);
     message.success('🚀 Multi-window sync performance monitoring started, please input content in the editor');
   };
 
