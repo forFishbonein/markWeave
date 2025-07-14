@@ -6,40 +6,43 @@ console.log("=".repeat(80));
 
 // Helper function: Display text with formatting information
 function showFormattedText(client, label) {
-  const chars = client.ychars.toArray().filter(c => {
+  const chars = client.ychars.toArray().filter((c) => {
     const del = typeof c?.get === "function" ? c.get("deleted") : c.deleted;
     return !del;
   });
-  
+
   const formatOps = client.ydoc.getArray("formatOps").toArray().flat();
-  const plainText = chars.map(c => typeof c?.get === "function" ? c.get("ch") : c.ch).join("");
-  
+  const plainText = chars
+    .map((c) => (typeof c?.get === "function" ? c.get("ch") : c.ch))
+    .join("");
+
   console.log(`📄 ${label}:`);
   console.log(`  Plain text: "${plainText}"`);
   console.log(`  Format operations count: ${formatOps.length}`);
-  
+
   if (formatOps.length > 0) {
     const marksByChar = new Map();
-    
+
     // Collect effective formats for each character
     chars.forEach((char, charIndex) => {
-      const charId = typeof char?.get === "function" ? char.get("opId") : char.opId;
+      const charId =
+        typeof char?.get === "function" ? char.get("opId") : char.opId;
       const charMarks = new Set();
-      
-      formatOps.forEach(op => {
+
+      formatOps.forEach((op) => {
         const startId = op.start?.opId || op.startId;
         const endId = op.end?.opId || op.endId;
-        
+
         // Simplified range check: if character is within format range
-        const startIndex = chars.findIndex(c => {
+        const startIndex = chars.findIndex((c) => {
           const id = typeof c?.get === "function" ? c.get("opId") : c.opId;
           return id === startId;
         });
-        const endIndex = chars.findIndex(c => {
+        const endIndex = chars.findIndex((c) => {
           const id = typeof c?.get === "function" ? c.get("opId") : c.opId;
           return id === endId;
         });
-        
+
         if (startIndex <= charIndex && charIndex <= endIndex) {
           if (op.action === "addMark") {
             charMarks.add(op.markType);
@@ -48,16 +51,16 @@ function showFormattedText(client, label) {
           }
         }
       });
-      
+
       marksByChar.set(charIndex, Array.from(charMarks));
     });
-    
+
     // Display formatted text
     let formattedDisplay = "  Formatted text: ";
     chars.forEach((char, index) => {
       const ch = typeof char?.get === "function" ? char.get("ch") : char.ch;
       const marks = marksByChar.get(index) || [];
-      
+
       if (marks.length > 0) {
         formattedDisplay += `[${ch}:${marks.join(",")}]`;
       } else {
@@ -65,11 +68,11 @@ function showFormattedText(client, label) {
       }
     });
     console.log(formattedDisplay);
-    
+
     // Display format operation details
     console.log("  Format operation details:");
     formatOps.forEach((op, i) => {
-      console.log(`    ${i+1}. ${op.action} ${op.markType} (${op.opId})`);
+      console.log(`    ${i + 1}. ${op.action} ${op.markType} (${op.opId})`);
     });
   }
   console.log("");
@@ -189,7 +192,9 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
 
     // Use new format display function
     showFormattedText(A, "🎯 Nested formatting final result");
-    console.log("Expected effect: 'Hello World' all bold, 'World' part also italic");
+    console.log(
+      "Expected effect: 'Hello World' all bold, 'World' part also italic"
+    );
 
     expect(finalA).toBe(finalB);
     expect(finalA).toBe("Hello World");
@@ -236,7 +241,9 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     B.apply(A.encode());
 
     // C client joins, applies both bold and italic to "CD" (2-3)
-    console.log("🔸 C operation: Apply both bold and italic to 'CD' (positions 2-3)");
+    console.log(
+      "🔸 C operation: Apply both bold and italic to 'CD' (positions 2-3)"
+    );
     const C = makeClient("C");
     C.apply(A.encode());
 
@@ -292,7 +299,9 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const chars = A.ychars.toArray();
     const [tId, eId, sId, t2Id] = chars.map((c) => c.opId);
 
-    console.log("📋 Test scenario: remove-wins priority - multi-client format conflicts");
+    console.log(
+      "📋 Test scenario: remove-wins priority - multi-client format conflicts"
+    );
 
     // A 加粗全文
     A.addBold(tId, t2Id, "after");
@@ -323,7 +332,7 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const finalB = B.snapshot();
     const finalC = C.snapshot();
 
-    console.log("🎯 remove-wins 最终结果:", finalA);
+    console.log("🎯 remove-wins final result:", finalA);
 
     // 验证一致性
     expect(finalA).toBe(finalB);
@@ -335,16 +344,16 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const addOps = formatOps.filter((op) => op.action === "addMark");
     const removeOps = formatOps.filter((op) => op.action === "removeMark");
 
-    console.log("格式操作统计:");
-    console.log("添加操作:", addOps.length);
-    console.log("移除操作:", removeOps.length);
+    console.log("Format operation statistics:");
+    console.log("Add operations:", addOps.length);
+    console.log("Remove operations:", removeOps.length);
 
     // 应该有 remove 操作优先生效
     expect(removeOps.length).toBeGreaterThan(0);
   });
 
   test("复杂格式序列 - 链式格式化操作", () => {
-    console.log("📋 测试场景: 链式格式化操作");
+    console.log("📋 Test scenario: Chain format operations");
 
     const A = makeClient("A");
     const B = makeClient("B");
@@ -353,7 +362,7 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     A.insertText(null, "This is a complex paragraph for testing.");
     B.apply(A.encode());
 
-    console.log("初始段落:", A.snapshot());
+    console.log("Initial paragraph:", A.snapshot());
 
     const chars = A.ychars.toArray();
 
@@ -362,50 +371,53 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const complexIds = chars.slice(10, 17).map((c) => c.opId); // "complex"
     const testingIds = chars.slice(31, 38).map((c) => c.opId); // "testing"
 
-    console.log("目标词汇定位:");
-    console.log("  'This' (0-3):", thisIds[0], "到", thisIds[3]);
-    console.log("  'complex' (10-16):", complexIds[0], "到", complexIds[6]);
-    console.log("  'testing' (31-37):", testingIds[0], "到", testingIds[6]);
+    console.log("Target word positions:");
+    console.log("  'This' (0-3):", thisIds[0], "to", thisIds[3]);
+    console.log("  'complex' (10-16):", complexIds[0], "to", complexIds[6]);
+    console.log("  'testing' (31-37):", testingIds[0], "to", testingIds[6]);
 
     // A 进行一系列格式化操作
-    console.log("🔸 A的格式化操作:");
-    console.log("  1. 对 'This' 加粗");
+    console.log("🔸 A's format operations:");
+    console.log("  1. Bold 'This'");
     A.addBold(thisIds[0], thisIds[3], "after");
 
-    console.log("  2. 对 'complex' 添加斜体");
+    console.log("  2. Add italic to 'complex'");
     A.addEm(complexIds[0], complexIds[6], "after");
 
-    console.log("  3. 对 'testing' 添加链接");
+    console.log("  3. Add link to 'testing'");
     A.addLink(testingIds[0], testingIds[6], "https://testing.com", "after");
 
     // B 同时进行其他格式化
-    console.log("🔸 B的格式化操作:");
-    console.log("  1. 对 'complex' 加粗 (与A的斜体叠加)");
+    console.log("🔸 B's format operations:");
+    console.log("  1. Bold 'complex' (overlapped with A's italic)");
     B.addBold(complexIds[0], complexIds[6], "after");
 
-    console.log("  2. 对 'This' 添加斜体 (与A的粗体叠加)");
+    console.log("  2. Add italic to 'This' (overlapped with A's bold)");
     B.addEm(thisIds[0], thisIds[3], "after");
 
     // 同步第一轮
-    console.log("🔄 第一轮同步格式化操作...");
+    console.log("🔄 First round sync of format operations...");
     A.apply(B.encode());
     B.apply(A.encode());
 
-    console.log("第一轮同步后:", A.snapshot());
+    console.log("After first round:", A.snapshot());
 
     const firstRoundOps = A.ydoc.getArray("formatOps").toArray().flat();
-    console.log("第一轮后格式操作数:", firstRoundOps.length);
+    console.log(
+      "Number of format operations after first round:",
+      firstRoundOps.length
+    );
 
     // 继续格式化操作
-    console.log("🔸 第二轮操作 - 撤销部分格式:");
-    console.log("  A: 撤销 'This' 的粗体");
+    console.log("🔸 Second round operations - undo some formats:");
+    console.log("  A: Undo bold for 'This'");
     A.removeBold(thisIds[0], thisIds[3], "after");
 
-    console.log("  B: 撤销 'complex' 的斜体");
+    console.log("  B: Undo italic for 'complex'");
     B.removeEm(complexIds[0], complexIds[6], "after");
 
     // 最终同步
-    console.log("🔄 最终同步所有操作...");
+    console.log("🔄 Final sync of all operations...");
     A.apply(B.encode());
     B.apply(A.encode());
 
@@ -414,28 +426,28 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
 
     // 分析最终格式状态
     const formatOps = A.ydoc.getArray("formatOps").toArray().flat();
-    console.log("最终格式操作总数:", formatOps.length);
+    console.log("Total number of format operations:", formatOps.length);
 
     const markTypes = new Set(formatOps.map((op) => op.markType));
-    console.log("涉及的格式类型:", Array.from(markTypes));
+    console.log("Types of formats involved:", Array.from(markTypes));
 
     const addOps = formatOps.filter((op) => op.action === "addMark");
     const removeOps = formatOps.filter((op) => op.action === "removeMark");
     console.log(
-      "添加操作:",
+      "Add operations:",
       addOps.length,
-      "个, 移除操作:",
+      ", Remove operations:",
       removeOps.length,
       "个"
     );
 
-    console.log("预期最终效果:");
-    console.log("  'This': 仅斜体 (粗体被撤销)");
-    console.log("  'complex': 仅粗体 (斜体被撤销)");
-    console.log("  'testing': 有链接");
+    console.log("Expected final effect:");
+    console.log("  'This': Only italic (bold removed)");
+    console.log("  'complex': Only bold (italic removed)");
+    console.log("  'testing': Has link");
 
     // 使用新的格式显示函数
-    showFormattedText(A, "🎯 链式格式化最终结果");
+    showFormattedText(A, "🎯 Chain format final result");
 
     expect(finalA).toBe(finalB);
     expect(finalA).toBe("This is a complex paragraph for testing.");
@@ -453,7 +465,9 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const A = makeClient("A");
     const B = makeClient("B");
 
-    console.log("📋 测试场景: 边界格式化 - 单字符格式");
+    console.log(
+      "📋 Test scenario: Boundary formatting - single character formatting"
+    );
 
     // 写入单个字符
     A.insertChar(null, "X");
@@ -483,7 +497,7 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const finalB = B.snapshot();
 
     // 使用新的格式显示函数
-    showFormattedText(A, "🎯 边界格式化结果");
+    showFormattedText(A, "🎯 Boundary formatting result");
 
     expect(finalA).toBe(finalB);
     expect(finalA).toBe("XY");
@@ -498,7 +512,9 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const B = makeClient("B");
     const C = makeClient("C");
 
-    console.log("📋 测试场景: 并发格式化与文本编辑混合");
+    console.log(
+      "📋 Test scenario: Concurrent formatting and text editing mixed"
+    );
 
     // 初始文档
     A.insertText(null, "edit");
@@ -519,10 +535,10 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     C.deleteChars(3, 4); // 删除 "i"
     C.addEm(eId, dId, "after"); // 对剩余部分斜体
 
-    console.log("混合操作后各客户端状态:");
-    console.log("A (插入):", A.snapshot());
-    console.log("B (格式化):", B.snapshot());
-    console.log("C (删除+格式化):", C.snapshot());
+    console.log("Status of each client after mixed operations:");
+    console.log("A (inserted):", A.snapshot());
+    console.log("B (formatted):", B.snapshot());
+    console.log("C (deleted+formatted):", C.snapshot());
 
     // 全面同步
     const updateA = A.encode();
@@ -540,7 +556,7 @@ describe("Multi-format stacking and concurrent conflict test suite", () => {
     const finalB = B.snapshot();
     const finalC = C.snapshot();
 
-    console.log("🎯 混合场景最终结果:");
+    console.log("🎯 Mixed scenario final result:");
     console.log("A:", finalA);
     console.log("B:", finalB);
     console.log("C:", finalC);

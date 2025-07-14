@@ -3,18 +3,18 @@ console.log("🎲 CRDT Randomized Fuzz Test Suite - fuzz.test.js");
 console.log("=".repeat(80));
 
 // ------------------------------------------------------------
-// 随机并发场景（property-based）
-// fast-check 生成随机操作序列，3 个客户端依次执行并实时广播 diff。
-// 覆盖 insert / delete 混合并发，numRuns=50，可根据需要加大。
-// 目标：证明算法在"非设计路径"随机输入下仍最终收敛。
+// Randomized concurrent scenario (property-based)
+// fast-check generates random operation sequences, 3 clients execute and broadcast diff in real time.
+// Covers insert / delete mixed concurrency, numRuns=50, can be increased as needed.
+// Goal: Prove algorithm can always converge under random input (non-design path).
 // ------------------------------------------------------------
 
 const makeClient = require("../helpers/makeClientWithRealLogic");
 const fc = require("fast-check");
 
-describe("CRDT 随机并发一致性", () => {
-  test("50 轮随机操作后所有客户端文本一致", () => {
-    console.log("🎯 开始执行 50 轮随机操作测试...");
+describe("CRDT Randomized Consistency", () => {
+  test("50 rounds of random operations all clients text consistent", () => {
+    console.log("🎯 Starting 50 rounds of random operation test...");
     fc.assert(
       fc.property(
         fc.array(
@@ -29,7 +29,7 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [0, 1, 2].map((i) => makeClient(i));
 
-          // 执行所有操作，但不立即同步
+          // Execute all operations but do not synchronize immediately
           operations.forEach((op) => {
             const target = clients[op.client];
             const len = target.ychars.length;
@@ -42,7 +42,7 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // 批量同步：每个客户端将状态广播给其他所有客户端
+          // Batch synchronization: each client broadcasts its state to all other clients
           const updates = clients.map((c) => c.encode());
 
           clients.forEach((client, i) => {
@@ -53,7 +53,7 @@ describe("CRDT 随机并发一致性", () => {
             });
           });
 
-          // 验证最终一致性
+          // Verify final consistency
           const snapshot = clients[0].snapshot();
           expect(clients[1].snapshot()).toBe(snapshot);
           expect(clients[2].snapshot()).toBe(snapshot);
@@ -61,11 +61,11 @@ describe("CRDT 随机并发一致性", () => {
       ),
       { numRuns: 50 }
     );
-    console.log("✅ 50 轮随机操作测试完成");
+    console.log("✅ 50 rounds of random operation test completed");
   });
 
-  test("复杂混合操作 - 插入、删除、批量文本操作", () => {
-    console.log("🔀 开始复杂混合操作测试 (30轮)...");
+  test("Complex mixed operations - insert, delete, batch text operations", () => {
+    console.log("🔀 Starting complex mixed operation test (30 rounds)...");
     fc.assert(
       fc.property(
         fc.array(
@@ -90,13 +90,13 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [0, 1, 2, 3].map((i) => makeClient(`Client${i}`));
 
-          // 添加初始内容
+          // Add initial content
           clients[0].insertText(null, "base_document");
           for (let i = 1; i < clients.length; i++) {
             clients[i].apply(clients[0].encode());
           }
 
-          // 执行随机操作
+          // Execute random operations
           operations.forEach((op, index) => {
             const target = clients[op.client];
             const currentLength = target.ychars.length;
@@ -113,7 +113,7 @@ describe("CRDT 随机并发一致性", () => {
                 case "insertText":
                   const textContent =
                     typeof op.content === "string" ? op.content : "text";
-                  target.insertText(null, textContent.slice(0, 5)); // 限制长度
+                  target.insertText(null, textContent.slice(0, 5)); // Limit length
                   break;
 
                 case "delete":
@@ -135,12 +135,12 @@ describe("CRDT 随机并发一致性", () => {
                   break;
               }
             } catch (error) {
-              // 忽略无效操作（如删除超出范围等）
+              // Ignore invalid operations (e.g., deleting out of bounds)
               console.log(`Operation ${index} failed:`, error.message);
             }
           });
 
-          // 全面同步
+          // Full synchronization
           const updates = clients.map((c) => c.encode());
           clients.forEach((client, i) => {
             updates.forEach((update, j) => {
@@ -150,7 +150,7 @@ describe("CRDT 随机并发一致性", () => {
             });
           });
 
-          // 验证一致性
+          // Verify consistency
           const snapshot = clients[0].snapshot();
           clients.forEach((client, index) => {
             expect(client.snapshot()).toBe(snapshot);
@@ -159,11 +159,11 @@ describe("CRDT 随机并发一致性", () => {
       ),
       { numRuns: 30 }
     );
-    console.log("✅ 复杂混合操作测试完成");
+    console.log("✅ Complex mixed operation test completed");
   });
 
-  test("极端边界情况 - 空文档和大量操作", () => {
-    console.log("⚡ 开始极端边界情况测试 (25轮)...");
+  test("Extreme boundary cases - empty document and large operations", () => {
+    console.log("⚡ Starting extreme boundary case test (25 rounds)...");
     fc.assert(
       fc.property(
         fc.array(
@@ -181,7 +181,7 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [makeClient("A"), makeClient("B")];
 
-          // 在空文档上执行大量操作
+          // Execute large operations on an empty document
           operations.forEach((op) => {
             const target = clients[op.client];
             const currentLength = target.ychars.length;
@@ -200,7 +200,7 @@ describe("CRDT 随机并发一致性", () => {
 
                 case "delete":
                   if (currentLength > 0) {
-                    // 随机删除位置
+                    // Randomly delete position
                     const deletePos =
                       Math.floor(Math.random() * currentLength) + 1;
                     target.deleteChars(deletePos, deletePos + 1);
@@ -208,28 +208,28 @@ describe("CRDT 随机并发一致性", () => {
                   break;
               }
             } catch (error) {
-              // 忽略边界错误
+              // Ignore boundary errors
             }
           });
 
-          // 同步
+          // Synchronize
           const updateA = clients[0].encode();
           const updateB = clients[1].encode();
 
           clients[0].apply(updateB);
           clients[1].apply(updateA);
 
-          // 验证一致性
+          // Verify consistency
           expect(clients[0].snapshot()).toBe(clients[1].snapshot());
         }
       ),
       { numRuns: 25 }
     );
-    console.log("✅ 极端边界情况测试完成");
+    console.log("✅ Extreme boundary case test completed");
   });
 
-  test("时间戳冲突压力测试 - 模拟高并发", () => {
-    console.log("⏰ 开始时间戳冲突压力测试 (20轮)...");
+  test("Timestamp conflict stress test - simulate high concurrency", () => {
+    console.log("⏰ Starting timestamp conflict stress test (20 rounds)...");
     fc.assert(
       fc.property(
         fc.array(
@@ -244,26 +244,26 @@ describe("CRDT 随机并发一致性", () => {
           const clients = Array.from({ length: 5 }, (_, i) =>
             makeClient(`Client${i}`)
           );
-          // 模拟在相似时间点的操作
+          // Simulate operations at similar time points
           const originalNow = Date.now;
           let mockTime = Date.now();
 
           Date.now = () => {
-            mockTime += Math.random() * 5; // 小的时间增量，增加冲突可能性
+            mockTime += Math.random() * 5; // Small time increment to increase conflict probability
             return Math.floor(mockTime);
           };
 
           try {
-            // 执行操作
+            // Execute operations
             operations.forEach((op) => {
               const target = clients[op.client];
               target.insertChar(null, op.char);
             });
 
-            // 恢复时间函数
+            // Restore time function
             Date.now = originalNow;
 
-            // 全面同步
+            // Full synchronization
             const updates = clients.map((c) => c.encode());
             clients.forEach((client, i) => {
               updates.forEach((update, j) => {
@@ -273,13 +273,13 @@ describe("CRDT 随机并发一致性", () => {
               });
             });
 
-            // 验证最终一致性
+            // Verify final consistency
             const baseSnapshot = clients[0].snapshot();
             clients.forEach((client, index) => {
               expect(client.snapshot()).toBe(baseSnapshot);
             });
 
-            // 验证内容完整性 - 所有字符都应该存在
+            // Verify content integrity - all characters should exist
             const uniqueChars = [...new Set(operations.map((op) => op.char))];
             uniqueChars.forEach((char) => {
               expect(baseSnapshot).toContain(char);
@@ -291,11 +291,11 @@ describe("CRDT 随机并发一致性", () => {
       ),
       { numRuns: 20 }
     );
-    console.log("✅ 时间戳冲突压力测试完成");
+    console.log("✅ Timestamp conflict stress test completed");
   });
 
-  test("网络分区恢复 - 随机分组和重连", () => {
-    console.log("🌐 开始网络分区恢复测试 (15轮)...");
+  test("Network partition recovery - random grouping and reconnection", () => {
+    console.log("🌐 Starting network partition recovery test (15 rounds)...");
     fc.assert(
       fc.property(
         fc.array(
@@ -315,26 +315,26 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [makeClient("A"), makeClient("B"), makeClient("C")];
 
-          // 初始同步
+          // Initial synchronization
           clients[0].insertText(null, "start");
           clients[1].apply(clients[0].encode());
           clients[2].apply(clients[0].encode());
 
-          // 按阶段分组操作
+          // Group operations by phase
           const phases = {
-            partition1: [], // A-B组
-            partition2: [], // C独立
-            isolated: [], // 完全隔离
-            recovery: [], // 网络恢复
+            partition1: [], // A-B group
+            partition2: [], // C isolated
+            isolated: [], // Completely isolated
+            recovery: [], // Network recovery
           };
 
           operations.forEach((op) => {
             phases[op.phase].push(op);
           });
 
-          // 执行分区1操作（A-B可通信）
+          // Execute partition 1 operations (A-B can communicate)
           phases.partition1.forEach((op) => {
-            const target = clients[op.client % 2]; // 只使用A和B
+            const target = clients[op.client % 2]; // Only use A and B
             if (op.operation === "insert") {
               target.insertChar(null, op.content);
             } else if (target.ychars.length > 1) {
@@ -342,13 +342,13 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // A-B同步
+          // A-B synchronization
           const updateA1 = clients[0].encode();
           const updateB1 = clients[1].encode();
           clients[0].apply(updateB1);
           clients[1].apply(updateA1);
 
-          // 执行分区2操作（C独立）
+          // Execute partition 2 operations (C isolated)
           phases.partition2.forEach((op) => {
             if (op.operation === "insert") {
               clients[2].insertChar(null, op.content);
@@ -357,7 +357,7 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // 执行隔离期操作（各自独立）
+          // Execute isolated period operations (each independently)
           phases.isolated.forEach((op) => {
             const target = clients[op.client];
             if (op.operation === "insert") {
@@ -367,7 +367,7 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // 网络恢复 - 全面同步
+          // Network recovery - full synchronization
           const finalUpdates = clients.map((c) => c.encode());
           clients.forEach((client, i) => {
             finalUpdates.forEach((update, j) => {
@@ -377,7 +377,7 @@ describe("CRDT 随机并发一致性", () => {
             });
           });
 
-          // 执行恢复后操作
+          // Execute post-recovery operations
           phases.recovery.forEach((op) => {
             const target = clients[op.client];
             if (op.operation === "insert") {
@@ -387,7 +387,7 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // 最终同步
+          // Final synchronization
           const lastUpdates = clients.map((c) => c.encode());
           clients.forEach((client, i) => {
             lastUpdates.forEach((update, j) => {
@@ -397,7 +397,7 @@ describe("CRDT 随机并发一致性", () => {
             });
           });
 
-          // 验证最终一致性
+          // Verify final consistency
           const finalSnapshot = clients[0].snapshot();
           clients.forEach((client) => {
             expect(client.snapshot()).toBe(finalSnapshot);
@@ -406,11 +406,11 @@ describe("CRDT 随机并发一致性", () => {
       ),
       { numRuns: 15 }
     );
-    console.log("✅ 网络分区恢复测试完成");
+    console.log("✅ Network partition recovery test completed");
   });
 
-  test("大规模数据量测试 - 处理长文档", () => {
-    console.log("📊 开始大规模数据量测试 (10轮)...");
+  test("Large data volume test - handle long documents", () => {
+    console.log("📊 Starting large data volume test (10 rounds)...");
     fc.assert(
       fc.property(
         fc.array(
@@ -429,7 +429,7 @@ describe("CRDT 随机并发一致性", () => {
         (operations) => {
           const clients = [makeClient("Heavy_A"), makeClient("Heavy_B")];
 
-          // 创建较大的初始文档
+          // Create a larger initial document
           const initialContent =
             "This is a large document with substantial content for testing. ".repeat(
               5
@@ -437,7 +437,7 @@ describe("CRDT 随机并发一致性", () => {
           clients[0].insertText(null, initialContent);
           clients[1].apply(clients[0].encode());
 
-          // 执行大数据量操作
+          // Execute large data operations
           operations.forEach((op, index) => {
             const target = clients[op.client];
             const currentLength = target.ychars.length;
@@ -464,13 +464,13 @@ describe("CRDT 随机并发一致性", () => {
                   const insertContent = (op.content || "pos").slice(0, 10);
                   if (currentLength > 0) {
                     const randomPos = Math.floor(Math.random() * currentLength);
-                    // 使用基本的插入，避免复杂的位置计算
+                    // Use basic insertion to avoid complex position calculations
                     target.insertText(null, insertContent);
                   }
                   break;
               }
             } catch (error) {
-              // 处理大数据量操作可能的错误
+              // Handle potential errors for large data operations
               console.log(
                 `Large data operation ${index} failed:`,
                 error.message
@@ -478,25 +478,25 @@ describe("CRDT 随机并发一致性", () => {
             }
           });
 
-          // 同步
+          // Synchronize
           const updateA = clients[0].encode();
           const updateB = clients[1].encode();
 
           clients[0].apply(updateB);
           clients[1].apply(updateA);
 
-          // 验证一致性
+          // Verify consistency
           const snapshotA = clients[0].snapshot();
           const snapshotB = clients[1].snapshot();
 
           expect(snapshotA).toBe(snapshotB);
 
-          // 验证文档仍包含一些原始内容
+          // Verify document still contains some original content
           expect(snapshotA).toContain("document");
         }
       ),
       { numRuns: 10 }
     );
-    console.log("✅ 大规模数据量测试完成");
+    console.log("✅ Large data volume test completed");
   });
 });

@@ -6,18 +6,18 @@ console.log("🚀 CRDT Performance Benchmark Test Suite - benchmark.test.js");
 console.log("=".repeat(80));
 
 // ------------------------------------------------------------
-// 性能基准
-// 3 个客户端 × 1000 次随机 insert/delete，同步过程中实时交换 diff。
-// 统计总耗时、吞吐量（ops/ms）以及最终文本长度，输出到 console。
-// 目标：提供可量化的 CRDT 执行效率，可与 OT 实现对比。
+// Performance benchmark
+// 3 clients × 1000 random insert/delete, real-time diff exchange during sync.
+// Statistics: total time, throughput (ops/ms), final text length, output to console.
+// Goal: Provide scalable CRDT execution efficiency, comparable to OT implementation.
 // ------------------------------------------------------------
 
 /**
- * 基准测试：3 个客户端，各执行 1000 次随机插入/删除并同步。
- * 打印总耗时、操作数、最终文本长度与前 120 字符示例。
+ * Benchmark test: 3 clients, each performs 1000 random insert/delete and sync.
+ * Print total time, operation count, final text length and first 120 chars as example.
  */
 
-test("CRDT 基准性能", () => {
+test("CRDT benchmark performance", () => {
   const OPE_PER_CLIENT = 300;
   const TOTAL_OPS = OPE_PER_CLIENT * 3;
 
@@ -32,16 +32,16 @@ test("CRDT 基准性能", () => {
 
     for (let j = 0; j < OPE_PER_CLIENT; j++) {
       const len = cl.ychars.length;
-      const isInsert = Math.random() < 0.7 || len === 0; // 70% 插入，30% 删除
+      const isInsert = Math.random() < 0.7 || len === 0; // 70% insert, 30% delete
 
       if (isInsert) {
-        cl.insertText(null, randChar()); // 统一追加
+        cl.insertText(null, randChar()); // always append
       } else {
         const pos = Math.floor(Math.random() * len);
         cl.deleteChars(pos + 1, pos + 2);
       }
 
-      // 广播 diff
+      // broadcast diff
       const diff = cl.encode();
       clients.forEach((other, idx) => idx !== cIdx && other.apply(diff));
     }
@@ -50,14 +50,14 @@ test("CRDT 基准性能", () => {
   const ms = performance.now() - t0;
 
   const finalText = clients[0].snapshot();
-  console.log("--- CRDT 基准结果 ---");
-  console.log("总操作数:", TOTAL_OPS);
-  console.log("耗时 (ms):", ms.toFixed(2));
-  console.log("操作 / 毫秒:", (TOTAL_OPS / ms).toFixed(2));
-  console.log("最终文本长度:", finalText.length);
-  console.log("文本前 120 字符:", finalText.slice(0, 120));
+  console.log("--- CRDT Benchmark Result ---");
+  console.log("Total operations:", TOTAL_OPS);
+  console.log("Time elapsed (ms):", ms.toFixed(2));
+  console.log("Operations / ms:", (TOTAL_OPS / ms).toFixed(2));
+  console.log("Final text length:", finalText.length);
+  console.log("First 120 chars of text:", finalText.slice(0, 120));
 
-  // 一致性断言
+  // Consistency assertion
   expect(clients[1].snapshot()).toBe(finalText);
   expect(clients[2].snapshot()).toBe(finalText);
 });
