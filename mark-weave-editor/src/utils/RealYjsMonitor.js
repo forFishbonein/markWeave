@@ -266,7 +266,7 @@ class RealYjsMonitor {
 
     if (matchedOperation) {
       const latency = timestamp - matchedOperation.timestamp;
-
+      console.log("latency", latency);
       // 只记录合理的延迟值
       if (latency >= 1 && latency <= 2000) {
         const latencyRecord = {
