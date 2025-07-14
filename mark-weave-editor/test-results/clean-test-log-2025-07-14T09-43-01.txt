@@ -1,5 +1,5 @@
 CRDT Test Results - Clean Version
-Generated at: 7/14/2025, 10:12:13 PM
+Generated at: 7/14/2025, 5:43:01 PM
 ================================
 
 
@@ -21,16 +21,16 @@ Generated at: 7/14/2025, 10:12:13 PM
     Total operations: 900
 
 
-    Time elapsed (ms): 2247.50
+    Time elapsed (ms): 2398.47
 
 
-    Operations / ms: 0.40
+    Operations / ms: 0.38
 
 
-    Final text length: 429
+    Final text length: 395
 
 
-    First 120 chars of text: ixdxgcxgpuiarocwsqvldvsqrumoljhgzymnwbknweeysyteycnvnkesiuoemyfwccnqpmxvoroaunssseejuxxpbldujkdpzcqfkxaoxopjxupyyssdaoyo
+    First 120 chars of text: vriqmdxwjxxrmvavimpjjhddwzlgqpeunjmapbvytbfnngzlilozxcqhtyosbmmfgyzukctznljrkcgkcpzkvpdtzozffmfecwhoglomgrtkhnelparqvplc
 
 
     ================================================================================
@@ -96,13 +96,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     Base document: hello
 
 
-    A inserted char "A" opId: 1752502332759@client
+    A inserted char "A" opId: 1752486181254@client
 
 
-    B inserted char "B" opId: 1752502332759@client
+    B inserted char "B" opId: 1752486181254@client
 
 
-    [RESULT] Final: "helloAB"
+    [RESULT] Final: "helloBA"
 
 
     [SCENARIO] Concurrent insert in middle - insert at specified char
@@ -138,7 +138,7 @@ Generated at: 7/14/2025, 10:12:13 PM
     Char array length: 9
 
 
-    Underscore "_" opId: 1752502332762_5@client
+    Underscore "_" opId: 1752486181260_5@client
 
 
     State after insertion:
@@ -192,13 +192,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Final result:
 
 
-    A: start231
+    A: start213
 
 
-    B: start231
+    B: start213
 
 
-    C: start231
+    C: start213
 
 
     ✅ Characters inserted at document end (modified behavior)
@@ -249,34 +249,34 @@ Generated at: 7/14/2025, 10:12:13 PM
     === Visible characters after mixed operations ===
 
 
-    [0] "h" -> opId: 1752502332776_0@client (timestamp: 1752502332776_0)
+    [0] "h" -> opId: 1752486181277_0@client (timestamp: 1752486181277_0)
 
 
-    [1] "e" -> opId: 1752502332776_1@client (timestamp: 1752502332776_1)
+    [1] "e" -> opId: 1752486181277_1@client (timestamp: 1752486181277_1)
 
 
-    [2] "l" -> opId: 1752502332776_2@client (timestamp: 1752502332776_2)
+    [2] "l" -> opId: 1752486181277_2@client (timestamp: 1752486181277_2)
 
 
-    [3] "l" -> opId: 1752502332776_3@client (timestamp: 1752502332776_3)
+    [3] "l" -> opId: 1752486181277_3@client (timestamp: 1752486181277_3)
 
 
-    [4] "o" -> opId: 1752502332776_4@client (timestamp: 1752502332776_4)
+    [4] "o" -> opId: 1752486181277_4@client (timestamp: 1752486181277_4)
 
 
-    [5] "o" -> opId: 1752502332776_7@client (timestamp: 1752502332776_7)
+    [5] "o" -> opId: 1752486181277_7@client (timestamp: 1752486181277_7)
 
 
-    [6] "r" -> opId: 1752502332776_8@client (timestamp: 1752502332776_8)
+    [6] "r" -> opId: 1752486181277_8@client (timestamp: 1752486181277_8)
 
 
-    [7] "l" -> opId: 1752502332776_9@client (timestamp: 1752502332776_9)
+    [7] "l" -> opId: 1752486181277_9@client (timestamp: 1752486181277_9)
 
 
-    [8] "d" -> opId: 1752502332776_10@client (timestamp: 1752502332776_10)
+    [8] "d" -> opId: 1752486181277_10@client (timestamp: 1752486181277_10)
 
 
-    [9] "X" -> opId: 1752502332777@client (timestamp: 1752502332777)
+    [9] "X" -> opId: 1752486181278@client (timestamp: 1752486181278)
 
 
     Actual result analysis: "helloorldX"
@@ -300,7 +300,7 @@ Generated at: 7/14/2025, 10:12:13 PM
     B: B
 
 
-    [RESULT] Empty document concurrent insertion result: "AB"
+    [RESULT] Empty document concurrent insertion result: "BA"
 
 
     Result length: 2
@@ -312,31 +312,31 @@ Generated at: 7/14/2025, 10:12:13 PM
     Timestamp analysis:
 
 
-      Start time: 1752502332784
+      Start time: 1752486181287
 
 
-      Middle time: 1752502332784 (difference: 0ms)
+      Middle time: 1752486181287 (difference: 0ms)
 
 
-      End time: 1752502332784 (difference: 0ms)
+      End time: 1752486181287 (difference: 0ms)
 
 
     Actual opId:
 
 
-      A opId: 1752502332784@client
+      A opId: 1752486181287@client
 
 
-      B opId: 1752502332784@client
+      B opId: 1752486181287@client
 
 
     [ORDER] Expected: Sort by timestamp, Actual: T2T1
 
 
-    Char "T2" timestamp: 1752502332784
+    Char "T2" timestamp: 1752486181287
 
 
-    Char "T1" timestamp: 1752502332784
+    Char "T1" timestamp: 1752486181287
 
 
     [RESULT] Final order: "T2T1"
@@ -349,14 +349,14 @@ Generated at: 7/14/2025, 10:12:13 PM
 
 
     🔍 baseChars: [
-      { ch: 'b', opId: '1752502332787_0@client' },
-      { ch: 'a', opId: '1752502332787_1@client' },
-      { ch: 's', opId: '1752502332787_2@client' },
-      { ch: 'e', opId: '1752502332787_3@client' }
+      { ch: 'b', opId: '1752486181291_0@client' },
+      { ch: 'a', opId: '1752486181291_1@client' },
+      { ch: 's', opId: '1752486181291_2@client' },
+      { ch: 'e', opId: '1752486181291_3@client' }
     ]
 
 
-    🔍 lastCharId: 1752502332787_3@client
+    🔍 lastCharId: 1752486181291_3@client
 
 
     State after ultra-fast insertion:
@@ -374,13 +374,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Ultra-fast concurrent final result:
 
 
-    A: baseB4B3B2B1B0C4C3C2C1C0A4A3A2A1A0
+    A: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
 
 
-    B: baseB4B3B2B1B0C4C3C2C1C0A4A3A2A1A0
+    B: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
 
 
-    C: baseB4B3B2B1B0C4C3C2C1C0A4A3A2A1A0
+    C: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
 
 
     [SCENARIO] Simulate network partition and delayed sync
@@ -389,7 +389,7 @@ Generated at: 7/14/2025, 10:12:13 PM
     After A-B sync during partition:
 
 
-    A-B state: start21
+    A-B state: start12
 
 
     C isolated state: startisolated
@@ -398,7 +398,7 @@ Generated at: 7/14/2025, 10:12:13 PM
     Before network recovery:
 
 
-    A-B: _network_partitionedstart21
+    A-B: _partitioned_networkstart12
 
 
     C: startisolated
@@ -407,13 +407,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Final state after network recovery:
 
 
-    A: _network_partitionedstart2isolated1
+    A: _partitioned_networkstartisolated12
 
 
-    B: _network_partitionedstart2isolated1
+    B: _partitioned_networkstartisolated12
 
 
-    C: _network_partitionedstart2isolated1
+    C: _partitioned_networkstartisolated12
 
 
     [SCENARIO] Large-scale concurrent pressure test - 10 clients
@@ -428,10 +428,10 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Large-scale concurrent final result:
 
 
-    Final document: _0_2__0_1_2_1_0_4_24_0_7_2_7_0_6_2__0_9_2_9_0_3_2_3_0_2_2_2_0_8_2_8_0_5_2_5_0shad_douent
+    Final document: _4_2_4_0_8_28_0_1_2__0_6_2_6_0_9_2_90_3_2_3_0_7_2_7_0_5_2_5_0_0_2_0_0_2_2_2_saeddcuent
 
 
-    Document length: 88
+    Document length: 86
 
 
     [SCENARIO] Out-of-order message sync test
@@ -443,13 +443,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Out-of-order sync final result:
 
 
-    A: B2B1A2A1C1
+    A: C1A2A1B2B1
 
 
-    B: B2B1A2A1C1
+    B: C1A2A1B2B1
 
 
-    C: B2B1A2A1C1
+    C: C1A2A1B2B1
 
 
     [SCENARIO] Conflict resolution for same timestamp
@@ -470,37 +470,37 @@ Generated at: 7/14/2025, 10:12:13 PM
     Delivery after packet loss:
 
 
-    A received: 2 updates
+    A received: 1 updates
 
 
-    B received: 1 updates
+    B received: 0 updates
 
 
-    C received: 1 updates
+    C received: 2 updates
 
 
     State after packet loss:
 
 
-    A: base1432
+    A: base143
 
 
-    B: base142
+    B: base2
 
 
-    C: base13
+    C: base123
 
 
     🎯 Final state after network recovery:
 
 
-    A: base1432
+    A: base1423
 
 
-    B: base1432
+    B: base1423
 
 
-    C: base1432
+    C: base1423
 
 
     [SCENARIO] Simulate different network delays
@@ -512,31 +512,31 @@ Generated at: 7/14/2025, 10:12:13 PM
     Step 1: C -> [A, B] (delay 50ms)
 
 
-       State: A="startCA", B="startBC", C="startC"
+       State: A="startAC", B="startCB", C="startC"
 
 
     Step 2: A -> [B, C] (delay 100ms)
 
 
-       State: A="startCA", B="startBCA", C="startCA"
+       State: A="startAC", B="startACB", C="startAC"
 
 
     Step 3: B -> [A, C] (delay 300ms)
 
 
-       State: A="startBCA", B="startBCA", C="startBCA"
+       State: A="startACB", B="startACB", C="startACB"
 
 
     🎯 Final result of delay simulation:
 
 
-    A: startBCA
+    A: startACB
 
 
-    B: startBCA
+    B: startACB
 
 
-    C: startBCA
+    C: startACB
 
 
     [SCENARIO] Simulate network duplicate transmission
@@ -641,10 +641,10 @@ Generated at: 7/14/2025, 10:12:13 PM
     Character ranges:
 
 
-      Hello range: 1752502332892_0@client to 1752502332892_4@client
+      Hello range: 1752486181429_0@client to 1752486181429_4@client
 
 
-      World range: 1752502332892_6@client to 1752502332893_10@client
+      World range: 1752486181429_6@client to 1752486181430_10@client
 
 
     🔸 A operation: Bold entire 'Hello World'
@@ -662,10 +662,10 @@ Generated at: 7/14/2025, 10:12:13 PM
     Format operation details:
 
 
-      1. addMark bold (1752502332895@client)
+      1. addMark bold (1752486181431@client)
 
 
-      2. addMark em (1752502332895@client)
+      2. addMark em (1752486181431@client)
 
 
     📄 🎯 Nested formatting final result:
@@ -683,10 +683,10 @@ Generated at: 7/14/2025, 10:12:13 PM
       Format operation details:
 
 
-        1. addMark bold (1752502332895@client)
+        1. addMark bold (1752486181431@client)
 
 
-        2. addMark em (1752502332895@client)
+        2. addMark em (1752486181431@client)
 
 
 
@@ -703,22 +703,22 @@ Generated at: 7/14/2025, 10:12:13 PM
     Character ID mapping:
 
 
-      A(0): 1752502332899_0@client
+      A(0): 1752486181437_0@client
 
 
-      B(1): 1752502332899_1@client
+      B(1): 1752486181437_1@client
 
 
-      C(2): 1752502332899_2@client
+      C(2): 1752486181437_2@client
 
 
-      D(3): 1752502332899_3@client
+      D(3): 1752486181437_3@client
 
 
-      E(4): 1752502332899_4@client
+      E(4): 1752486181437_4@client
 
 
-      F(5): 1752502332899_5@client
+      F(5): 1752486181438_5@client
 
 
     🔸 A operation: Bold 'ABC' (positions 0-2)
@@ -766,16 +766,16 @@ Generated at: 7/14/2025, 10:12:13 PM
       Format operation details:
 
 
-        1. addMark bold (1752502332901@client)
+        1. addMark bold (1752486181440@client)
 
 
-        2. addMark em (1752502332901@client)
+        2. addMark em (1752486181440@client)
 
 
-        3. addMark bold (1752502332902@client)
+        3. addMark bold (1752486181441@client)
 
 
-        4. addMark em (1752502332902@client)
+        4. addMark em (1752486181441@client)
 
 
 
@@ -804,13 +804,13 @@ Generated at: 7/14/2025, 10:12:13 PM
     Target word positions:
 
 
-      'This' (0-3): 1752502332910_0@client to 1752502332910_3@client
+      'This' (0-3): 1752486181449_0@client to 1752486181449_3@client
 
 
-      'complex' (10-16): 1752502332910_10@client to 1752502332910_16@client
+      'complex' (10-16): 1752486181449_10@client to 1752486181449_16@client
 
 
-      'testing' (31-37): 1752502332910_31@client to 1752502332911_37@client
+      'testing' (31-37): 1752486181449_31@client to 1752486181450_37@client
 
 
     🔸 A's format operations:
@@ -891,25 +891,25 @@ Generated at: 7/14/2025, 10:12:13 PM
       Format operation details:
 
 
-        1. addMark bold (1752502332913@client)
+        1. addMark bold (1752486181452@client)
 
 
-        2. addMark em (1752502332913@client)
+        2. addMark em (1752486181452@client)
 
 
-        3. addMark bold (1752502332913@client)
+        3. addMark link (1752486181453@client)
 
 
-        4. addMark em (1752502332913@client)
+        4. addMark bold (1752486181453@client)
 
 
-        5. addMark link (1752502332913@client)
+        5. addMark em (1752486181453@client)
 
 
-        6. removeMark em (1752502332916@client)
+        6. removeMark bold (1752486181455@client)
 
 
-        7. removeMark bold (1752502332915@client)
+        7. removeMark em (1752486181456@client)
 
 
 
@@ -932,13 +932,13 @@ Generated at: 7/14/2025, 10:12:13 PM
       Format operation details:
 
 
-        1. addMark em (1752502332922@client)
+        1. addMark em (1752486181464@client)
 
 
-        2. addMark bold (1752502332922@client)
+        2. addMark bold (1752486181464@client)
 
 
-        3. addMark link (1752502332922@client)
+        3. addMark link (1752486181464@client)
 
 
 
@@ -985,7 +985,7 @@ Generated at: 7/14/2025, 10:12:13 PM
     Initial text: hi
 
 
-    Character IDs: { hId: '1752502332979_0@client', iId: '1752502332980_1@client' }
+    Character IDs: { hId: '1752486181529_0@client', iId: '1752486181530_1@client' }
 
 
     C2 after sync: hi
@@ -1058,10 +1058,10 @@ Generated at: 7/14/2025, 10:12:13 PM
     🎯 Final result after synchronization:
 
 
-    A: abcXYZ
+    A: XYZabc
 
 
-    B: abcXYZ
+    B: XYZabc
 
 
     ✅ State consistency verification: Passed
