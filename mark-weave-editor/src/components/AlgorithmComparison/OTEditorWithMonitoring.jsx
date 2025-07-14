@@ -85,8 +85,7 @@ const OTEditorWithMonitoring = forwardRef(({
           // 合并协作状态数据
           const enhancedStats = {
             ...stats,
-            windowCount: collaborationState.activeUsers,
-            multiWindow: collaborationState.isMultiWindow,
+            // 不再覆盖 windowCount 和 multiWindow，直接用 stats 的真实值
             userStates: collaborationState.userStates,
             activeUsers: collaborationState.activeUsers,
           };

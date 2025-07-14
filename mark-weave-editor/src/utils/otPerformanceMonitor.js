@@ -72,8 +72,8 @@ class OTPerformanceMonitor {
     console.log(`🔑 [MULTI-WINDOW] OT客户端信息:`, {
       windowId: this.windowId,
       otClientConnected: !!(this.otClient && this.otClient.isConnected),
-      userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other',
-      sessionStorage: sessionStorage.length // 无痕窗口会有不同的session
+      userAgent: navigator.userAgent.includes("Chrome") ? "Chrome" : "Other",
+      sessionStorage: sessionStorage.length, // 无痕窗口会有不同的session
     });
 
     // 设置真实事件监听
@@ -330,15 +330,16 @@ class OTPerformanceMonitor {
       data,
       operationSize,
       timestamp,
-      operationsCount: this.metrics.operationsCount
+      operationsCount: this.metrics.operationsCount,
     });
 
     // 🔥 方案A：用户感知延迟测量（与CRDT保持一致）
     // OT的特点：需要等待服务器确认才能更新界面
-    
+
     // 检查是否为本地操作的服务器确认
-    const isLocalOperationConfirm = !data || 
-      data.source === 'local' || 
+    const isLocalOperationConfirm =
+      !data ||
+      data.source === "local" ||
       data.source === this.windowId ||
       !data.clientId ||
       data.clientId === this.windowId;
@@ -346,14 +347,17 @@ class OTPerformanceMonitor {
     if (isLocalOperationConfirm) {
       // 本地操作确认：尝试匹配键盘输入，测量用户感知延迟
       const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
-      
+
       if (matchedOperation) {
         const userPerceivedLatency = timestamp - matchedOperation.timestamp;
-        
-        console.log(`⚡ [OT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`);
-        
+
+        console.log(
+          `⚡ [OT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`
+        );
+
         // 记录用户感知延迟
-        if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 5000) { // OT可能有更高延迟
+        if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 5000) {
+          // OT可能有更高延迟
           const latencyRecord = {
             latency: userPerceivedLatency,
             timestamp,
@@ -361,39 +365,47 @@ class OTPerformanceMonitor {
             operationType: matchedOperation.key,
             operationId: matchedOperation.id,
             windowId: this.windowId,
-            source: 'user_perceived',
-            isReal: true
+            source: "user_perceived",
+            isReal: true,
           };
 
           this.metrics.operationLatencies.push(latencyRecord);
 
           console.log(
-            `📊 [OT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(1)}ms, 操作: ${
-              matchedOperation.key
-            }, 数组长度: ${this.metrics.operationLatencies.length}`
+            `📊 [OT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(
+              1
+            )}ms, 操作: ${matchedOperation.key}, 数组长度: ${
+              this.metrics.operationLatencies.length
+            }`
           );
         } else {
-          console.log(`⚠️ OT用户感知延迟异常: ${userPerceivedLatency.toFixed(1)}ms，已忽略`);
+          console.log(
+            `⚠️ OT用户感知延迟异常: ${userPerceivedLatency.toFixed(
+              1
+            )}ms，已忽略`
+          );
         }
       } else {
         // 无法匹配的本地操作（如格式化或初始化）
         // OT中这类操作通常也需要服务器往返，所以有一定延迟
         const estimatedLatency = 50; // 50ms估算的服务器往返时间
-        
+
         const latencyRecord = {
           latency: estimatedLatency,
           timestamp,
           operationSize,
-          operationType: 'formatting_or_server_op',
+          operationType: "formatting_or_server_op",
           operationId: `server_op_${timestamp}`,
           windowId: this.windowId,
-          source: 'estimated_server_latency',
-          isReal: false
+          source: "estimated_server_latency",
+          isReal: false,
         };
 
         this.metrics.operationLatencies.push(latencyRecord);
-        
-        console.log(`📊 [OT] 服务器操作延迟(估算): ${estimatedLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`);
+
+        console.log(
+          `📊 [OT] 服务器操作延迟(估算): ${estimatedLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`
+        );
       }
     } else {
       // 远程操作：不影响本地用户感知延迟，不记录
@@ -409,46 +421,62 @@ class OTPerformanceMonitor {
       timestamp,
       operationSize,
       data,
-      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0
+      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0,
     });
 
-    if (!this.pendingSyncOperations || this.pendingSyncOperations.length === 0) {
+    if (
+      !this.pendingSyncOperations ||
+      this.pendingSyncOperations.length === 0
+    ) {
       console.log(`⚠️ [DEBUG] 没有待同步操作，可能是纯远程操作`);
       return;
     }
 
     // 🔥 简化匹配策略：使用FIFO匹配最老的待同步操作
     const pendingOp = this.pendingSyncOperations.shift();
-    
+
     console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
-    
+
     if (pendingOp) {
       const multiWindowSyncLatency = timestamp - pendingOp.timestamp;
-      
-      console.log(`📐 [DEBUG] 计算OT多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms`);
-      
+
+      console.log(
+        `📐 [DEBUG] 计算OT多窗口同步延迟: ${multiWindowSyncLatency.toFixed(
+          1
+        )}ms`
+      );
+
       // 记录多窗口网络同步延迟
-      if (multiWindowSyncLatency >= 1 && multiWindowSyncLatency <= 10000) { // 与CRDT保持一致
+      if (multiWindowSyncLatency >= 1 && multiWindowSyncLatency <= 10000) {
+        // 与CRDT保持一致
         const latencyRecord = {
           latency: multiWindowSyncLatency,
           timestamp,
           operationSize,
-          operationType: 'multi_window_sync',
+          operationType: "multi_window_sync",
           operationId: pendingOp.id,
           windowId: this.windowId,
-          source: 'multi_window_sync',
+          source: "multi_window_sync",
           isReal: true,
-          remoteData: data
+          remoteData: data,
         };
 
         this.metrics.operationLatencies.push(latencyRecord);
 
         console.log(
-          `📊 [OT] 多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms, 大小: ${operationSize}字节`
+          `📊 [OT] 多窗口同步延迟: ${multiWindowSyncLatency.toFixed(
+            1
+          )}ms, 大小: ${operationSize}字节`
         );
-        console.log(`📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`);
+        console.log(
+          `📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`
+        );
       } else {
-        console.log(`⚠️ [DEBUG] OT多窗口同步延迟异常: ${multiWindowSyncLatency.toFixed(1)}ms，已忽略`);
+        console.log(
+          `⚠️ [DEBUG] OT多窗口同步延迟异常: ${multiWindowSyncLatency.toFixed(
+            1
+          )}ms，已忽略`
+        );
       }
     }
   }
@@ -551,7 +579,16 @@ class OTPerformanceMonitor {
     };
 
     try {
-      localStorage.setItem("ot-performance-data", JSON.stringify(data));
+      // 每个窗口写入独立 key
+      localStorage.setItem(
+        `ot-performance-data-${this.windowId}`,
+        JSON.stringify(data)
+      );
+      // 触发其他窗口更新
+      localStorage.setItem(
+        "ot-performance-sync-trigger",
+        Date.now().toString()
+      );
     } catch (error) {
       console.warn("同步OT性能数据失败:", error);
     }
@@ -561,7 +598,12 @@ class OTPerformanceMonitor {
    * 处理localStorage变化（多窗口同步）
    */
   handleStorageChange(event) {
-    if (event.key === "ot-performance-data" && event.newValue) {
+    // 只处理相关 key
+    if (
+      event.key &&
+      event.key.startsWith("ot-performance-data-") &&
+      event.newValue
+    ) {
       try {
         const data = JSON.parse(event.newValue);
         if (data.windowId !== this.windowId) {
@@ -776,22 +818,24 @@ class OTPerformanceMonitor {
    * 检查多窗口状态
    */
   checkMultiWindow() {
+    let windowCount = 0;
     try {
-      const storedData = localStorage.getItem("ot-performance-data");
-      if (storedData) {
-        const data = JSON.parse(storedData);
-        const timeDiff = Date.now() - data.timestamp;
-
-        // 5秒内有其他窗口活动
-        if (data.windowId !== this.windowId && timeDiff < 5000) {
-          return { isMultiWindow: true, windowCount: 2 };
+      const now = Date.now();
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("ot-performance-data-")) {
+          try {
+            const data = JSON.parse(localStorage.getItem(key));
+            if (data && now - data.timestamp < 5000) {
+              windowCount++;
+            }
+          } catch (e) {}
         }
       }
     } catch (error) {
       console.warn("检查多窗口状态失败:", error);
     }
-
-    return { isMultiWindow: false, windowCount: 1 };
+    return { isMultiWindow: windowCount > 1, windowCount: windowCount };
   }
 
   /**
@@ -815,6 +859,9 @@ class OTPerformanceMonitor {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
     }
+
+    // 不再删除 localStorage key，让其自然过期
+    // localStorage.removeItem(`ot-performance-data-${this.windowId}`);
 
     console.log("⏹️ 已停止OT性能监控");
   }
@@ -849,12 +896,10 @@ class OTPerformanceMonitor {
     };
     this.startTime = performance.now();
 
-    // 清理localStorage
-    try {
-      localStorage.removeItem("ot-performance-data");
-    } catch (e) {
-      console.warn("清理localStorage失败:", e);
-    }
+    // 不再删除 localStorage key，让其自然过期
+    // localStorage.removeItem(`ot-performance-data-${this.windowId}`);
+    // 立即写入一条新数据，保证key存在
+    this.syncDataToStorage();
 
     console.log("🔄 OT性能指标已重置");
   }
