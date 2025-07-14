@@ -32,6 +32,7 @@ class RealYjsMonitor {
     };
 
     this.pendingOperations = [];
+    this.pendingSyncOperations = []; // 🔥 新增：待同步操作队列
 
     // 绑定方法
     this.handleDocumentUpdate = this.handleDocumentUpdate.bind(this);
@@ -50,6 +51,13 @@ class RealYjsMonitor {
       return;
     }
 
+    console.log("🚀 [DEBUG] 开始启动CRDT监控，参数:", {
+      ydoc: !!ydoc,
+      awareness: !!awareness,
+      provider: !!provider,
+      ydocClientID: ydoc?.clientID
+    });
+
     this.isMonitoring = true;
     this.startTime = performance.now();
     this.ydoc = ydoc;
@@ -57,11 +65,32 @@ class RealYjsMonitor {
     this.provider = provider;
 
     console.log(`🚀 开始真实Yjs性能监控 - 窗口ID: ${this.windowId}`);
+    console.log(`🔑 [MULTI-WINDOW] 客户端信息:`, {
+      windowId: this.windowId,
+      ydocClientID: ydoc?.clientID,
+      userAgent: navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Other',
+      isIncognito: 'Unknown' // 无法直接检测
+    });
 
     // 监听文档更新
     if (ydoc) {
+      // 🔥 测试：先移除可能存在的监听器
+      ydoc.off("update", this.handleDocumentUpdate);
+      
       ydoc.on("update", this.handleDocumentUpdate);
       console.log("✅ 已监听文档更新事件");
+      
+      // 🔥 调试：测试事件是否工作
+      setTimeout(() => {
+        console.log("🧪 [DEBUG] 测试文档更新事件监听是否工作...");
+        // 创建一个小的测试更新
+        const testText = ydoc.getText('test');
+        testText.insert(0, 'test');
+        testText.delete(0, 4);
+      }, 1000);
+      
+    } else {
+      console.error("❌ ydoc 为空，无法监听文档更新");
     }
 
     // 监听awareness变化
@@ -261,37 +290,174 @@ class RealYjsMonitor {
     this.metrics.totalUpdateSize += updateSize;
     this.metrics.updateTimes.push(timestamp);
 
-    // 查找匹配的操作
-    const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
+    console.log(`📝 [CRDT] 文档更新事件:`, {
+      origin,
+      updateSize,
+      timestamp,
+      documentUpdates: this.metrics.documentUpdates
+    });
 
-    if (matchedOperation) {
-      const latency = timestamp - matchedOperation.timestamp;
-      console.log("latency", latency);
-      // 只记录合理的延迟值
-      if (latency >= 1 && latency <= 2000) {
+    // 🔥 方案A：用户感知延迟测量
+    // 只测量本地操作到界面更新的延迟
+    if (!origin || origin === 'local' || origin === this.ydoc?.clientID) {
+      // 本地操作：尝试匹配键盘输入，测量用户感知延迟
+      const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
+      
+      if (matchedOperation) {
+        const userPerceivedLatency = timestamp - matchedOperation.timestamp;
+        
+        console.log(`⚡ [CRDT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`);
+        
+        // 记录用户感知延迟
+        if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 1000) {
+          const latencyRecord = {
+            latency: userPerceivedLatency,
+            timestamp,
+            updateSize,
+            origin: 'local',
+            operationType: matchedOperation.key,
+            operationId: matchedOperation.id,
+            windowId: this.windowId,
+            source: 'user_perceived'
+          };
+
+          this.metrics.operationLatencies.push(latencyRecord);
+
+          console.log(
+            `📊 [CRDT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(1)}ms, 操作: ${
+              matchedOperation.key
+            }, 数组长度: ${this.metrics.operationLatencies.length}`
+          );
+        } else {
+          console.log(`⚠️ 用户感知延迟异常: ${userPerceivedLatency.toFixed(1)}ms，已忽略`);
+        }
+      } else {
+        // 无法匹配的本地操作（如格式化），估算为即时响应
+        const instantLatency = 1; // 1ms表示即时响应
+        
         const latencyRecord = {
-          latency,
+          latency: instantLatency,
+          timestamp,
+          updateSize,
+          origin: 'local',
+          operationType: 'formatting_or_instant',
+          operationId: `instant_${timestamp}`,
+          windowId: this.windowId,
+          source: 'instant_response'
+        };
+
+        this.metrics.operationLatencies.push(latencyRecord);
+        
+        console.log(`📊 [CRDT] 即时操作延迟: ${instantLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`);
+      }
+    } else {
+      // 远程操作：不影响本地用户感知延迟，不记录
+      console.log(`📥 [CRDT] 远程操作（不影响用户感知）: 来源 ${origin}`);
+    }
+  }
+
+  /**
+   * 🔥 处理多窗口同步确认
+   */
+  handleMultiWindowSyncConfirmation(timestamp, updateSize, origin) {
+    console.log(`🔍 [DEBUG] 处理多窗口同步确认:`, {
+      timestamp,
+      updateSize,
+      origin,
+      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0
+    });
+
+    if (!this.pendingSyncOperations || this.pendingSyncOperations.length === 0) {
+      console.log(`⚠️ [DEBUG] 没有待同步操作，可能是纯远程操作`);
+      return;
+    }
+
+    // 🔥 简化匹配策略：使用FIFO匹配最老的待同步操作
+    // 这假设操作按顺序在多个窗口间同步
+    const pendingOp = this.pendingSyncOperations.shift();
+    
+    console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
+    
+    if (pendingOp) {
+      const multiWindowSyncLatency = timestamp - pendingOp.timestamp;
+      
+      console.log(`📐 [DEBUG] 计算多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms`);
+      
+      // 记录多窗口网络同步延迟
+      if (multiWindowSyncLatency >= 1 && multiWindowSyncLatency <= 10000) { // 放宽上限到10秒
+        const latencyRecord = {
+          latency: multiWindowSyncLatency,
           timestamp,
           updateSize,
           origin,
-          operationType: matchedOperation.key,
-          operationId: matchedOperation.id,
+          operationType: 'multi_window_sync',
+          operationId: pendingOp.id,
           windowId: this.windowId,
+          source: 'multi_window_sync',
+          remoteOrigin: origin
         };
 
         this.metrics.operationLatencies.push(latencyRecord);
 
         console.log(
-          `📊 CRDT延迟: ${latency.toFixed(1)}ms, 操作: ${
-            matchedOperation.key
-          }, 大小: ${updateSize}字节`
+          `📊 [CRDT] 多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms, 大小: ${updateSize}字节, 来源: ${origin}`
         );
+        console.log(`📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`);
+      } else {
+        console.log(`⚠️ [DEBUG] 多窗口同步延迟异常: ${multiWindowSyncLatency.toFixed(1)}ms，已忽略`);
       }
     }
+  }
 
-    console.log(
-      `📝 文档更新 #${this.metrics.documentUpdates}, 大小: ${updateSize}字节, 来源: ${origin}`
-    );
+  /**
+   * 🔥 新增：处理网络同步确认
+   */
+  handleSyncConfirmation(timestamp, updateSize) {
+    console.log(`🔍 [DEBUG] 尝试处理同步确认:`, {
+      timestamp,
+      updateSize,
+      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0,
+      pendingSyncOps: this.pendingSyncOperations?.slice(0, 3)
+    });
+
+    if (!this.pendingSyncOperations || this.pendingSyncOperations.length === 0) {
+      console.log(`⚠️ [DEBUG] 没有待同步操作，忽略远程更新`);
+      return;
+    }
+
+    // 查找匹配的待同步操作（简单的FIFO匹配）
+    const pendingOp = this.pendingSyncOperations.shift();
+    
+    console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
+    
+    if (pendingOp) {
+      const syncLatency = timestamp - pendingOp.timestamp;
+      
+      console.log(`📐 [DEBUG] 计算同步延迟: ${syncLatency.toFixed(1)}ms`);
+      
+      // 记录网络同步延迟
+      if (syncLatency >= 1 && syncLatency <= 5000) {
+        const latencyRecord = {
+          latency: syncLatency,
+          timestamp,
+          updateSize,
+          origin: 'network_sync',
+          operationType: 'network_sync',
+          operationId: pendingOp.id,
+          windowId: this.windowId,
+          source: 'network_sync'
+        };
+
+        this.metrics.operationLatencies.push(latencyRecord);
+
+        console.log(
+          `📊 [CRDT] 网络同步延迟: ${syncLatency.toFixed(1)}ms, 大小: ${updateSize}字节`
+        );
+        console.log(`📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`);
+      } else {
+        console.log(`⚠️ [DEBUG] 同步延迟异常: ${syncLatency.toFixed(1)}ms，已忽略`);
+      }
+    }
   }
 
   /**
@@ -391,10 +557,18 @@ class RealYjsMonitor {
 
       this.metrics.userOperations.push(operation);
 
+      console.log(`⌨️ [DEBUG] 键盘事件:`, {
+        key: event.key,
+        timestamp,
+        operationId,
+        isPrintable: this.isPrintableKey(event.key),
+        pendingOpsCount: this.pendingOperations.length
+      });
+
       if (this.isPrintableKey(event.key)) {
         this.pendingOperations.push(operation);
 
-        const cutoffTime = timestamp - 5000;
+        const cutoffTime = timestamp - 1000;
         this.pendingOperations = this.pendingOperations.filter(
           (op) => op.timestamp > cutoffTime
         );
@@ -402,6 +576,8 @@ class RealYjsMonitor {
         console.log(
           `⌨️ 记录操作: ${event.key}, 待处理队列: ${this.pendingOperations.length}`
         );
+      } else {
+        console.log(`⌨️ [DEBUG] 非打印字符，不记录: ${event.key}`);
       }
     }
   }
@@ -551,6 +727,15 @@ class RealYjsMonitor {
     const allNetworkLatencies = this.mergedMetrics
       ? this.mergedMetrics.networkLatencies.map((l) => l.latency)
       : this.metrics.networkLatencies.map((l) => l.latency);
+
+    // 🔥 调试信息
+    console.log(`📊 [DEBUG] 性能统计计算:`, {
+      originalLatencies: this.metrics.operationLatencies.length,
+      mergedLatencies: this.mergedMetrics?.operationLatencies?.length || 0,
+      allLatencies: allLatencies.length,
+      latencyValues: allLatencies.slice(0, 10),
+      monitoringDuration
+    });
 
     // 🔥 优化：缩短时间窗口为4秒，提升响应速度
     const recentWindow = 4000; // 从10000ms改为4000ms
@@ -768,6 +953,7 @@ class RealYjsMonitor {
     };
 
     this.pendingOperations = [];
+    this.pendingSyncOperations = []; // 🔥 清理待同步操作队列
     this.mergedMetrics = null;
     this.startTime = performance.now();
 
