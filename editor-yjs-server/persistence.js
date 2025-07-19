@@ -141,39 +141,68 @@ function jsonToYjs(jsonContent, ydoc) {
  * 保存Yjs文档状态并转换为JSON存储
  * @param {string} docId 文档唯一标识
  * @param {Y.Doc} ydoc 当前 Y.Doc
- * @param {string} userId 用户ID
- * @param {string} teamId 团队ID
+ * @param {string} userId 用户ID (可选，仅在创建文档时需要)
+ * @param {string} teamId 团队ID (可选，仅在创建文档时需要)
  */
-export async function saveDocState(docId, ydoc, userId, teamId = null) {
+export async function saveDocState(docId, ydoc, userId = null, teamId = null) {
   try {
     await connectMongo();
 
     // 将Yjs转换为JSON格式
     const jsonContent = yjsToJson(ydoc);
-    // console.log("jsonContent:", jsonContent);
-    const result = await Doc.updateOne(
-      { docId },
-      {
-        $set: {
-          content: jsonContent,
-          lastUpdated: new Date(),
-        },
-        $inc: {
-          version: 1,
-        },
-        $setOnInsert: {
-          ownerId: userId,
-          teamId: teamId,
-          participants: [{ userId, role: "owner" }],
-          createdAt: new Date(),
-          title: "未命名文档",
-        },
-      },
-      { upsert: true }
-    );
 
-    console.log(`✅ 保存文档 ${docId} 状态成功`);
-    return result;
+    // 检查文档是否已存在
+    const existingDoc = await Doc.findOne({ docId });
+
+    if (existingDoc) {
+      // 文档已存在，仅更新内容
+      const result = await Doc.updateOne(
+        { docId },
+        {
+          $set: {
+            content: jsonContent,
+            lastUpdated: new Date(),
+          },
+          $inc: {
+            version: 1,
+          },
+        }
+      );
+      console.log(
+        `✅ 更新文档 ${docId} 内容成功 (版本: ${existingDoc.version + 1})`
+      );
+      return result;
+    } else if (userId) {
+      // 文档不存在且提供了userId，创建新文档
+      const result = await Doc.updateOne(
+        { docId },
+        {
+          $set: {
+            content: jsonContent,
+            lastUpdated: new Date(),
+          },
+          $inc: {
+            version: 1,
+          },
+          $setOnInsert: {
+            ownerId: userId,
+            teamId: teamId,
+            participants: [{ userId, role: "owner" }],
+            createdAt: new Date(),
+            title: "未命名文档",
+          },
+        },
+        { upsert: true }
+      );
+      console.log(`✅ 创建并保存文档 ${docId} 成功`);
+      return result;
+    } else {
+      // 文档不存在且没有提供userId，记录警告但不抛出错误
+      console.warn(
+        `⚠️ 文档 ${docId} 不存在且无法创建（缺少用户信息），跳过保存`
+      );
+      return null;
+    }
   } catch (err) {
     console.error("❌ 保存文档状态失败:", err);
     throw err;

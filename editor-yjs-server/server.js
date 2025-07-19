@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-07 04:02:15
+ * @LastEditTime: 2025-07-20 01:57:18
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -239,11 +239,18 @@ async function getYDoc(roomName) {
   // 从数据库加载文档状态
   await loadDocState(roomName, ydoc);
 
-  // 设置持久化（防抖处理）
+  // 设置持久化（防抖处理）- 缩短延迟时间，避免数据丢失
   const persist = debounce(
-    () => saveDocState(roomName, ydoc),
-    2000, // 2秒内的更新合并
-    { maxWait: 10000 } // 最长10秒必须保存一次
+    async () => {
+      try {
+        await saveDocState(roomName, ydoc);
+        console.log(`💾 文档 ${roomName} 自动保存成功`);
+      } catch (err) {
+        console.error(`❌ 文档 ${roomName} 自动保存失败:`, err);
+      }
+    },
+    500, // 500ms内的更新合并（更快响应）
+    { maxWait: 2000 } // 最长2秒必须保存一次（更频繁保存）
   );
 
   ydoc.on("update", persist);
@@ -251,6 +258,22 @@ async function getYDoc(roomName) {
 
   return ydoc;
 }
+
+// 定期强制保存所有文档（防止长时间无更新导致的数据丢失）
+setInterval(async () => {
+  if (docs.size > 0) {
+    console.log(`⏰ 开始定期保存 ${docs.size} 个文档...`);
+    for (const [docId, ydoc] of docs.entries()) {
+      try {
+        await saveDocState(docId, ydoc);
+        console.log(`⏰ 定期保存文档 ${docId} 成功`);
+      } catch (err) {
+        console.error(`❌ 定期保存文档 ${docId} 失败:`, err);
+      }
+    }
+    console.log(`✅ 定期保存完成`);
+  }
+}, 30000); // 每30秒执行一次
 
 // WebSocket处理
 wss.on("connection", async (ws, req) => {
@@ -313,11 +336,26 @@ server.listen(PORT, async () => {
 // --------------------------
 async function flushAllDocs() {
   try {
-    console.log("💾 正在持久化所有内存中的 Y.Doc ...");
+    const docCount = docs.size;
+    console.log(`💾 正在持久化所有内存中的 ${docCount} 个 Y.Doc ...`);
+
+    let successCount = 0;
+    let failCount = 0;
+
     for (const [docId, ydoc] of docs.entries()) {
-      await saveDocState(docId, ydoc);
+      try {
+        await saveDocState(docId, ydoc);
+        successCount++;
+        console.log(`✅ 退出保存文档 ${docId} 成功`);
+      } catch (err) {
+        failCount++;
+        console.error(`❌ 退出保存文档 ${docId} 失败:`, err);
+      }
     }
-    console.log("✅ 持久化完成，准备退出");
+
+    console.log(
+      `🎯 持久化完成: 成功 ${successCount}/${docCount} 个文档，失败 ${failCount} 个`
+    );
   } catch (err) {
     console.error("❌ 持久化所有文档失败:", err);
   }
