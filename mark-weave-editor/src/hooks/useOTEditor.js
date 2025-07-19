@@ -378,10 +378,20 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
 
   const processUserOperations = (tr, client) => {
     try {
+      // 🔥 新增：获取当前文档状态信息
+      const currentDoc = viewRef.current.state.doc;
+      const currentLength = currentDoc.textContent.length;
+      const currentContent = currentDoc.textContent;
+
       console.log("🔥 [OT] 处理用户操作", {
         docChanged: tr.docChanged,
         steps: tr.steps.length,
         isConnected: client.isConnected,
+        clientId: client.connectionId,
+        currentDocLength: currentLength,
+        currentContentPreview:
+          currentContent.substring(0, 30) + (currentLength > 30 ? "..." : ""),
+        docVersion: client.documents.get(`${collection}/${docId}`)?.version,
       });
 
       if (!tr.docChanged || !client || !client.isConnected) {
@@ -400,10 +410,24 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           // 插入操作 - 支持富文本格式
           console.log(`🔤 [OT] 处理插入操作在位置 ${step.from}`);
 
+          // 🔥 修复：验证插入位置的有效性
+          const insertPos = step.from;
+          const docSize = currentDoc.content.size;
+
+          if (insertPos > docSize) {
+            console.error(
+              `❌ [OT] 插入位置超出文档范围: ${insertPos} > ${docSize}，跳过操作`
+            );
+            return; // 跳过无效操作
+          }
+
+          // 🔥 修复：动态调整 retain 位置，基于当前文档的真实长度
+          const actualRetain = Math.min(insertPos, docSize);
+
           // 构建标准的Delta操作格式（直接发送操作数组，不包装在ops对象中）
           const deltaOps = [];
-          if (step.from > 0) {
-            deltaOps.push({ retain: step.from });
+          if (actualRetain > 0) {
+            deltaOps.push({ retain: actualRetain });
           }
 
           // 处理富文本格式 - 提取文本和格式信息
@@ -442,6 +466,13 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           // ShareDB rich-text期望直接的Delta数组，不是{ops: [...]}格式
           const op = deltaOps;
 
+          console.log("🔍 [DEBUG] 准备提交的操作:", {
+            isArray: Array.isArray(op),
+            opType: typeof op,
+            op: op,
+            opLength: Array.isArray(op) ? op.length : "N/A",
+          });
+
           try {
             client.submitOperation(collection, docId, op);
             console.log("✅ [OT] 富文本插入操作提交成功");
@@ -474,16 +505,22 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         } else if (step.constructor.name === "AddMarkStep") {
           // 添加格式（如加粗、斜体等）
           const { from, to, mark } = step;
-          
+
           // 🔧 修复：在多窗口环境下更精确的位置计算
           // 确保位置基于最新的文档状态
           const currentDoc = viewRef.current.state.doc;
-          const actualFrom = Math.max(0, Math.min(from, currentDoc.content.size));
-          const actualTo = Math.max(actualFrom, Math.min(to, currentDoc.content.size));
-          
+          const actualFrom = Math.max(
+            0,
+            Math.min(from, currentDoc.content.size)
+          );
+          const actualTo = Math.max(
+            actualFrom,
+            Math.min(to, currentDoc.content.size)
+          );
+
           const deltaOps = [];
           if (actualFrom > 0) deltaOps.push({ retain: actualFrom });
-          
+
           const attrs = {};
           switch (mark.type.name) {
             case "bold":
@@ -495,24 +532,21 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             default:
               break;
           }
-          
+
           if (Object.keys(attrs).length === 0) {
             // 不支持的格式，跳过
             return;
           }
-          
-          // 🔧 新增：多窗口同步时添加操作标识
+
+          // 🔥 修复：使用标准的Delta格式，不添加额外属性
           const retainLength = actualTo - actualFrom;
           if (retainLength > 0) {
-            deltaOps.push({ 
-              retain: retainLength, 
-              attributes: attrs,
-              // 多窗口同步标识
-              multiWindow: true,
-              timestamp: Date.now()
+            deltaOps.push({
+              retain: retainLength,
+              attributes: attrs, // 只保留标准的attributes
             });
           }
-          
+
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
@@ -520,7 +554,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               from: actualFrom,
               to: actualTo,
               markType: mark.type.name,
-              op
+              op,
             });
           } catch (error) {
             console.error("❌ [OT] 格式添加操作提交失败:", error);
@@ -528,16 +562,22 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         } else if (step.constructor.name === "RemoveMarkStep") {
           // 移除格式
           const { from, to, mark } = step;
-          
+
           // 🔧 修复：在多窗口环境下更精确的位置计算
           // 确保位置基于最新的文档状态
           const currentDoc = viewRef.current.state.doc;
-          const actualFrom = Math.max(0, Math.min(from, currentDoc.content.size));
-          const actualTo = Math.max(actualFrom, Math.min(to, currentDoc.content.size));
-          
+          const actualFrom = Math.max(
+            0,
+            Math.min(from, currentDoc.content.size)
+          );
+          const actualTo = Math.max(
+            actualFrom,
+            Math.min(to, currentDoc.content.size)
+          );
+
           const deltaOps = [];
           if (actualFrom > 0) deltaOps.push({ retain: actualFrom });
-          
+
           const attrs = {};
           switch (mark.type.name) {
             case "bold":
@@ -549,23 +589,20 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             default:
               break;
           }
-          
+
           if (Object.keys(attrs).length === 0) {
             return;
           }
-          
-          // 🔧 新增：多窗口同步时添加操作标识
+
+          // 🔥 修复：使用标准的Delta格式，不添加额外属性
           const retainLength = actualTo - actualFrom;
           if (retainLength > 0) {
-            deltaOps.push({ 
-              retain: retainLength, 
-              attributes: attrs,
-              // 多窗口同步标识
-              multiWindow: true,
-              timestamp: Date.now()
+            deltaOps.push({
+              retain: retainLength,
+              attributes: attrs, // 只保留标准的attributes
             });
           }
-          
+
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
@@ -573,7 +610,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               from: actualFrom,
               to: actualTo,
               markType: mark.type.name,
-              op
+              op,
             });
           } catch (error) {
             console.error("❌ [OT] 格式移除操作提交失败:", error);
@@ -658,6 +695,19 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
     try {
       console.log("🔄 [OT] 从OT更新编辑器", data);
 
+      // 🔥 修复：检查是否是自己发送的操作
+      if (data._clientId) {
+        const clientId = otClientRef.current?.connectionId;
+        if (data._clientId === clientId) {
+          console.log("🔄 [OT] 跳过自己发送的操作 (编辑器层)", {
+            messageClientId: data._clientId,
+            myClientId: clientId,
+            messageId: data._messageId,
+          });
+          return;
+        }
+      }
+
       // 处理操作类型的数据
       if (data.op) {
         console.log("⚡ [OT] 处理操作更新:", data.op);
@@ -684,31 +734,46 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               const start = pos - op.retain;
               const end = pos;
               const { bold, italic } = op.attributes;
-              
+
               // 🔧 修复：多窗口环境下的格式同步优化
               // 确保位置边界正确性
               const docSize = viewRef.current.state.doc.content.size;
               const actualStart = Math.max(0, Math.min(start, docSize));
               const actualEnd = Math.max(actualStart, Math.min(end, docSize));
-              
-              console.log(`🎨 [OT] 应用格式属性变化: [${actualStart}, ${actualEnd}]`, op.attributes);
-              
+
+              console.log(
+                `🎨 [OT] 应用格式属性变化: [${actualStart}, ${actualEnd}]`,
+                op.attributes
+              );
+
               if (bold !== undefined && actualEnd > actualStart) {
                 if (bold) {
-                  tr.addMark(actualStart, actualEnd, schema.marks.bold.create());
-                  console.log(`✅ [OT] 添加粗体格式: [${actualStart}, ${actualEnd}]`);
+                  tr.addMark(
+                    actualStart,
+                    actualEnd,
+                    schema.marks.bold.create()
+                  );
+                  console.log(
+                    `✅ [OT] 添加粗体格式: [${actualStart}, ${actualEnd}]`
+                  );
                 } else {
                   tr.removeMark(actualStart, actualEnd, schema.marks.bold);
-                  console.log(`❌ [OT] 移除粗体格式: [${actualStart}, ${actualEnd}]`);
+                  console.log(
+                    `❌ [OT] 移除粗体格式: [${actualStart}, ${actualEnd}]`
+                  );
                 }
               }
               if (italic !== undefined && actualEnd > actualStart) {
                 if (italic) {
                   tr.addMark(actualStart, actualEnd, schema.marks.em.create());
-                  console.log(`✅ [OT] 添加斜体格式: [${actualStart}, ${actualEnd}]`);
+                  console.log(
+                    `✅ [OT] 添加斜体格式: [${actualStart}, ${actualEnd}]`
+                  );
                 } else {
                   tr.removeMark(actualStart, actualEnd, schema.marks.em);
-                  console.log(`❌ [OT] 移除斜体格式: [${actualStart}, ${actualEnd}]`);
+                  console.log(
+                    `❌ [OT] 移除斜体格式: [${actualStart}, ${actualEnd}]`
+                  );
                 }
               }
             }
@@ -781,6 +846,28 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           Array.isArray(data.data)
         );
 
+        // 🔥 新增：检测文档状态不一致
+        const currentContent = viewRef.current.state.doc.textContent;
+        const expectedContent = extractTextFromShareDBData(data.data);
+
+        if (currentContent !== expectedContent) {
+          console.warn("⚠️ [OT] 检测到文档状态不一致", {
+            current: currentContent.length,
+            expected: expectedContent.length,
+            currentPreview: currentContent.substring(0, 50),
+            expectedPreview: expectedContent.substring(0, 50),
+            requiresRebuild:
+              Math.abs(currentContent.length - expectedContent.length) > 5,
+          });
+
+          // 如果差异较大，强制重建文档
+          if (Math.abs(currentContent.length - expectedContent.length) > 5) {
+            console.log("🔄 [OT] 差异较大，强制重建文档");
+            forceDocumentRebuild(data.data);
+            return;
+          }
+        }
+
         // 尝试重建文档内容
         const reconstructedContent = reconstructDocumentFromShareDB(data.data);
 
@@ -818,6 +905,78 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       }
     } catch (error) {
       console.error("[OT] 从OT更新编辑器失败:", error);
+    }
+  };
+
+  // 🔥 新增：从ShareDB数据中提取纯文本内容
+  const extractTextFromShareDBData = (shareDBData) => {
+    try {
+      let operations = [];
+
+      if (Array.isArray(shareDBData)) {
+        operations = shareDBData;
+      } else if (shareDBData.ops && Array.isArray(shareDBData.ops)) {
+        operations = shareDBData.ops;
+      } else if (shareDBData && typeof shareDBData === "object") {
+        operations = [shareDBData];
+      }
+
+      let text = "";
+      operations.forEach((op) => {
+        if (
+          op &&
+          typeof op === "object" &&
+          op.insert &&
+          typeof op.insert === "string"
+        ) {
+          text += op.insert;
+        } else if (typeof op === "string") {
+          text += op;
+        }
+      });
+
+      return text;
+    } catch (error) {
+      console.error("❌ [OT] 提取文本内容失败:", error);
+      return "";
+    }
+  };
+
+  // 🔥 新增：强制重建文档
+  const forceDocumentRebuild = (shareDBData) => {
+    try {
+      console.log("🔄 [OT] 开始强制重建文档状态");
+
+      const reconstructedContent = reconstructDocumentFromShareDB(shareDBData);
+
+      if (reconstructedContent && reconstructedContent.length > 0) {
+        const newDoc = schema.nodes.doc.create(
+          null,
+          schema.nodes.paragraph.create(null, reconstructedContent)
+        );
+
+        const tr = viewRef.current.state.tr
+          .setMeta("fromOT", true)
+          .setMeta("forceRebuild", true)
+          .replaceWith(
+            0,
+            viewRef.current.state.doc.content.size,
+            newDoc.content
+          );
+
+        viewRef.current.dispatch(tr);
+        console.log("✅ [OT] 文档状态强制同步完成");
+
+        // 计算重建后的文本内容
+        const reconstructedText = reconstructedContent
+          .map((node) => node.textContent || node.text || "")
+          .join("");
+        console.log(`📄 [OT] 重建后的文本内容: "${reconstructedText}"`);
+      } else {
+        console.log("ℹ️ [OT] 无法重建文档内容或内容为空");
+      }
+    } catch (error) {
+      console.error("❌ [OT] 强制重建文档失败:", error);
     }
   };
 

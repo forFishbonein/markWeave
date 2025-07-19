@@ -231,6 +231,17 @@ class OTClient {
 
     console.log("⚡ 收到操作:", { collection, id, version });
 
+    // 🔥 修复：过滤自己发送的操作，防止重复应用
+    // 检查消息层的客户端ID
+    if (message._clientId === this.connectionId) {
+      console.log("🔄 [OT] 跳过自己发送的操作", {
+        messageClientId: message._clientId,
+        myClientId: this.connectionId,
+        messageId: message._messageId,
+      });
+      return; // 不处理自己发送的操作
+    }
+
     if (this.documents.has(docKey)) {
       const doc = this.documents.get(docKey);
 
@@ -290,6 +301,8 @@ class OTClient {
       collection,
       id,
       op,
+      isArray: Array.isArray(op),
+      opType: typeof op,
       isConnected: this.isConnected,
       wsReadyState: this.ws?.readyState,
       hasDocuments: this.documents.size,
@@ -316,13 +329,36 @@ class OTClient {
 
     console.log("📄 [DEBUG] 当前文档状态:", doc);
 
+    // 🔥 修复：为操作添加客户端标识，防止重复应用
+    // 注意：ShareDB操作应该是数组格式，不能用扩展操作符直接合并
+    let enhancedOp;
+    if (Array.isArray(op)) {
+      // 如果操作是数组格式（正确的Delta格式），保持数组格式
+      enhancedOp = op; // 不修改原始操作格式
+    } else {
+      // 如果是对象格式，使用扩展操作符
+      enhancedOp = {
+        ...op,
+        _clientId: this.connectionId,
+        _timestamp: Date.now(),
+        _messageId: `${this.connectionId}_${Date.now()}_${Math.random()
+          .toString(36)
+          .substr(2, 9)}`,
+      };
+    }
+
     const message = {
       type: "op",
       collection,
       id,
-      op,
+      op: enhancedOp, // 使用增强后的操作
       version: doc.version,
       timestamp: performance.now(),
+      // 🔥 在消息层添加客户端标识，用于过滤
+      _clientId: this.connectionId,
+      _messageId: `${this.connectionId}_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`,
     };
 
     console.log("📤 [DEBUG] 准备发送消息:", message);
