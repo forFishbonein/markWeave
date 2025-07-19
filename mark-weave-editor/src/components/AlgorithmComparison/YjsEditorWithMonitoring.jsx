@@ -25,7 +25,7 @@ import {
   SyncOutlined
 } from '@ant-design/icons';
 import { useYjsEditor } from '../../hooks/useYjsEditor';
-import RealYjsMonitor from '../../utils/RealYjsMonitor';
+import YjsPerformanceMonitor from '../../utils/YjsPerformanceMonitor';
 import { ydoc } from '../../crdt';
 
 const YjsEditorWithMonitoring = forwardRef(({
@@ -51,7 +51,7 @@ const YjsEditorWithMonitoring = forwardRef(({
   // 初始化监控器
   useEffect(() => {
     if (!monitorRef.current) {
-      monitorRef.current = new RealYjsMonitor();
+      monitorRef.current = new YjsPerformanceMonitor();
     }
     // 自动开始监控
     if (provider && awareness && isConnected && !isMonitoring) {
