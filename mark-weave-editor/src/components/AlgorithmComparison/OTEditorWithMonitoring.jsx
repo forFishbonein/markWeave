@@ -163,10 +163,10 @@ const OTEditorWithMonitoring = forwardRef(({
                 timestamp: Date.now(),
                 latency: enhancedStats.avgLatency,
                 p95: enhancedStats.p95Latency,
+                e2eLatency: enhancedStats.avgE2ELatency || 0,
                 networkLatency: enhancedStats.avgNetworkLatency,
                 samples: enhancedStats.recentLatencySamples,
-                pending: enhancedStats.pendingOperations,
-                windows: enhancedStats.windowCount || 1
+                pending: enhancedStats.pendingOperations
               }];
               return newHistory.slice(-30); // 保持最近30个数据点
             });
@@ -300,17 +300,7 @@ const OTEditorWithMonitoring = forwardRef(({
     message.success('📊 OT performance data exported');
   };
 
-  const handleMultiWindowTest = () => {
-    const newWindow = window.open(
-      window.location.href,
-      '_blank',
-      'width=900,height=700'
-    );
 
-    if (newWindow) {
-      message.success('✅ New window opened! Data will sync automatically, please edit in both windows to test');
-    }
-  };
 
   const handlePing = () => {
     if (otClient && isConnected) {
@@ -399,13 +389,15 @@ const OTEditorWithMonitoring = forwardRef(({
       width: 80
     },
     {
-      title: 'Windows',
-      dataIndex: 'windows',
-      key: 'windows',
-      render: (windows) => (
-        <Tag color="blue" size="small">{windows}</Tag>
+      title: 'E2E (ms)',
+      dataIndex: 'e2eLatency',
+      key: 'e2eLatency',
+      render: (e2eLatency) => (
+        <span style={{ color: getLatencyColor(e2eLatency || 0), fontSize: '12px' }}>
+          {(e2eLatency || 0).toFixed(1)}
+        </span>
       ),
-      width: 50
+      width: 80
     }
   ];
 
@@ -479,7 +471,7 @@ const OTEditorWithMonitoring = forwardRef(({
         title={
           <Space>
             <ExperimentOutlined />
-            <span>ShareDB OT Multi-window Sync Performance Monitor</span>
+            <span>OT Performance Monitor</span>
             <Tag color="purple">Real-time Sync Version</Tag>
           </Space>
         }
@@ -508,45 +500,11 @@ const OTEditorWithMonitoring = forwardRef(({
             >
               Export Data
             </Button>
-            <Button
-              icon={<GlobalOutlined />}
-              onClick={handleMultiWindowTest}
-              type="primary"
-              ghost
-            >
-              Open New Window
-            </Button>
+
           </Space>
         }
       >
-        {/* Multi-window sync description */}
-        <Alert
-          message="🔄 Real-time Multi-window Sync Monitoring"
-          description="Supports real-time data sync across multiple windows. P95 latency is calculated based on recent data to ensure accuracy. Open multiple windows to edit simultaneously, data will merge automatically."
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
 
-        {performanceData && performanceData.windowCount > 1 && (
-          <Alert
-            message={`🌐 Detected ${performanceData.windowCount} Monitoring Windows`}
-            description="Data has been automatically merged from all windows, showing combined performance metrics from all monitoring points."
-            type="info"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
-
-        {!isMonitoring && (
-          <Alert
-            message="Multi-window Testing Guide"
-            description="1. Click 'Start Monitoring' → 2. Click 'Open New Window' → 3. Edit simultaneously in both windows → 4. Observe real-time sync performance data"
-            type="warning"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
 
         <Row gutter={16}>
           {/* Left: OT Editor */}
@@ -558,7 +516,7 @@ const OTEditorWithMonitoring = forwardRef(({
               <div
                 ref={editorRef}
                 style={editorStyle}
-                placeholder="Enter content here, supports multi-window real-time sync monitoring..."
+                placeholder="Enter content here, supports real-time sync monitoring..."
               />
 
               <div style={{ marginTop: '12px', padding: '8px', backgroundColor: '#f6f8fa', borderRadius: '4px', fontSize: '12px' }}>
@@ -575,7 +533,6 @@ const OTEditorWithMonitoring = forwardRef(({
                     {performanceData && (
                       <Space size="small">
                         <SyncOutlined style={{ color: '#1890ff' }} />
-                        <span>Windows: {performanceData.windowCount || 1}</span>
                         <span>Pending: {performanceData.pendingOperations}</span>
                       </Space>
                     )}
@@ -598,10 +555,10 @@ const OTEditorWithMonitoring = forwardRef(({
                 <div>
                   {/* Core Metrics */}
                   <Row gutter={8} style={{ marginBottom: 16 }}>
-                    <Col span={12}>
+                    <Col span={8}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
-                          title="Real-time OT Latency"
+                          title="Real-time Latency"
                           value={performanceData.avgLatency}
                           suffix="ms"
                           precision={1}
@@ -620,7 +577,7 @@ const OTEditorWithMonitoring = forwardRef(({
                         </div>
                       </Card>
                     </Col>
-                    <Col span={12}>
+                    <Col span={8}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
                           title="Real-time P95 Latency"
@@ -639,6 +596,28 @@ const OTEditorWithMonitoring = forwardRef(({
                         </Tag>
                         <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
                           Dynamically calculated, real-time updates
+                        </div>
+                      </Card>
+                    </Col>
+                    <Col span={8}>
+                      <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
+                        <Statistic
+                          title="Real-time E2E Latency"
+                          value={performanceData.avgE2ELatency || 0}
+                          suffix="ms"
+                          precision={1}
+                          valueStyle={{
+                            color: getLatencyColor(performanceData.avgE2ELatency || 0),
+                            fontSize: '22px',
+                            fontWeight: 'bold'
+                          }}
+                          prefix={<GlobalOutlined />}
+                        />
+                        <Tag color={getLatencyColor(performanceData.avgE2ELatency || 0)} style={{ marginTop: '4px' }}>
+                          {getLatencyLevel(performanceData.avgE2ELatency || 0)}
+                        </Tag>
+                        <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
+                          {performanceData.e2eSamples || 0} WebSocket samples
                         </div>
                       </Card>
                     </Col>
@@ -675,22 +654,16 @@ const OTEditorWithMonitoring = forwardRef(({
                     </Col>
                   </Row>
 
-                  {/* Multi-window Sync Status */}
+                  {/* Sync Status */}
                   <div style={{ marginBottom: 16, padding: '8px', backgroundColor: '#e6f7ff', borderRadius: '4px', border: '1px solid #91d5ff' }}>
                     <Row gutter={16}>
-                      <Col span={8}>
-                        <Space size="small">
-                          <GlobalOutlined style={{ color: '#1890ff' }} />
-                          <span><strong>Windows:</strong> {performanceData.windowCount || 1}</span>
-                        </Space>
-                      </Col>
-                      <Col span={8}>
+                      <Col span={12}>
                         <Space size="small">
                           <ClockCircleOutlined style={{ color: '#52c41a' }} />
                           <span><strong>Recent Samples:</strong> {performanceData.recentLatencySamples || 0}</span>
                         </Space>
                       </Col>
-                      <Col span={8}>
+                      <Col span={12}>
                         <Space size="small">
                           <SyncOutlined style={{ color: '#fa8c16' }} />
                           <span><strong>Pending:</strong> {performanceData.pendingOperations}</span>
@@ -707,11 +680,14 @@ const OTEditorWithMonitoring = forwardRef(({
                       <span>Received: {(performanceData.bytesReceived / 1024).toFixed(2)} KB</span>
                       <span>Bandwidth: {(performanceData.bytesPerSecond / 1024).toFixed(2)} KB/s</span>
                     </div>
-                    {performanceData.avgNetworkLatency > 0 && (
-                      <div style={{ marginTop: '4px', color: '#666' }}>
-                        Network Latency: {performanceData.avgNetworkLatency.toFixed(1)}ms
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', color: '#666' }}>
+                      {performanceData.avgNetworkLatency > 0 && (
+                        <span>Network Latency: {performanceData.avgNetworkLatency.toFixed(1)}ms</span>
+                      )}
+                      {performanceData.avgE2ELatency > 0 && (
+                        <span>E2E Latency: {performanceData.avgE2ELatency.toFixed(1)}ms ({performanceData.e2eSamples || 0} samples)</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Monitoring Status */}
@@ -751,7 +727,7 @@ const OTEditorWithMonitoring = forwardRef(({
                     <div>
                       <div style={{ fontSize: '16px', color: '#666' }}>Click "Start Monitoring" to begin collecting data</div>
                       <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                        Multi-window Sync Version: Real-time P95 calculation, automatic data merging
+                        Real-time Sync Version: Real-time P95 calculation and E2E latency monitoring
                       </div>
                     </div>
                   )}
@@ -767,6 +743,37 @@ const OTEditorWithMonitoring = forwardRef(({
             <Row gutter={16}>
               <Col span={4}>
                 <Statistic
+                  title="Input Rate"
+                  value={performanceData.keystrokesPerSecond}
+                  suffix="keys/s"
+                  precision={2}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Network Samples"
+                  value={performanceData.networkLatencySamples}
+                  valueStyle={{ color: '#fa8c16' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="E2E P95 Latency"
+                  value={performanceData.p95E2ELatency || 0}
+                  suffix="ms"
+                  precision={1}
+                  valueStyle={{ color: '#722ed1' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="E2E Samples"
+                  value={performanceData.e2eSamples || 0}
+                  valueStyle={{ color: '#eb2f96' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
                   title="Update Rate"
                   value={performanceData.opsPerSecond}
                   suffix="ops/s"
@@ -779,35 +786,6 @@ const OTEditorWithMonitoring = forwardRef(({
                   value={performanceData.avgOperationSize}
                   suffix="bytes"
                   precision={0}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Input Rate"
-                  value={performanceData.keystrokesPerSecond}
-                  suffix="keys/s"
-                  precision={2}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Active Users"
-                  value={performanceData.activeConnections}
-                  valueStyle={{ color: '#1890ff' }}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Sync Windows"
-                  value={performanceData.windowCount || 1}
-                  valueStyle={{ color: '#52c41a' }}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Network Samples"
-                  value={performanceData.networkLatencySamples}
-                  valueStyle={{ color: '#fa8c16' }}
                 />
               </Col>
             </Row>

@@ -16,7 +16,6 @@ import DocumentList from "./components/Documents/DocumentList";
 import EditorPage from "./components/EditorPage/EditorPage";
 import YjsEditorWithMonitoring from "./components/AlgorithmComparison/YjsEditorWithMonitoring";
 import OTEditorWithMonitoring from "./components/AlgorithmComparison/OTEditorWithMonitoring";
-import AlgorithmComparisonPage from "./components/AlgorithmComparison/AlgorithmComparisonPage";
 import MemberList from "./components/Members/MemberList";
 import TeamSettings from "./components/Settings/TeamSettings";
 import GlobalHeader from "./components/GlobalHeader";
@@ -54,10 +53,7 @@ function App() {
               path='/performance-lab-ot'
               element={<OTEditorWithMonitoring />}
             />
-            <Route
-              path='/algorithm-comparison-lab'
-              element={<AlgorithmComparisonPage />}
-            />
+
             <Route path='/team/:teamId/*' element={<TeamLayout />}>
               <Route path='documents' element={<DocumentList />} />
               <Route path='members' element={<MemberList />} />

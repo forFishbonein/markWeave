@@ -35,7 +35,7 @@ const YjsEditorWithMonitoring = forwardRef(({
   onMetricsUpdate = null
 }, ref) => {
   const editorRef = useRef(null);
-  const [editorView, awareness, provider, isConnected] = useYjsEditor(docId, editorRef);
+  const [editorView, awareness, provider, isConnected, ydoc] = useYjsEditor(docId, editorRef);
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [performanceData, setPerformanceData] = useState(null);
   const [latencyHistory, setLatencyHistory] = useState([]);
@@ -54,7 +54,7 @@ const YjsEditorWithMonitoring = forwardRef(({
       monitorRef.current = new YjsPerformanceMonitor();
     }
     // 自动开始监控
-    if (provider && awareness && isConnected && !isMonitoring) {
+    if (ydoc && provider && awareness && isConnected && !isMonitoring) {
       handleStartMonitoring();
     }
     return () => {
@@ -65,60 +65,101 @@ const YjsEditorWithMonitoring = forwardRef(({
         clearInterval(refreshTimer.current);
       }
     };
-  }, [provider, awareness, isConnected]);
+  }, [ydoc, provider, awareness, isConnected]);
 
-  // 监控数据刷新 - 更频繁的更新
+  // 监控数据刷新 - 只在有实际变化时更新
   useEffect(() => {
     if (isMonitoring && monitorRef.current) {
-      refreshTimer.current = setInterval(() => {
+      // 初始加载时获取一次数据
+      const initialStats = monitorRef.current.getPerformanceStats();
+      if (initialStats) {
+        setPerformanceData(initialStats);
+        if (onMetricsUpdate) {
+          onMetricsUpdate({
+            // 基本操作指标
+            operationsCount: initialStats.documentUpdates || 0,
+            avgLatency: initialStats.avgLatency || 0,
+            p95Latency: initialStats.p95Latency || 0,
+
+            // 网络传输指标
+            bytesSent: initialStats.sentBytes || 0,
+            bytesReceived: initialStats.receivedBytes || 0,
+
+            // 协作用户指标
+            activeUsers: initialStats.totalWindows || 0,
+
+            // 🔥 修复：统一计算方式
+            opsPerSecond: initialStats.updatesPerSecond || 0,
+            bytesPerSecond: (initialStats.bandwidthKBps || 0) * 1024,
+
+            // 额外指标
+            keystrokes: initialStats.keystrokes || 0,
+            keystrokesPerSecond: initialStats.keystrokesPerSecond || 0,
+            pendingOperations: initialStats.pendingOperations || 0,
+            totalUpdateSize: initialStats.totalUpdateSize || 0,
+            avgUpdateSize: initialStats.avgUpdateSize || 0,
+
+            // 网络延迟指标
+            avgNetworkLatency: initialStats.avgNetworkLatency || 0,
+            networkLatencySamples: initialStats.networkLatencySamples || 0,
+
+            // 🔥 新增：端到端延迟指标
+            avgE2ELatency: initialStats.avgE2ELatency || 0,
+            p95E2ELatency: initialStats.p95E2ELatency || 0,
+            e2eSamples: initialStats.e2eSamples || 0,
+
+            // 监控状态
+            monitoringDuration: initialStats.monitoringDuration || 0,
+            isConnected: initialStats.isConnected || false,
+            windowId: initialStats.windowId || '',
+
+            // 数据样本统计
+            latencySamples: initialStats.latencySamples || 0,
+            recentLatencySamples: initialStats.recentLatencySamples || 0,
+
+            // 协作统计
+            activeCollaborators: initialStats.activeCollaborators || 0,
+            totalAwarenessChanges: initialStats.totalAwarenessChanges || 0,
+
+            // 数据源标识
+            algorithm: 'CRDT',
+            dataSource: 'yjs-real-monitoring'
+          });
+        }
+      }
+
+      // 只在用户操作时更新，而不是定时刷新
+      const handleUserActivity = () => {
         const stats = monitorRef.current.getPerformanceStats();
         if (stats) {
           setPerformanceData(stats);
-
-          // 通知父组件指标更新 - 🔥 统一指标格式
           if (onMetricsUpdate) {
             onMetricsUpdate({
-              // 基本操作指标
               operationsCount: stats.documentUpdates || 0,
               avgLatency: stats.avgLatency || 0,
               p95Latency: stats.p95Latency || 0,
-
-              // 网络传输指标
               bytesSent: stats.sentBytes || 0,
               bytesReceived: stats.receivedBytes || 0,
-
-              // 协作用户指标
               activeUsers: stats.totalWindows || 0,
-
-              // 🔥 修复：统一计算方式
-              opsPerSecond: stats.updatesPerSecond || 0,  // 使用已计算的值
-              bytesPerSecond: (stats.bandwidthKBps || 0) * 1024,  // 转换为字节/秒
-
-              // 额外指标
+              opsPerSecond: stats.updatesPerSecond || 0,
+              bytesPerSecond: (stats.bandwidthKBps || 0) * 1024,
               keystrokes: stats.keystrokes || 0,
               keystrokesPerSecond: stats.keystrokesPerSecond || 0,
               pendingOperations: stats.pendingOperations || 0,
               totalUpdateSize: stats.totalUpdateSize || 0,
               avgUpdateSize: stats.avgUpdateSize || 0,
-
-              // 网络延迟指标
               avgNetworkLatency: stats.avgNetworkLatency || 0,
               networkLatencySamples: stats.networkLatencySamples || 0,
-
-              // 监控状态
+              avgE2ELatency: stats.avgE2ELatency || 0,
+              p95E2ELatency: stats.p95E2ELatency || 0,
+              e2eSamples: stats.e2eSamples || 0,
               monitoringDuration: stats.monitoringDuration || 0,
               isConnected: stats.isConnected || false,
               windowId: stats.windowId || '',
-
-              // 数据样本统计
               latencySamples: stats.latencySamples || 0,
               recentLatencySamples: stats.recentLatencySamples || 0,
-
-              // 协作统计
               activeCollaborators: stats.activeCollaborators || 0,
               totalAwarenessChanges: stats.totalAwarenessChanges || 0,
-
-              // 数据源标识
               algorithm: 'CRDT',
               dataSource: 'yjs-real-monitoring'
             });
@@ -131,43 +172,44 @@ const YjsEditorWithMonitoring = forwardRef(({
                 timestamp: Date.now(),
                 latency: stats.avgLatency,
                 p95: stats.p95Latency,
+                e2eLatency: stats.avgE2ELatency || 0,
                 networkLatency: stats.avgNetworkLatency,
                 samples: stats.recentLatencySamples,
-                pending: stats.pendingOperations,
-                windows: stats.totalWindows
+                pending: stats.pendingOperations
               }];
-              return newHistory.slice(-30); // 保持最近30个数据点
+              return newHistory.slice(-30);
             });
           }
         }
-      }, 400); // 🔧 优化：每400ms刷新一次，与4秒P95窗口形成10倍合理关系
+      };
+
+      // 监听用户操作事件
+      document.addEventListener('keydown', handleUserActivity);
+      document.addEventListener('mousedown', handleUserActivity);
+
+      return () => {
+        document.removeEventListener('keydown', handleUserActivity);
+        document.removeEventListener('mousedown', handleUserActivity);
+      };
     } else {
       if (refreshTimer.current) {
         clearInterval(refreshTimer.current);
         refreshTimer.current = null;
       }
     }
-
-    return () => {
-      if (refreshTimer.current) {
-        clearInterval(refreshTimer.current);
-      }
-    };
-  }, [isMonitoring]);
+  }, [isMonitoring, onMetricsUpdate]);
 
   const handleStartMonitoring = () => {
-    // 🔥 修复：使用实际的全局ydoc而不是hook返回的
-    const actualYdoc = ydoc; // 从crdt模块导入的全局ydoc
-
-    if (!actualYdoc || !awareness || !provider || !isConnected) {
+    // 🔥 修复：使用hook返回的ydoc，确保与provider一致
+    if (!ydoc || !awareness || !provider || !isConnected) {
       message.error('Editor not fully initialized or not connected, please try again later');
       return;
     }
 
-    console.log("🔧 [DEBUG] 使用实际的ydoc:", {
-      actualYdoc: !!actualYdoc,
-      awareness: !!awareness,
-      provider: !!provider,
+    console.log("🔧 [DEBUG] 使用hook返回的ydoc:", {
+      hasYdoc: !!ydoc,
+      hasAwareness: !!awareness,
+      hasProvider: !!provider,
       isConnected
     });
 
@@ -175,8 +217,8 @@ const YjsEditorWithMonitoring = forwardRef(({
     setPerformanceData(null);
     setLatencyHistory([]);
 
-    monitorRef.current.startMonitoring(actualYdoc, awareness, provider);
-    message.success('🚀 Multi-window sync performance monitoring started, please input content in the editor');
+    monitorRef.current.startMonitoring(ydoc, awareness, provider);
+    message.success('🚀 Performance monitoring started, please input content in the editor');
   };
 
   const handleStopMonitoring = () => {
@@ -212,26 +254,16 @@ const YjsEditorWithMonitoring = forwardRef(({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `yjs-multi-window-performance-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+    a.download = `yjs-performance-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    message.success('📊 Multi-window academic data exported');
+    message.success('📊 Academic data exported');
   };
 
-  const handleMultiWindowTest = () => {
-    const newWindow = window.open(
-      window.location.href,
-      '_blank',
-      'width=900,height=700'
-    );
 
-    if (newWindow) {
-      message.success('✅ New window opened! Data will sync automatically, please edit in both windows to test');
-    }
-  };
 
   const getLatencyColor = (latency) => {
     if (latency < 20) return '#52c41a';
@@ -289,13 +321,15 @@ const YjsEditorWithMonitoring = forwardRef(({
       width: 70
     },
     {
-      title: 'Windows',
-      dataIndex: 'windows',
-      key: 'windows',
-      render: (windows) => (
-        <Tag color="blue" size="small">{windows}</Tag>
+      title: 'E2E (ms)',
+      dataIndex: 'e2eLatency',
+      key: 'e2eLatency',
+      render: (e2eLatency) => (
+        <span style={{ color: getLatencyColor(e2eLatency || 0), fontSize: '12px' }}>
+          {(e2eLatency || 0).toFixed(1)}
+        </span>
       ),
-      width: 50
+      width: 70
     }
   ];
 
@@ -352,7 +386,6 @@ const YjsEditorWithMonitoring = forwardRef(({
                 {performanceData && (
                   <Space size="small">
                     <span>Operations: {performanceData.operationsCount}</span>
-                    <span>Windows: {performanceData.totalWindows || 1}</span>
                   </Space>
                 )}
               </Col>
@@ -369,7 +402,7 @@ const YjsEditorWithMonitoring = forwardRef(({
         title={
           <Space>
             <ExperimentOutlined />
-            <span>Yjs CRDT Multi-window Sync Performance Monitor</span>
+            <span>CRDT Performance Monitor</span>
             <Tag color="purple">Real-time Sync Version</Tag>
           </Space>
         }
@@ -397,45 +430,11 @@ const YjsEditorWithMonitoring = forwardRef(({
             >
               Export Data
             </Button>
-            <Button
-              icon={<GlobalOutlined />}
-              onClick={handleMultiWindowTest}
-              type="primary"
-              ghost
-            >
-              Open New Window
-            </Button>
+
           </Space>
         }
       >
-        {/* Multi-window sync description */}
-        <Alert
-          message="🔄 Real-time Multi-window Sync Monitoring"
-          description="Supports real-time data sync across multiple windows. P95 latency is calculated based on recent data to ensure accuracy. Open multiple windows to edit simultaneously, data will merge automatically."
-          type="success"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
 
-        {performanceData && performanceData.totalWindows > 1 && (
-          <Alert
-            message={`🌐 Detected ${performanceData.totalWindows} Monitoring Windows`}
-            description="Data has been automatically merged from all windows, showing combined performance metrics from all monitoring points."
-            type="info"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
-
-        {!isMonitoring && (
-          <Alert
-            message="Multi-window Testing Guide"
-            description="1. Click 'Start Monitoring' → 2. Click 'Open New Window' → 3. Edit simultaneously in both windows → 4. Observe real-time sync performance data"
-            type="warning"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
 
         <Row gutter={16}>
           {/* Left: Editor */}
@@ -444,7 +443,7 @@ const YjsEditorWithMonitoring = forwardRef(({
               <div
                 ref={editorRef}
                 style={editorStyle}
-                placeholder="Enter content here, supports multi-window real-time sync monitoring..."
+                placeholder="Enter content here, supports real-time sync monitoring..."
               />
 
               <div style={{ marginTop: '12px', padding: '8px', backgroundColor: '#f6f8fa', borderRadius: '4px', fontSize: '12px' }}>
@@ -461,7 +460,6 @@ const YjsEditorWithMonitoring = forwardRef(({
                     {performanceData && (
                       <Space size="small">
                         <SyncOutlined style={{ color: '#1890ff' }} />
-                        <span>Windows: {performanceData.totalWindows}</span>
                         <span>Pending: {performanceData.pendingOperations}</span>
                       </Space>
                     )}
@@ -484,10 +482,10 @@ const YjsEditorWithMonitoring = forwardRef(({
                 <div>
                   {/* Core Metrics */}
                   <Row gutter={8} style={{ marginBottom: 16 }}>
-                    <Col span={12}>
+                    <Col span={8}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
-                          title="Real-time CRDT Latency"
+                          title="Real-time Latency"
                           value={performanceData.avgLatency}
                           suffix="ms"
                           precision={1}
@@ -506,7 +504,7 @@ const YjsEditorWithMonitoring = forwardRef(({
                         </div>
                       </Card>
                     </Col>
-                    <Col span={12}>
+                    <Col span={8}>
                       <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
                         <Statistic
                           title="Real-time P95 Latency"
@@ -525,6 +523,28 @@ const YjsEditorWithMonitoring = forwardRef(({
                         </Tag>
                         <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
                           Dynamically calculated, real-time updates
+                        </div>
+                      </Card>
+                    </Col>
+                    <Col span={8}>
+                      <Card size="small" style={{ textAlign: 'center', backgroundColor: '#f9f9f9' }}>
+                        <Statistic
+                          title="Real-time E2E Latency"
+                          value={performanceData.avgE2ELatency || 0}
+                          suffix="ms"
+                          precision={1}
+                          valueStyle={{
+                            color: getLatencyColor(performanceData.avgE2ELatency || 0),
+                            fontSize: '22px',
+                            fontWeight: 'bold'
+                          }}
+                          prefix={<GlobalOutlined />}
+                        />
+                        <Tag color={getLatencyColor(performanceData.avgE2ELatency || 0)} style={{ marginTop: '4px' }}>
+                          {getLatencyLevel(performanceData.avgE2ELatency || 0)}
+                        </Tag>
+                        <div style={{ fontSize: '10px', color: '#666', marginTop: '2px' }}>
+                          {performanceData.e2eSamples || 0} WebSocket samples
                         </div>
                       </Card>
                     </Col>
@@ -561,22 +581,16 @@ const YjsEditorWithMonitoring = forwardRef(({
                     </Col>
                   </Row>
 
-                  {/* Multi-window Sync Status */}
+                  {/* Sync Status */}
                   <div style={{ marginBottom: 16, padding: '8px', backgroundColor: '#e6f7ff', borderRadius: '4px', border: '1px solid #91d5ff' }}>
                     <Row gutter={16}>
-                      <Col span={8}>
-                        <Space size="small">
-                          <GlobalOutlined style={{ color: '#1890ff' }} />
-                          <span><strong>Windows:</strong> {performanceData.totalWindows}</span>
-                        </Space>
-                      </Col>
-                      <Col span={8}>
+                      <Col span={12}>
                         <Space size="small">
                           <ClockCircleOutlined style={{ color: '#52c41a' }} />
                           <span><strong>Recent Samples:</strong> {performanceData.recentLatencySamples}</span>
                         </Space>
                       </Col>
-                      <Col span={8}>
+                      <Col span={12}>
                         <Space size="small">
                           <SyncOutlined style={{ color: '#fa8c16' }} />
                           <span><strong>Pending:</strong> {performanceData.pendingOperations}</span>
@@ -593,11 +607,14 @@ const YjsEditorWithMonitoring = forwardRef(({
                       <span>Received: {(performanceData.receivedBytes / 1024).toFixed(2)} KB</span>
                       <span>Bandwidth: {performanceData.bandwidthKBps.toFixed(2)} KB/s</span>
                     </div>
-                    {performanceData.avgNetworkLatency > 0 && (
-                      <div style={{ marginTop: '4px', color: '#666' }}>
-                        Network Latency: {performanceData.avgNetworkLatency.toFixed(1)}ms
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', color: '#666' }}>
+                      {performanceData.avgNetworkLatency > 0 && (
+                        <span>Network Latency: {performanceData.avgNetworkLatency.toFixed(1)}ms</span>
+                      )}
+                      {performanceData.avgE2ELatency > 0 && (
+                        <span>E2E Latency: {performanceData.avgE2ELatency.toFixed(1)}ms ({performanceData.e2eSamples || 0} samples)</span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Monitoring Status */}
@@ -637,7 +654,7 @@ const YjsEditorWithMonitoring = forwardRef(({
                     <div>
                       <div style={{ fontSize: '16px', color: '#666' }}>Click "Start Monitoring" to begin collecting data</div>
                       <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
-                        Multi-window Sync Version: Real-time P95 calculation, automatic data merging
+                        Real-time Sync Version: Real-time P95 calculation and E2E latency monitoring
                       </div>
                     </div>
                   )}
@@ -653,47 +670,52 @@ const YjsEditorWithMonitoring = forwardRef(({
             <Row gutter={16}>
               <Col span={4}>
                 <Statistic
-                  title="Update Rate"
-                  value={performanceData.updatesPerSecond}
-                  suffix="ops/s"
-                  precision={2}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Average Update Size"
-                  value={performanceData.avgUpdateSize}
-                  suffix="bytes"
-                  precision={0}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
                   title="Input Rate"
                   value={performanceData.keystrokesPerSecond}
                   suffix="keys/s"
                   precision={2}
+                  valueStyle={{ color: '#fa8c16' }}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
-                  title="Active Users"
-                  value={performanceData.activeCollaborators}
-                  valueStyle={{ color: '#1890ff' }}
-                />
-              </Col>
-              <Col span={4}>
-                <Statistic
-                  title="Sync Windows"
-                  value={performanceData.totalWindows}
-                  valueStyle={{ color: '#52c41a' }}
+                  title="E2E P95 Latency"
+                  value={performanceData.p95E2ELatency || 0}
+                  suffix="ms"
+                  precision={1}
+                  valueStyle={{ color: '#722ed1' }}
                 />
               </Col>
               <Col span={4}>
                 <Statistic
                   title="Network Samples"
                   value={performanceData.networkLatencySamples}
-                  valueStyle={{ color: '#fa8c16' }}
+                  valueStyle={{ color: '#faad14' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="E2E Samples"
+                  value={performanceData.e2eSamples || 0}
+                  valueStyle={{ color: '#a0d911' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Update Rate"
+                  value={performanceData.updatesPerSecond}
+                  suffix="ops/s"
+                  precision={2}
+                  valueStyle={{ color: '#1890ff' }}
+                />
+              </Col>
+              <Col span={4}>
+                <Statistic
+                  title="Average Operation Size"
+                  value={performanceData.avgUpdateSize}
+                  suffix="bytes"
+                  precision={0}
+                  valueStyle={{ color: '#52c41a' }}
                 />
               </Col>
             </Row>

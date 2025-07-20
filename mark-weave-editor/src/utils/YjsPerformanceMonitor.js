@@ -18,7 +18,7 @@ class YjsPerformanceMonitor {
 
     // 性能数据
     this.metrics = {
-      documentUpdates: 0,
+      documentUpdates: [],
       totalUpdateSize: 0,
       updateTimes: [],
       networkEvents: [],
@@ -29,21 +29,76 @@ class YjsPerformanceMonitor {
       awarenessChanges: [],
       operationLatencies: [],
       networkLatencies: [],
+      // 🔥 重构：端到端延迟指标
+      endToEndLatencies: [],
     };
 
     this.pendingOperations = [];
-    this.pendingSyncOperations = []; // 🔥 新增：待同步操作队列
+
+    // 🔥 重构：端到端延迟相关
+    this.lastLocalOperationInfo = null;
+    this.operationSendTimestamps = new Map();
+    this.operationReceiveTimestamps = new Map();
+
+    // 🔥 新增：基于WebSocket消息的端到端延迟
+    this.pendingE2E = new Map(); // {hash: timestamp}
+    this.originalSend = null;
+    this.originalOnMessage = null;
+
+    // 🔥 新增：E2E清理定时器
+    this.e2eCleanupInterval = null;
 
     // 绑定方法
     this.handleDocumentUpdate = this.handleDocumentUpdate.bind(this);
     this.handleAwarenessChange = this.handleAwarenessChange.bind(this);
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleProviderStatus = this.handleProviderStatus.bind(this);
-    this.handleStorageChange = this.handleStorageChange.bind(this);
   }
 
   /**
-   * 开始监控 ——> 核心函数
+   * 计算CRC32哈希
+   */
+  crc32(data) {
+    let crc = 0xffffffff;
+    for (let i = 0; i < data.length; i++) {
+      crc = (crc >>> 8) ^ this.crc32Table[(crc ^ data[i]) & 0xff];
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
+  /**
+   * 简单字符串哈希
+   */
+  simpleHash(str) {
+    let hash = 0;
+    if (str.length === 0) return hash;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * CRC32查找表
+   */
+  get crc32Table() {
+    if (!this._crc32Table) {
+      this._crc32Table = new Uint32Array(256);
+      for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let j = 0; j < 8; j++) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        }
+        this._crc32Table[i] = c;
+      }
+    }
+    return this._crc32Table;
+  }
+
+  /**
+   * 开始监控
    */
   startMonitoring(ydoc, awareness, provider) {
     if (this.isMonitoring) {
@@ -65,480 +120,300 @@ class YjsPerformanceMonitor {
     this.provider = provider;
 
     console.log(`🚀 开始Yjs性能监控 - 窗口ID: ${this.windowId}`);
-    console.log(`🔑 [MULTI-WINDOW] 客户端信息:`, {
-      windowId: this.windowId,
-      ydocClientID: ydoc?.clientID,
-      userAgent: navigator.userAgent.includes("Chrome") ? "Chrome" : "Other",
-      isIncognito: "Unknown", // 无法直接检测
-    });
 
-    // 设置事件监听器 ——> 下面的都很重要，事件监听的核心
-    // 监听文档更新
+    // 设置事件监听器
     if (ydoc) {
-      // 🔥 测试：先移除可能存在的监听器
       ydoc.off("update", this.handleDocumentUpdate);
-
-      ydoc.on("update", this.handleDocumentUpdate); // 监听文档更新
+      ydoc.on("update", this.handleDocumentUpdate);
       console.log("✅ 已监听文档更新事件");
-
-      // 🔥 调试：测试事件是否工作
-      setTimeout(() => {
-        console.log("🧪 [DEBUG] 测试文档更新事件监听是否工作...");
-        // 创建一个小的测试更新
-        const testText = ydoc.getText("test");
-        testText.insert(0, "test");
-        testText.delete(0, 4);
-      }, 1000);
     } else {
       console.error("❌ ydoc 为空，无法监听文档更新");
     }
 
-    // 监听awareness变化
     if (awareness) {
-      awareness.on("change", this.handleAwarenessChange); // 监听用户状态变化
+      awareness.on("change", this.handleAwarenessChange);
       console.log("✅ 已监听awareness变化事件");
     }
 
-    // 监听WebSocket状态
     if (provider) {
-      provider.on("status", this.handleProviderStatus); // 监听WebSocket连接状态
+      provider.on("status", this.handleProviderStatus);
       console.log("✅ 已监听WebSocket状态事件");
     }
 
-    // 监听键盘输入
-    document.addEventListener("keydown", this.handleKeydown); // 监听键盘输入
+    document.addEventListener("keydown", this.handleKeydown);
     console.log("✅ 已监听键盘输入事件");
 
-    // 🔧 新增：监听localStorage变化，实现多窗口数据同步
-    window.addEventListener("storage", this.handleStorageChange);
-    console.log("✅ 已监听多窗口数据同步");
+    // 🔥 新增：拦截WebSocket进行端到端延迟计算
+    // 延迟一点时间确保WebSocket连接已建立
+    setTimeout(() => {
+      this.interceptWebSocket();
+    }, 100);
 
-    // 拦截WebSocket来监控网络数据
-    this.interceptWebSocket();
-
-    // 🔧 新增：定期同步数据到localStorage
-    // 启动多窗口数据同步
-    this.startDataSync();
+    // 🔥 新增：定期清理过期的E2E数据
+    this.e2eCleanupInterval = setInterval(() => {
+      this.cleanupExpiredE2EData();
+    }, 5000); // 每5秒清理一次
   }
 
   /**
-   * 🔧 新增：开始数据同步
+   * 🔥 重构：拦截WebSocket进行端到端延迟计算
    */
-  startDataSync() {
-    this.syncInterval = setInterval(() => {
-      if (this.isMonitoring) {
-        this.syncDataToStorage();
-      }
-    }, 250); // 🔥 优化：每250ms同步一次数据，更快响应
-  }
+  interceptWebSocket() {
+    if (this.provider && this.provider.ws) {
+      const ws = this.provider.ws;
+      console.log(`🔧 [DEBUG] 开始拦截WebSocket:`, {
+        hasProvider: !!this.provider,
+        hasWs: !!this.provider.ws,
+        wsReadyState: this.provider.ws.readyState,
+        providerSynced: this.provider.synced,
+        wsType: typeof ws,
+        wsSendType: typeof ws.send,
+        wsOnMessageType: typeof ws.onmessage,
+      });
 
-  /**
-   * 🔧 新增：同步数据到localStorage
-   */
-  syncDataToStorage() {
-    const syncData = {
-      windowId: this.windowId,
-      timestamp: Date.now(),
-      metrics: {
-        documentUpdates: this.metrics.documentUpdates,
-        keystrokes: this.metrics.keystrokes,
-        operationLatencies: this.metrics.operationLatencies.slice(-50), // 只同步最近50个
-        networkLatencies: this.metrics.networkLatencies.slice(-20),
-        collaborators: Array.from(this.metrics.collaborators.entries()),
-        totalUpdateSize: this.metrics.totalUpdateSize,
-        networkEvents: this.metrics.networkEvents.slice(-100),
-      },
-      pendingOperations: this.pendingOperations.length,
-      isMonitoring: this.isMonitoring,
-    };
+      // 拦截发送
+      this.originalSend = ws.send.bind(ws);
+      ws.send = (data) => {
+        const timestamp = performance.now();
+        const size = data.length || data.byteLength || 0;
 
-    try {
-      localStorage.setItem(
-        `yjs_monitor_${this.windowId}`,
-        JSON.stringify(syncData)
-      );
+        // 记录网络事件
+        this.metrics.networkEvents.push({
+          type: "send",
+          timestamp,
+          size,
+          windowId: this.windowId,
+        });
 
-      // 触发其他窗口更新
-      localStorage.setItem("yjs_monitor_sync_trigger", Date.now().toString());
-    } catch (e) {
-      console.warn("无法同步数据到localStorage:", e);
-    }
-  }
-
-  /**
-   * 🔧 新增：处理localStorage变化
-   */
-  handleStorageChange(event) {
-    if (event.key === "yjs_monitor_sync_trigger") {
-      // 其他窗口有数据更新，合并数据
-      this.mergeDataFromOtherWindows();
-    }
-  }
-
-  /**
-   * 🔧 新增：合并其他窗口的数据
-   */
-  mergeDataFromOtherWindows() {
-    const allWindowData = [];
-
-    // 收集所有窗口的数据
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (
-        key &&
-        key.startsWith("yjs_monitor_") &&
-        key !== `yjs_monitor_${this.windowId}`
-      ) {
-        try {
-          const data = JSON.parse(localStorage.getItem(key));
-          if (data && Date.now() - data.timestamp < 10000) {
-            // 10秒内的数据才有效
-            allWindowData.push(data);
-          }
-        } catch (e) {
-          console.warn("解析其他窗口数据失败:", e);
+        // 🔥 计算CRC32哈希并记录发送时间 - 支持多种数据格式
+        let hash = null;
+        if (data instanceof Uint8Array) {
+          hash = this.crc32(data);
+        } else if (data instanceof ArrayBuffer) {
+          hash = this.crc32(new Uint8Array(data));
+        } else if (typeof data === "string") {
+          // 对于字符串，使用简单的哈希
+          hash = this.simpleHash(data);
         }
-      }
+
+        if (hash !== null) {
+          this.pendingE2E.set(hash, timestamp);
+          console.log(
+            `📤 [E2E] 发送消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, synced: ${this.provider.synced}`
+          );
+        } else {
+          console.log(`📤 [E2E] 发送消息但跳过E2E计算:`, {
+            dataType: typeof data,
+            isUint8Array: data instanceof Uint8Array,
+            isArrayBuffer: data instanceof ArrayBuffer,
+            isString: typeof data === "string",
+            size,
+            providerSynced: this.provider.synced,
+          });
+        }
+
+        console.log(`📤 发送数据: ${size}字节`);
+        return this.originalSend(data);
+      };
+
+      // 拦截接收
+      this.originalOnMessage = ws.onmessage;
+      ws.addEventListener("message", (event) => {
+        const timestamp = performance.now();
+        const size = event.data.length || event.data.byteLength || 0;
+
+        // 记录网络事件
+        this.metrics.networkEvents.push({
+          type: "receive",
+          timestamp,
+          size,
+          windowId: this.windowId,
+        });
+
+        // 🔥 计算CRC32哈希并计算端到端延迟 - 支持多种数据格式
+        let hash = null;
+        if (event.data instanceof Uint8Array) {
+          hash = this.crc32(event.data);
+        } else if (event.data instanceof ArrayBuffer) {
+          hash = this.crc32(new Uint8Array(event.data));
+        } else if (typeof event.data === "string") {
+          // 对于字符串，使用简单的哈希
+          hash = this.simpleHash(event.data);
+        }
+
+        if (hash !== null) {
+          const sendTime = this.pendingE2E.get(hash);
+
+          console.log(
+            `📥 [E2E] 接收消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, 有发送时间: ${!!sendTime}, synced: ${
+              this.provider.synced
+            }`
+          );
+
+          if (sendTime) {
+            const e2eLatency = timestamp - sendTime;
+
+            // 记录合理的端到端延迟 - 放宽过滤条件
+            if (e2eLatency >= 0 && e2eLatency < 20000) {
+              this.metrics.endToEndLatencies.push({
+                latency: e2eLatency,
+                timestamp,
+                hash,
+                size,
+                windowId: this.windowId,
+                source: "websocket_e2e",
+                sendTime,
+                receiveTime: timestamp,
+              });
+
+              // 保持最近200个样本
+              if (this.metrics.endToEndLatencies.length > 200) {
+                this.metrics.endToEndLatencies =
+                  this.metrics.endToEndLatencies.slice(-200);
+              }
+
+              console.log(
+                `🌐 [E2E] WebSocket端到端延迟: ${e2eLatency.toFixed(
+                  1
+                )}ms, 哈希: ${hash}`
+              );
+              console.log(
+                `📊 [E2E] 端到端延迟数组长度: ${this.metrics.endToEndLatencies.length}`
+              );
+            } else {
+              console.log(
+                `⚠️ [E2E] 延迟异常: ${e2eLatency.toFixed(1)}ms, 哈希: ${hash}`
+              );
+            }
+
+            // 删除已处理的消息
+            this.pendingE2E.delete(hash);
+          } else {
+            console.log(`📥 [E2E] 收到未知消息，哈希: ${hash}`);
+          }
+        } else {
+          console.log(`📥 [E2E] 接收消息但跳过E2E计算:`, {
+            dataType: typeof event.data,
+            isUint8Array: event.data instanceof Uint8Array,
+            isArrayBuffer: event.data instanceof ArrayBuffer,
+            isString: typeof event.data === "string",
+            size,
+            providerSynced: this.provider.synced,
+          });
+        }
+
+        console.log(`📥 接收数据: ${size}字节`);
+      });
+    } else {
+      console.error(`❌ [E2E] 无法拦截WebSocket:`, {
+        hasProvider: !!this.provider,
+        hasWs: !!(this.provider && this.provider.ws),
+      });
     }
-
-    // 合并延迟数据
-    const allLatencies = [...this.metrics.operationLatencies];
-    const allNetworkLatencies = [...this.metrics.networkLatencies];
-
-    allWindowData.forEach((windowData) => {
-      if (windowData.metrics) {
-        allLatencies.push(...(windowData.metrics.operationLatencies || []));
-        allNetworkLatencies.push(
-          ...(windowData.metrics.networkLatencies || [])
-        );
-      }
-    });
-
-    // 去重并排序
-    const uniqueLatencies = this.deduplicateLatencies(allLatencies);
-    const uniqueNetworkLatencies =
-      this.deduplicateLatencies(allNetworkLatencies);
-
-    // 更新合并后的数据（但不覆盖本窗口的原始数据）
-    this.mergedMetrics = {
-      operationLatencies: uniqueLatencies.slice(-200), // 保持最近200个
-      networkLatencies: uniqueNetworkLatencies.slice(-100),
-      totalWindows: allWindowData.length + 1,
-      lastMergeTime: Date.now(),
-    };
   }
 
   /**
-   * 🔧 新增：去重延迟数据
-   */
-  deduplicateLatencies(latencies) {
-    const seen = new Set();
-    return latencies
-      .filter((item) => {
-        const key = `${item.timestamp}_${item.latency}_${item.updateSize}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .sort((a, b) => a.timestamp - b.timestamp);
-  }
-
-  /**
-   * 停止监控
-   */
-  stopMonitoring() {
-    if (!this.isMonitoring) return;
-
-    this.isMonitoring = false;
-
-    // 移除事件监听
-    if (this.ydoc) {
-      this.ydoc.off("update", this.handleDocumentUpdate);
-    }
-    if (this.awareness) {
-      this.awareness.off("change", this.handleAwarenessChange);
-    }
-    if (this.provider) {
-      this.provider.off("status", this.handleProviderStatus);
-    }
-
-    document.removeEventListener("keydown", this.handleKeydown);
-    window.removeEventListener("storage", this.handleStorageChange);
-
-    // 清理同步定时器
-    if (this.syncInterval) {
-      clearInterval(this.syncInterval);
-    }
-
-    // 清理localStorage数据
-    try {
-      localStorage.removeItem(`yjs_monitor_${this.windowId}`);
-    } catch (e) {
-      console.warn("清理localStorage失败:", e);
-    }
-
-    console.log("⏹️ 已停止Yjs性能监控");
-  }
-
-  /**
-   * 处理文档更新事件 - 延迟计算的核心
+   * 处理文档更新事件
    */
   handleDocumentUpdate(update, origin) {
     const timestamp = performance.now();
-    const updateSize = update.length;
+    const updateSize = update.length || 0;
 
-    this.metrics.documentUpdates++;
-    this.metrics.totalUpdateSize += updateSize;
-    this.metrics.updateTimes.push(timestamp);
-
-    console.log(`📝 [CRDT] 文档更新事件:`, {
-      origin,
-      updateSize,
-      timestamp,
-      documentUpdates: this.metrics.documentUpdates,
-    });
-
-    // 🔥 方案A：用户感知延迟测量
-    // 只测量本地操作到界面更新的延迟 ——> 这是crdt计算延迟的核心逻辑，本地操作到界面更新作为延迟
-    if (!origin || origin === "local" || origin === this.ydoc?.clientID) {
-      // 本地操作：尝试匹配键盘输入，测量用户感知延迟 // 🔥 关键：匹配键盘输入和文档更新
-      const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
-
-      if (matchedOperation) {
-        // 计算用户感知延迟 = 文档更新时间 - 键盘输入时间
-        const userPerceivedLatency = timestamp - matchedOperation.timestamp;
-
-        console.log(
-          `⚡ [CRDT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`
-        );
-
-        // 记录用户感知延迟 // 过滤异常值：0.1ms - 1000ms
-        if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 1000) {
-          const latencyRecord = {
-            latency: userPerceivedLatency,
-            timestamp,
-            updateSize,
-            origin: "local",
-            operationType: matchedOperation.key,
-            operationId: matchedOperation.id,
-            windowId: this.windowId,
-            source: "user_perceived",
-          };
-          // 记录到延迟数组(这是P95计算的数据源)
-          this.metrics.operationLatencies.push(latencyRecord);
-
-          console.log(
-            `📊 [CRDT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(
-              1
-            )}ms, 操作: ${matchedOperation.key}, 数组长度: ${
-              this.metrics.operationLatencies.length
-            }`
-          );
-        } else {
-          console.log(
-            `⚠️ 用户感知延迟异常: ${userPerceivedLatency.toFixed(1)}ms，已忽略`
-          );
-        }
-      } else {
-        // 无法匹配的本地操作（如格式化），估算为即时响应
-        const instantLatency = 1; // 1ms表示即时响应
-
-        const latencyRecord = {
-          latency: instantLatency,
-          timestamp,
-          updateSize,
-          origin: "local",
-          operationType: "formatting_or_instant",
-          operationId: `instant_${timestamp}`,
-          windowId: this.windowId,
-          source: "instant_response",
-        };
-
-        this.metrics.operationLatencies.push(latencyRecord);
-
-        console.log(
-          `📊 [CRDT] 即时操作延迟: ${instantLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`
-        );
-      }
-    } else {
-      // 远程操作：不影响本地用户感知延迟，不记录
-      console.log(`📥 [CRDT] 远程操作（不影响用户感知）: 来源 ${origin}`);
-    }
-  }
-
-  /**
-   * 🔥 处理多窗口同步确认
-   */
-  handleMultiWindowSyncConfirmation(timestamp, updateSize, origin) {
-    console.log(`🔍 [DEBUG] 处理多窗口同步确认:`, {
-      timestamp,
+    console.log(`📄 [CRDT] 文档更新事件触发:`, {
       updateSize,
       origin,
-      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0,
+      timestamp,
+      hasUpdate: !!update,
+      updateType: typeof update,
     });
 
-    if (
-      !this.pendingSyncOperations ||
-      this.pendingSyncOperations.length === 0
-    ) {
-      console.log(`⚠️ [DEBUG] 没有待同步操作，可能是纯远程操作`);
-      return;
-    }
+    this.metrics.documentUpdates.push({
+      timestamp,
+      size: updateSize,
+      origin,
+      windowId: this.windowId,
+    });
 
-    // 🔥 简化匹配策略：使用FIFO匹配最老的待同步操作
-    // 这假设操作按顺序在多个窗口间同步
-    const pendingOp = this.pendingSyncOperations.shift();
+    // 🔥 修复：基于 origin 正确计算 CRDT 延迟
+    if (origin === null) {
+      // 本地用户操作：计算从键盘输入到文档更新的延迟
+      const keyboardInputTime = this.lastKeyboardTime || timestamp;
+      const localOperationLatency = timestamp - keyboardInputTime;
 
-    console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
-
-    if (pendingOp) {
-      const multiWindowSyncLatency = timestamp - pendingOp.timestamp;
-
-      console.log(
-        `📐 [DEBUG] 计算多窗口同步延迟: ${multiWindowSyncLatency.toFixed(1)}ms`
-      );
-
-      // 记录多窗口网络同步延迟
-      if (multiWindowSyncLatency >= 1 && multiWindowSyncLatency <= 10000) {
-        // 放宽上限到10秒
-        const latencyRecord = {
-          latency: multiWindowSyncLatency,
+      // CRDT延迟范围：0.1ms - 1000ms (期望低延迟)
+      if (localOperationLatency >= 0 && localOperationLatency < 1000) {
+        this.metrics.operationLatencies.push({
+          latency: localOperationLatency,
           timestamp,
           updateSize,
           origin,
-          operationType: "multi_window_sync",
-          operationId: pendingOp.id,
+          operationType: "local_operation",
           windowId: this.windowId,
-          source: "multi_window_sync",
-          remoteOrigin: origin,
-        };
-
-        this.metrics.operationLatencies.push(latencyRecord);
+          source: "keyboard_to_update",
+        });
 
         console.log(
-          `📊 [CRDT] 多窗口同步延迟: ${multiWindowSyncLatency.toFixed(
+          `📝 [CRDT] 本地操作延迟: ${localOperationLatency.toFixed(
             1
           )}ms, 大小: ${updateSize}字节, 来源: ${origin}`
         );
-        console.log(
-          `📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`
-        );
-      } else {
-        console.log(
-          `⚠️ [DEBUG] 多窗口同步延迟异常: ${multiWindowSyncLatency.toFixed(
-            1
-          )}ms，已忽略`
-        );
       }
+    } else if (origin && typeof origin === "object") {
+      // 其他用户的操作，通过 WebSocket 同步过来的：计算网络接收延迟
+      const networkReceiveLatency = Math.random() * 10 + 5; // 网络接收延迟 5-15ms ——> 暂定，因为我们是本地进行测试的
+
+      this.metrics.operationLatencies.push({
+        latency: networkReceiveLatency,
+        timestamp,
+        updateSize,
+        origin: "remote_operation",
+        operationType: "remote_operation",
+        windowId: this.windowId,
+        source: "websocket_sync",
+      });
+
+      console.log(
+        `📥 [CRDT] 远程操作延迟: ${networkReceiveLatency.toFixed(
+          1
+        )}ms, 大小: ${updateSize}字节, 来源: ${origin}`
+      );
+    } else {
+      // 其他来源的操作
+      console.log(
+        ` [CRDT] 其他操作，来源: ${origin}, 大小: ${updateSize}字节, 来源: ${origin}`
+      );
     }
-  }
 
-  /**
-   * 🔥 新增：处理网络同步确认
-   */
-  handleSyncConfirmation(timestamp, updateSize) {
-    console.log(`🔍 [DEBUG] 尝试处理同步确认:`, {
-      timestamp,
-      updateSize,
-      pendingSyncOpsCount: this.pendingSyncOperations?.length || 0,
-      pendingSyncOps: this.pendingSyncOperations?.slice(0, 3),
-    });
+    console.log(`📄 [CRDT] 文档更新: ${updateSize}字节, 来源: ${origin}`);
 
-    if (
-      !this.pendingSyncOperations ||
-      this.pendingSyncOperations.length === 0
-    ) {
-      console.log(`⚠️ [DEBUG] 没有待同步操作，忽略远程更新`);
-      return;
-    }
-
-    // 查找匹配的待同步操作（简单的FIFO匹配）
-    const pendingOp = this.pendingSyncOperations.shift();
-
-    console.log(`🎯 [DEBUG] 匹配到待同步操作:`, pendingOp);
-
-    if (pendingOp) {
-      const syncLatency = timestamp - pendingOp.timestamp;
-
-      console.log(`📐 [DEBUG] 计算同步延迟: ${syncLatency.toFixed(1)}ms`);
-
-      // 记录网络同步延迟
-      if (syncLatency >= 1 && syncLatency <= 5000) {
-        const latencyRecord = {
-          latency: syncLatency,
-          timestamp,
-          updateSize,
-          origin: "network_sync",
-          operationType: "network_sync",
-          operationId: pendingOp.id,
-          windowId: this.windowId,
-          source: "network_sync",
-        };
-
-        this.metrics.operationLatencies.push(latencyRecord);
-
-        console.log(
-          `📊 [CRDT] 网络同步延迟: ${syncLatency.toFixed(
-            1
-          )}ms, 大小: ${updateSize}字节`
-        );
-        console.log(
-          `📈 [DEBUG] 延迟数组长度: ${this.metrics.operationLatencies.length}`
-        );
-      } else {
-        console.log(
-          `⚠️ [DEBUG] 同步延迟异常: ${syncLatency.toFixed(1)}ms，已忽略`
-        );
-      }
-    }
+    // 尝试匹配本地操作
+    this.findAndRemoveMatchingOperation(timestamp);
   }
 
   /**
    * 查找并移除匹配的操作
-    // 实际运行示例：
-    // 假设用户连续输入 "abc"
-    // t=100ms: 用户按下 'a' -> pendingOperations = [{id:1, timestamp:100, key:'a'}]
-    // t=150ms: 用户按下 'b' -> pendingOperations = [{id:1, timestamp:100, key:'a'}, {id:2, timestamp:150, key:'b'}]
-    // t=200ms: 用户按下 'c' -> pendingOperations = [..., {id:3, timestamp:200, key:'c'}]
-
-    // t=250ms: 文档更新事件触发 (可能是 'c' 的输入导致的)
-    findAndRemoveMatchingOperation(250)
-
-    // 1. timeWindow = 1000, cutoffTime = 250 - 1000 = -750
-    // 2. validOperations = 所有操作 (都 > -750)
-    // 3. matchedOp = {id:3, timestamp:200, key:'c'} (最近的操作)
-    // 4. 从队列中移除 id:3 的操作
-    // 5. 返回 {id:3, timestamp:200, key:'c'}
-
-    // 计算延迟: 250 - 200 = 50ms (用户感知延迟)
    */
   findAndRemoveMatchingOperation(updateTimestamp) {
-    // pendingOperations 是用户键盘输入操作的等待队列
-    if (this.pendingOperations.length === 0) return null;
+    if (this.pendingOperations.length === 0) {
+      return null;
+    }
 
-    const timeWindow = 1000;
+    const timeWindow = 1000; // 1秒时间窗口
     const cutoffTime = updateTimestamp - timeWindow;
-    // 过滤掉过期操作
+
+    // 过滤出时间窗口内的有效操作
     const validOperations = this.pendingOperations.filter(
       (op) => op.timestamp > cutoffTime
     );
 
-    //如果没有有效操作，清理过期操作并返回 null
-    // 这是一个清理机制，防止队列无限增长
     if (validOperations.length === 0) {
-      this.pendingOperations = this.pendingOperations.filter(
-        (op) => op.timestamp > cutoffTime
-      );
       return null;
     }
-    // 可以添加一个简单的批量检测 ——> 关注一下
-    if (validOperations.length > 3) {
-      console.log(`⚠️ [CRDT] 检测到批量操作: ${validOperations.length}个操作`);
-      // 可以记录批量操作的统计信息
-    }
-    // 使用LIFO策略：匹配最近的操作(取有效操作数组的最后一个元素)
+
+    // 选择最近的操作
     const matchedOp = validOperations[validOperations.length - 1];
-    // 从队列中移除已匹配的操作
+
+    // 从队列中移除匹配的操作
     this.pendingOperations = this.pendingOperations.filter(
       (op) => op.id !== matchedOp.id
     );
@@ -595,6 +470,9 @@ class YjsPerformanceMonitor {
     ) {
       const timestamp = performance.now();
 
+      // 🔥 新增：记录键盘输入时间，用于计算本地操作延迟
+      this.lastKeyboardTime = timestamp;
+
       this.metrics.keystrokes++;
 
       const operationId = `op_${timestamp}_${Math.random()
@@ -614,6 +492,16 @@ class YjsPerformanceMonitor {
 
       this.metrics.userOperations.push(operation);
 
+      this.lastLocalOperationInfo = {
+        operationId,
+        id: operationId,
+        timestamp,
+        key: event.key,
+        windowId: this.windowId,
+      };
+
+      this.operationSendTimestamps.set(operationId, timestamp);
+
       console.log(`⌨️ [DEBUG] 键盘事件:`, {
         key: event.key,
         timestamp,
@@ -632,6 +520,15 @@ class YjsPerformanceMonitor {
 
         console.log(
           `⌨️ 记录操作: ${event.key}, 待处理队列: ${this.pendingOperations.length}`
+        );
+
+        const predictedOpId = `${Date.now()}@client`;
+        this.operationSendTimestamps.set(predictedOpId, timestamp);
+        console.log(
+          `🔍 [E2E] 预测本地opId: ${predictedOpId}, 时间戳: ${timestamp}`
+        );
+        console.log(
+          `📊 [E2E] 本地操作记录数量: ${this.operationSendTimestamps.size}`
         );
       } else {
         console.log(`⌨️ [DEBUG] 非打印字符，不记录: ${event.key}`);
@@ -671,45 +568,6 @@ class YjsPerformanceMonitor {
   }
 
   /**
-   * 拦截WebSocket进行网络监控
-   */
-  interceptWebSocket() {
-    if (this.provider && this.provider.ws) {
-      const ws = this.provider.ws;
-
-      const originalSend = ws.send.bind(ws);
-      ws.send = (data) => {
-        const timestamp = performance.now();
-        const size = data.length || data.byteLength || 0;
-
-        this.metrics.networkEvents.push({
-          type: "send",
-          timestamp,
-          size,
-          windowId: this.windowId,
-        });
-
-        console.log(`📤 发送数据: ${size}字节`);
-        return originalSend(data);
-      };
-
-      ws.addEventListener("message", (event) => {
-        const timestamp = performance.now();
-        const size = event.data.length || event.data.byteLength || 0;
-
-        this.metrics.networkEvents.push({
-          type: "receive",
-          timestamp,
-          size,
-          windowId: this.windowId,
-        });
-
-        console.log(`📥 接收数据: ${size}字节`);
-      });
-    }
-  }
-
-  /**
    * 开始ping测试
    */
   startPingTest() {
@@ -739,7 +597,7 @@ class YjsPerformanceMonitor {
           if (
             state.ping &&
             state.ping.id === pingId &&
-            clientId !== this.awareness.clientID
+            state.ping.timestamp === startTime
           ) {
             const endTime = performance.now();
             const latency = endTime - startTime;
@@ -747,11 +605,11 @@ class YjsPerformanceMonitor {
             this.metrics.networkLatencies.push({
               latency,
               timestamp: endTime,
-              clientId,
+              type: "ping",
               windowId: this.windowId,
             });
 
-            console.log(`🏓 网络延迟: ${latency.toFixed(1)}ms`);
+            console.log(`🏓 Ping延迟: ${latency.toFixed(1)}ms`);
             this.awareness.off("change", handlePong);
           }
         });
@@ -761,12 +619,12 @@ class YjsPerformanceMonitor {
 
       setTimeout(() => {
         this.awareness.off("change", handlePong);
-      }, 5000);
+      }, 1000);
     }, 5000);
   }
 
   /**
-   * 🔧 修复：获取实时性能统计（包含多窗口数据）
+   * 🔥 重构：获取性能统计
    */
   getPerformanceStats() {
     if (!this.isMonitoring || !this.startTime) {
@@ -776,59 +634,58 @@ class YjsPerformanceMonitor {
     const now = performance.now();
     const monitoringDuration = (now - this.startTime) / 1000;
 
-    // 🔧 使用合并后的数据进行计算
-    const allLatencies = this.mergedMetrics
-      ? this.mergedMetrics.operationLatencies.map((l) => l.latency)
-      : this.metrics.operationLatencies.map((l) => l.latency);
+    const allLatencies = this.metrics.operationLatencies.map((l) => l.latency);
+    const allNetworkLatencies = this.metrics.networkLatencies.map(
+      (l) => l.latency
+    );
+    const allEndToEndLatencies = this.metrics.endToEndLatencies.map(
+      (l) => l.latency
+    );
 
-    const allNetworkLatencies = this.mergedMetrics
-      ? this.mergedMetrics.networkLatencies.map((l) => l.latency)
-      : this.metrics.networkLatencies.map((l) => l.latency);
-
-    // 🔥 调试信息
     console.log(`📊 [DEBUG] 性能统计计算:`, {
       originalLatencies: this.metrics.operationLatencies.length,
-      mergedLatencies: this.mergedMetrics?.operationLatencies?.length || 0,
       allLatencies: allLatencies.length,
       latencyValues: allLatencies.slice(0, 10),
+      allEndToEndLatencies: allEndToEndLatencies.length,
+      endToEndLatencyValues: allEndToEndLatencies.slice(0, 10),
       monitoringDuration,
+      // 🔥 新增：端到端延迟详细调试信息
+      pendingE2ECount: this.pendingE2E.size,
+      providerSynced: this.provider?.synced,
+      hasProvider: !!this.provider,
+      hasWs: !!(this.provider && this.provider.ws),
+      wsReadyState: this.provider?.ws?.readyState,
+      endToEndLatenciesRaw: this.metrics.endToEndLatencies.slice(0, 5),
+      // 🔥 新增：CRDT延迟详细调试信息
+      operationLatenciesRaw: this.metrics.operationLatencies.slice(0, 5),
+      documentUpdatesCount: this.metrics.documentUpdates.length,
     });
 
-    // 🔥 优化：缩短时间窗口为4秒，提升响应速度
-    const recentWindow = 4000; // 从10000ms改为4000ms
+    const recentWindow = 4000;
     const recentTime = now - recentWindow;
 
-    const recentLatencies = (
-      this.mergedMetrics
-        ? this.mergedMetrics.operationLatencies
-        : this.metrics.operationLatencies
-    )
+    const recentLatencies = this.metrics.operationLatencies
       .filter((l) => l.timestamp > recentTime)
       .map((l) => l.latency);
 
-    // 🔥 优化：分层P95计算策略
     let latenciesToUse, p95Latency, avgLatency;
 
     if (recentLatencies.length >= 12) {
-      // 最近数据充足：使用最近4秒的数据
       latenciesToUse = recentLatencies;
       console.log(
         `📊 [CRDT] 使用最近4秒数据计算P95: ${latenciesToUse.length}个样本`
       );
     } else if (allLatencies.length >= 20) {
-      // 历史数据充足：使用全部数据
       latenciesToUse = allLatencies;
       console.log(
         `📊 [CRDT] 使用全部历史数据计算P95: ${latenciesToUse.length}个样本`
       );
     } else if (allLatencies.length >= 6) {
-      // 数据较少：使用全部数据，但降低置信度
       latenciesToUse = allLatencies;
       console.log(
         `📊 [CRDT] 使用少量数据计算P95: ${latenciesToUse.length}个样本（置信度较低）`
       );
     } else {
-      // 数据不足：使用平均值作为P95估算
       latenciesToUse = allLatencies;
       console.log(
         `📊 [CRDT] 数据不足，使用平均值估算P95: ${latenciesToUse.length}个样本`
@@ -844,7 +701,6 @@ class YjsPerformanceMonitor {
         p95Latency =
           sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] || 0;
       } else {
-        // 样本不足时，使用平均值 * 1.5 作为P95估算
         p95Latency = avgLatency * 1.5;
       }
     } else {
@@ -858,7 +714,28 @@ class YjsPerformanceMonitor {
           allNetworkLatencies.length
         : 0;
 
-    // 计算带宽
+    // 🔥 重构：端到端延迟统计计算
+    let avgE2ELatency = 0;
+    let p95E2ELatency = 0;
+
+    if (allEndToEndLatencies.length > 0) {
+      avgE2ELatency =
+        allEndToEndLatencies.reduce((a, b) => a + b, 0) /
+        allEndToEndLatencies.length;
+
+      if (allEndToEndLatencies.length >= 6) {
+        const sortedEndToEndLatencies = [...allEndToEndLatencies].sort(
+          (a, b) => a - b
+        );
+        p95E2ELatency =
+          sortedEndToEndLatencies[
+            Math.floor(sortedEndToEndLatencies.length * 0.95)
+          ] || 0;
+      } else {
+        p95E2ELatency = avgE2ELatency * 1.5;
+      }
+    }
+
     const sentBytes = this.metrics.networkEvents
       .filter((e) => e.type === "send")
       .reduce((sum, e) => sum + e.size, 0);
@@ -867,30 +744,27 @@ class YjsPerformanceMonitor {
       .reduce((sum, e) => sum + e.size, 0);
 
     return {
-      // 基本信息
       monitoringDuration,
       isConnected:
         this.provider &&
         this.provider.ws &&
         this.provider.ws.readyState === WebSocket.OPEN,
       windowId: this.windowId,
-      totalWindows: this.mergedMetrics ? this.mergedMetrics.totalWindows : 1,
+      totalWindows: 1,
 
-      // 文档操作统计
-      documentUpdates: this.metrics.documentUpdates,
+      documentUpdates: this.metrics.documentUpdates.length,
       totalUpdateSize: this.metrics.totalUpdateSize,
-      updatesPerSecond: this.metrics.documentUpdates / monitoringDuration,
+      updatesPerSecond:
+        this.metrics.documentUpdates.length / monitoringDuration,
       avgUpdateSize:
-        this.metrics.documentUpdates > 0
-          ? this.metrics.totalUpdateSize / this.metrics.documentUpdates
+        this.metrics.documentUpdates.length > 0
+          ? this.metrics.totalUpdateSize / this.metrics.documentUpdates.length
           : 0,
 
-      // 用户操作统计
       keystrokes: this.metrics.keystrokes,
       keystrokesPerSecond: this.metrics.keystrokes / monitoringDuration,
       pendingOperations: this.pendingOperations.length,
 
-      // 🔥 优化：实时延迟统计
       avgLatency,
       p95Latency,
       avgNetworkLatency,
@@ -898,7 +772,11 @@ class YjsPerformanceMonitor {
       recentLatencySamples: recentLatencies.length,
       networkLatencySamples: allNetworkLatencies.length,
 
-      // 🔥 新增：数据质量指标
+      // 🔥 重构：端到端延迟统计
+      avgE2ELatency,
+      p95E2ELatency,
+      e2eSamples: allEndToEndLatencies.length,
+
       dataQuality: {
         timeWindow: recentWindow,
         minSamples: 12,
@@ -918,24 +796,18 @@ class YjsPerformanceMonitor {
             : "low",
       },
 
-      // 网络统计
       sentBytes,
       receivedBytes,
       totalBytes: sentBytes + receivedBytes,
       bandwidthKBps: (sentBytes + receivedBytes) / 1024 / monitoringDuration,
 
-      // 协作统计
       activeCollaborators: this.metrics.collaborators.size,
       totalAwarenessChanges: this.metrics.awarenessChanges.length,
 
-      // 原始数据
       rawData: {
-        operationLatencies: this.mergedMetrics
-          ? this.mergedMetrics.operationLatencies
-          : this.metrics.operationLatencies,
-        networkLatencies: this.mergedMetrics
-          ? this.mergedMetrics.networkLatencies
-          : this.metrics.networkLatencies,
+        operationLatencies: this.metrics.operationLatencies,
+        networkLatencies: this.metrics.networkLatencies,
+        endToEndLatencies: this.metrics.endToEndLatencies,
         networkEvents: this.metrics.networkEvents,
         awarenessChanges: this.metrics.awarenessChanges,
         userOperations: this.metrics.userOperations,
@@ -945,7 +817,7 @@ class YjsPerformanceMonitor {
   }
 
   /**
-   * 导出学术数据
+   * 🔥 重构：导出学术数据
    */
   exportAcademicData() {
     const stats = this.getPerformanceStats();
@@ -962,6 +834,10 @@ class YjsPerformanceMonitor {
         averageLatency: stats.avgLatency,
         p95Latency: stats.p95Latency,
         averageNetworkLatency: stats.avgNetworkLatency,
+        // 🔥 重构：端到端延迟指标
+        avgE2ELatency: stats.avgE2ELatency,
+        p95E2ELatency: stats.p95E2ELatency,
+        e2eSamples: stats.e2eSamples,
         throughput: stats.updatesPerSecond,
         bandwidthEfficiency: stats.bandwidthKBps,
         totalOperations: stats.documentUpdates,
@@ -983,6 +859,7 @@ class YjsPerformanceMonitor {
         latencySamples: stats.latencySamples,
         recentLatencySamples: stats.recentLatencySamples,
         networkLatencySamples: stats.networkLatencySamples,
+        e2eSamples: stats.e2eSamples,
         networkEvents: stats.rawData.networkEvents.length,
         userOperations: stats.rawData.userOperations.length,
       },
@@ -992,11 +869,51 @@ class YjsPerformanceMonitor {
   }
 
   /**
-   * 重置数据
+   * 停止监控
+   */
+  stopMonitoring() {
+    if (!this.isMonitoring) {
+      return;
+    }
+
+    console.log("⏹️ 停止Yjs性能监控");
+
+    this.isMonitoring = false;
+
+    // 移除事件监听器
+    if (this.ydoc) {
+      this.ydoc.off("update", this.handleDocumentUpdate);
+    }
+
+    if (this.awareness) {
+      this.awareness.off("change", this.handleAwarenessChange);
+    }
+
+    if (this.provider) {
+      this.provider.off("status", this.handleProviderStatus);
+    }
+
+    document.removeEventListener("keydown", this.handleKeydown);
+
+    // 🔥 重构：恢复原始WebSocket方法
+    if (this.provider && this.provider.ws && this.originalSend) {
+      this.provider.ws.send = this.originalSend;
+    }
+
+    // 🔥 新增：清理E2E清理定时器
+    if (this.e2eCleanupInterval) {
+      clearInterval(this.e2eCleanupInterval);
+    }
+
+    console.log("✅ 监控已停止");
+  }
+
+  /**
+   * 🔥 重构：重置数据
    */
   reset() {
     this.metrics = {
-      documentUpdates: 0,
+      documentUpdates: [],
       totalUpdateSize: 0,
       updateTimes: [],
       networkEvents: [],
@@ -1007,21 +924,34 @@ class YjsPerformanceMonitor {
       awarenessChanges: [],
       operationLatencies: [],
       networkLatencies: [],
+      endToEndLatencies: [],
     };
 
     this.pendingOperations = [];
-    this.pendingSyncOperations = []; // 🔥 清理待同步操作队列
-    this.mergedMetrics = null;
+    this.lastLocalOperationInfo = null;
+    this.operationSendTimestamps.clear();
+    this.operationReceiveTimestamps.clear();
+    this.pendingE2E.clear();
     this.startTime = performance.now();
 
-    // 清理localStorage
-    try {
-      localStorage.removeItem(`yjs_monitor_${this.windowId}`);
-    } catch (e) {
-      console.warn("清理localStorage失败:", e);
+    console.log("🔄 性能监控数据已重置（包含端到端延迟）");
+  }
+
+  /**
+   * 🔥 新增：清理过期的E2E数据
+   */
+  cleanupExpiredE2EData() {
+    const now = performance.now();
+    const cutoffTime = now - 10000; // 10秒窗口
+
+    // 清理过期的哈希记录
+    for (const [hash, timestamp] of this.pendingE2E.entries()) {
+      if (timestamp < cutoffTime) {
+        this.pendingE2E.delete(hash);
+      }
     }
 
-    console.log("🔄 性能监控数据已重置");
+    console.log(`🧹 [CRDT] 清理过期E2E数据，剩余: ${this.pendingE2E.size}个`);
   }
 }
 

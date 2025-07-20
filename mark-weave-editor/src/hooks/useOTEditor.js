@@ -33,9 +33,9 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
   const isInitializedRef = useRef(false);
   const { user: authUser } = useAuth();
 
-  console.log("🔧 [OT] 当前文档ID:", docId, "集合:", collection);
-
   useEffect(() => {
+    console.log("🔧 [OT] 当前文档ID:", docId, "集合:", collection);
+
     if (!editorRef.current || !docId || isInitializedRef.current) return;
 
     console.log("🚀 [OT] 初始化OT编辑器", { docId, collection });
@@ -142,9 +142,6 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         setTimeout(() => {
           client.subscribeDocument(collection, docId);
         }, 100);
-
-        // 启动多窗口同步
-        startMultiWindowSync();
       });
 
       client.on("disconnect", (data) => {
@@ -214,33 +211,6 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       console.error("❌ [OT] 编辑器初始化失败:", error);
       setIsConnected(false);
     }
-  };
-
-  const startMultiWindowSync = () => {
-    // 定期同步用户在线状态
-    window.otSyncInterval = setInterval(() => {
-      if (otClientRef.current && isConnected && authUser) {
-        const clientId = otClientRef.current.connectionId || `ot_${Date.now()}`;
-        const userKey = `ot_user_${clientId}`;
-
-        try {
-          const existingUser = localStorage.getItem(userKey);
-          if (existingUser) {
-            const userInfo = JSON.parse(existingUser);
-            userInfo.lastSeen = Date.now();
-            userInfo.online = true;
-            localStorage.setItem(userKey, JSON.stringify(userInfo));
-
-            console.log("⏰ [OT] 定期同步用户在线状态");
-          }
-        } catch (error) {
-          console.warn("[OT] 同步用户状态失败:", error);
-        }
-
-        // 清理过期用户
-        cleanupExpiredUsers();
-      }
-    }, 3000); // 每3秒同步一次
   };
 
   const handleStorageChange = (event) => {
@@ -980,12 +950,11 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
     }
   };
 
-  // 获取多窗口协作状态
+  // 获取协作状态
   const getCollaborationState = () => {
     return {
       userStates: Array.from(userStates.values()),
       activeUsers: userStates.size,
-      isMultiWindow: userStates.size > 1,
     };
   };
 

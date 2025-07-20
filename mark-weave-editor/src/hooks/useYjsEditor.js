@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-14 23:42:03
+ * @LastEditTime: 2025-07-21 03:51:12
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -39,6 +39,7 @@ export function useYjsEditor(docId, editorRef) {
   const providerRef = useRef(null);
   const awarenessRef = useRef(null);
   const syncIntervalRef = useRef(null);
+  const ydocRef = useRef(null); // 添加 ydoc 引用
 
   const [editorView, setEditorView] = useState(null);
   const [awareness, setAwareness] = useState(null);
@@ -55,6 +56,8 @@ export function useYjsEditor(docId, editorRef) {
     console.log("🔄 为文档", docId, "创建新的 Y.Doc");
     resetYDoc();
     const newYDoc = getYDoc(); // 使用 getter 获取实际的 Y.Doc 实例
+    ydocRef.current = newYDoc; // 存储到 ref 中
+    ydocRef.current = newYDoc; // 存储到 ref 中
 
     const fetchInitialState = async () => {
       try {
@@ -64,7 +67,12 @@ export function useYjsEditor(docId, editorRef) {
         if (res.ok) {
           const data = await res.json();
           if (data && data.update) {
-            const uint8 = Uint8Array.from(Buffer.from(data.update, "base64"));
+            // 在浏览器环境中使用 atob 和 Uint8Array 替代 Buffer
+            const binaryString = atob(data.update);
+            const uint8 = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+              uint8[i] = binaryString.charCodeAt(i);
+            }
             newYDoc.transact(() => {
               Y.applyUpdate(newYDoc, uint8);
             });
@@ -164,20 +172,20 @@ export function useYjsEditor(docId, editorRef) {
       // 立即设置用户信息
       setUserInfo();
 
-      // 定期强制同步awareness状态，确保其他客户端能看到
-      const syncInterval = setInterval(() => {
-        if (aw.getLocalState().user) {
-          // 更新时间戳触发awareness变化
-          aw.setLocalStateField("lastSeen", Date.now());
-          // TODO
-          // console.log("⏰ 定期同步用户在线状态");
-        }
-      }, 3000); // 每3秒同步一次
+      // 移除定期同步，只在用户实际活动时更新状态
+      // const syncInterval = setInterval(() => {
+      //   if (aw.getLocalState().user) {
+      //     // 更新时间戳触发awareness变化
+      //     aw.setLocalStateField("lastSeen", Date.now());
+      //     // TODO
+      //     // console.log("⏰ 定期同步用户在线状态");
+      //   }
+      // }, 3000); // 每3秒同步一次
 
       setAwareness(aw);
       // 存到 ref，用于外层 cleanup
       awarenessRef.current = aw;
-      syncIntervalRef.current = syncInterval;
+      // syncIntervalRef.current = syncInterval; // 不再需要，因为移除了定时器
 
       wsProvider.on("status", (event) => {
         console.log("🔌 WebSocket状态变化：", event.status);
@@ -359,7 +367,7 @@ export function useYjsEditor(docId, editorRef) {
 
       // 定义 cleanup 逻辑，并存储到外层变量
       cleanup = () => {
-        clearInterval(syncInterval);
+        // clearInterval(syncInterval); // 不再需要，因为移除了定时器
 
         aw.setLocalState(null);
 
@@ -383,5 +391,5 @@ export function useYjsEditor(docId, editorRef) {
     };
   }, [docId, authUser]); // 添加authUser依赖
 
-  return [editorView, awareness, provider, isConnected]; // Add isConnected to return values
+  return [editorView, awareness, provider, isConnected, ydocRef.current]; // Add ydoc to return values
 }

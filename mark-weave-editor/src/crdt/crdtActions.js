@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:27
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-13 18:46:41
+ * @LastEditTime: 2025-07-21 05:28:28
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -176,13 +176,15 @@ export function addBold(startId, endId, boundaryType = "after") {
 
   // 增强时间戳唯一性，避免多窗口时间戳冲突
   const timestamp = Date.now();
-  const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
+  const opId = `${timestamp}_${formatOpCounter}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}@client`;
   formatOpCounter += 1;
-  
+
   // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
   // 直接使用传入的boundaryType，确保格式范围准确
   const adjustedBoundaryType = boundaryType;
-  
+
   const markOp = {
     opId,
     action: "addMark",
@@ -191,12 +193,9 @@ export function addBold(startId, endId, boundaryType = "after") {
     // 使用调整后的边界类型
     end: { type: adjustedBoundaryType, opId: endId },
     timestamp, // 记录操作的时间戳
-    // 🔧 新增：多窗口同步标识
-    multiWindow: true,
-    clientId: `client_${Date.now()}`,
   };
   yformatOps.push([markOp]);
-  console.log("🔄 Bold addMark (多窗口优化):", { opId, boundaryType: adjustedBoundaryType });
+  console.log("🔄 Bold addMark:", { opId, boundaryType: adjustedBoundaryType });
 }
 
 //取消的时候在中间是before，否则会导致多取消一个，在末尾才是after
@@ -205,13 +204,15 @@ export function removeBold(startId, endId, boundaryType = "before") {
 
   // 增强时间戳唯一性，避免多窗口时间戳冲突
   const timestamp = Date.now();
-  const opId = `${timestamp}_${formatOpCounter}_${Math.random().toString(36).substr(2, 9)}@client`;
+  const opId = `${timestamp}_${formatOpCounter}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}@client`;
   formatOpCounter += 1;
-  
+
   // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
   // 直接使用传入的boundaryType，确保格式范围准确
   const adjustedBoundaryType = boundaryType;
-  
+
   const markOp = {
     opId,
     action: "removeMark",
@@ -219,13 +220,13 @@ export function removeBold(startId, endId, boundaryType = "before") {
     start: { type: "before", opId: startId },
     end: { type: adjustedBoundaryType, opId: endId },
     timestamp, // 记录操作的时间戳
-    // 🔧 新增：多窗口同步标识
-    multiWindow: true,
-    clientId: `client_${Date.now()}`,
   };
   // 注意：如果你的 CRDT 需要 push([markOp])，那就这样写
   yformatOps.push([markOp]);
-  console.log("🔄 Bold removeMark (多窗口优化):", { opId, boundaryType: adjustedBoundaryType });
+  console.log("🔄 Bold removeMark:", {
+    opId,
+    boundaryType: adjustedBoundaryType,
+  });
 }
 // CRDT.js 中的辅助函数：添加斜体标记（em）
 export function addEm(startId, endId, boundaryType = "after") {

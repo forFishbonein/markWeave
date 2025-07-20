@@ -180,6 +180,7 @@ class OTClient {
         this.triggerCallback("connected", { connectionId: message.id });
         break;
       case "doc":
+      case "docUpdate":
         this.handleDocumentUpdate(message);
         break;
       case "op":

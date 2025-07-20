@@ -5,8 +5,7 @@ import {
   LogoutOutlined,
   SettingOutlined,
   BarChartOutlined,
-  SwapOutlined,
-  FieldTimeOutlined
+  SwapOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -98,7 +97,7 @@ const GlobalHeader = () => {
             e.target.style.color = '#52c41a';
           }}
         >
-          CRDT性能分析
+          CRDT Performance
         </Button>
         <Button
           type="text"
@@ -119,29 +118,9 @@ const GlobalHeader = () => {
             e.target.style.color = '#fa8c16';
           }}
         >
-          OT性能分析
+          OT Performance
         </Button>
-        <Button
-          type="text"
-          icon={<FieldTimeOutlined />}
-          onClick={() => navigate('/algorithm-comparison-lab')}
-          style={{
-            color: '#722ed1',
-            fontWeight: 500,
-            height: '32px',
-            padding: '4px 12px',
-            borderRadius: '6px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.color = '#531dab';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.color = '#722ed1';
-          }}
-        >
-          算法对比分析
-        </Button>
+
       </Space>
 
       {/* 右侧：用户菜单 */}
