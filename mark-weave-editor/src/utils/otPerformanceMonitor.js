@@ -59,7 +59,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 开始监控
+   * 开始监控  ——> 调用了setupRealEventListeners
    */
   startMonitoring(otClient) {
     if (this.isMonitoring) return;
@@ -84,7 +84,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 设置真实事件监听器
+   * 设置真实事件监听器  ——> 核心函数
    */
   setupRealEventListeners() {
     // 键盘事件监听

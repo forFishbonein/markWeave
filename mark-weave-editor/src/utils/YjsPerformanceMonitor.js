@@ -43,7 +43,7 @@ class YjsPerformanceMonitor {
   }
 
   /**
-   * 开始监控
+   * 开始监控 ——> 核心函数
    */
   startMonitoring(ydoc, awareness, provider) {
     if (this.isMonitoring) {
@@ -72,12 +72,13 @@ class YjsPerformanceMonitor {
       isIncognito: "Unknown", // 无法直接检测
     });
 
+    // 设置事件监听器 ——> 下面的都很重要，事件监听的核心
     // 监听文档更新
     if (ydoc) {
       // 🔥 测试：先移除可能存在的监听器
       ydoc.off("update", this.handleDocumentUpdate);
 
-      ydoc.on("update", this.handleDocumentUpdate);
+      ydoc.on("update", this.handleDocumentUpdate); // 监听文档更新
       console.log("✅ 已监听文档更新事件");
 
       // 🔥 调试：测试事件是否工作
@@ -94,18 +95,18 @@ class YjsPerformanceMonitor {
 
     // 监听awareness变化
     if (awareness) {
-      awareness.on("change", this.handleAwarenessChange);
+      awareness.on("change", this.handleAwarenessChange); // 监听用户状态变化
       console.log("✅ 已监听awareness变化事件");
     }
 
     // 监听WebSocket状态
     if (provider) {
-      provider.on("status", this.handleProviderStatus);
+      provider.on("status", this.handleProviderStatus); // 监听WebSocket连接状态
       console.log("✅ 已监听WebSocket状态事件");
     }
 
     // 监听键盘输入
-    document.addEventListener("keydown", this.handleKeydown);
+    document.addEventListener("keydown", this.handleKeydown); // 监听键盘输入
     console.log("✅ 已监听键盘输入事件");
 
     // 🔧 新增：监听localStorage变化，实现多窗口数据同步
@@ -116,6 +117,7 @@ class YjsPerformanceMonitor {
     this.interceptWebSocket();
 
     // 🔧 新增：定期同步数据到localStorage
+    // 启动多窗口数据同步
     this.startDataSync();
   }
 
@@ -279,7 +281,7 @@ class YjsPerformanceMonitor {
   }
 
   /**
-   * 处理文档更新事件
+   * 处理文档更新事件 - 延迟计算的核心
    */
   handleDocumentUpdate(update, origin) {
     const timestamp = performance.now();
@@ -297,19 +299,20 @@ class YjsPerformanceMonitor {
     });
 
     // 🔥 方案A：用户感知延迟测量
-    // 只测量本地操作到界面更新的延迟
+    // 只测量本地操作到界面更新的延迟 ——> 这是crdt计算延迟的核心逻辑，本地操作到界面更新作为延迟
     if (!origin || origin === "local" || origin === this.ydoc?.clientID) {
-      // 本地操作：尝试匹配键盘输入，测量用户感知延迟
+      // 本地操作：尝试匹配键盘输入，测量用户感知延迟 // 🔥 关键：匹配键盘输入和文档更新
       const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
 
       if (matchedOperation) {
+        // 计算用户感知延迟 = 文档更新时间 - 键盘输入时间
         const userPerceivedLatency = timestamp - matchedOperation.timestamp;
 
         console.log(
           `⚡ [CRDT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`
         );
 
-        // 记录用户感知延迟
+        // 记录用户感知延迟 // 过滤异常值：0.1ms - 1000ms
         if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 1000) {
           const latencyRecord = {
             latency: userPerceivedLatency,
@@ -321,7 +324,7 @@ class YjsPerformanceMonitor {
             windowId: this.windowId,
             source: "user_perceived",
           };
-
+          // 记录到延迟数组(这是P95计算的数据源)
           this.metrics.operationLatencies.push(latencyRecord);
 
           console.log(
@@ -492,26 +495,50 @@ class YjsPerformanceMonitor {
 
   /**
    * 查找并移除匹配的操作
+    // 实际运行示例：
+    // 假设用户连续输入 "abc"
+    // t=100ms: 用户按下 'a' -> pendingOperations = [{id:1, timestamp:100, key:'a'}]
+    // t=150ms: 用户按下 'b' -> pendingOperations = [{id:1, timestamp:100, key:'a'}, {id:2, timestamp:150, key:'b'}]
+    // t=200ms: 用户按下 'c' -> pendingOperations = [..., {id:3, timestamp:200, key:'c'}]
+
+    // t=250ms: 文档更新事件触发 (可能是 'c' 的输入导致的)
+    findAndRemoveMatchingOperation(250)
+
+    // 1. timeWindow = 1000, cutoffTime = 250 - 1000 = -750
+    // 2. validOperations = 所有操作 (都 > -750)
+    // 3. matchedOp = {id:3, timestamp:200, key:'c'} (最近的操作)
+    // 4. 从队列中移除 id:3 的操作
+    // 5. 返回 {id:3, timestamp:200, key:'c'}
+
+    // 计算延迟: 250 - 200 = 50ms (用户感知延迟)
    */
   findAndRemoveMatchingOperation(updateTimestamp) {
+    // pendingOperations 是用户键盘输入操作的等待队列
     if (this.pendingOperations.length === 0) return null;
 
     const timeWindow = 1000;
     const cutoffTime = updateTimestamp - timeWindow;
-
+    // 过滤掉过期操作
     const validOperations = this.pendingOperations.filter(
       (op) => op.timestamp > cutoffTime
     );
 
+    //如果没有有效操作，清理过期操作并返回 null
+    // 这是一个清理机制，防止队列无限增长
     if (validOperations.length === 0) {
       this.pendingOperations = this.pendingOperations.filter(
         (op) => op.timestamp > cutoffTime
       );
       return null;
     }
-
+    // 可以添加一个简单的批量检测 ——> 关注一下
+    if (validOperations.length > 3) {
+      console.log(`⚠️ [CRDT] 检测到批量操作: ${validOperations.length}个操作`);
+      // 可以记录批量操作的统计信息
+    }
+    // 使用LIFO策略：匹配最近的操作(取有效操作数组的最后一个元素)
     const matchedOp = validOperations[validOperations.length - 1];
-
+    // 从队列中移除已匹配的操作
     this.pendingOperations = this.pendingOperations.filter(
       (op) => op.id !== matchedOp.id
     );
