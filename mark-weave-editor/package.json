@@ -37,6 +37,7 @@
     "test:clean": "node save-clean-test-results.js",
     "test:concurrent": "npm run test:crdt -- --testNamePattern=\"并发插入完整测试套件\"",
     "test:concurrent:save": "node save-concurrent-tests.js",
+    "benchmark:crdt_dual_user": "node benchmark/scenarios/crdt_dual_user.js",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
@@ -44,7 +45,8 @@
     "fast-check": "^3.15.0",
     "babel-jest": "^29.7.0",
     "@babel/core": "^7.24.0",
-    "@babel/preset-env": "^7.24.0"
+    "@babel/preset-env": "^7.24.0",
+    "playwright": "^1.43.1"
   },
   "jest": {
     "testEnvironment": "node",
