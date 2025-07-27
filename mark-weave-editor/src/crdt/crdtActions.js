@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:27
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-21 05:28:28
+ * @LastEditTime: 2025-07-27 07:44:36
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -16,16 +16,74 @@ function getProp(obj, key) {
   return typeof obj?.get === "function" ? obj.get(key) : obj[key];
 }
 
+let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
+let formatOpCounter = 0; // 用于确保格式操作的唯一性
+
+// 🔧 添加opId解析和比较函数
+function parseOpId(opId) {
+  const parts = opId.split("@");
+  const timestampPart = parts[0];
+  const userId = parts[1] || "client";
+
+  // 解析时间戳和计数器
+  const timestampParts = timestampPart.split("_");
+  const timestamp = parseInt(timestampParts[0]);
+  const counter = timestampParts.length > 1 ? parseInt(timestampParts[1]) : 0;
+
+  return { timestamp, counter, userId };
+}
+
+function compareOpIds(opId1, opId2) {
+  // 检查是否是旧格式（没有下划线）
+  const isOldFormat1 = !opId1.includes("_");
+  const isOldFormat2 = !opId2.includes("_");
+
+  if (isOldFormat1 && isOldFormat2) {
+    // 都是旧格式，使用简单的时间戳比较
+    const timestamp1 = parseInt(opId1.split("@")[0]);
+    const timestamp2 = parseInt(opId2.split("@")[0]);
+    return timestamp1 - timestamp2;
+  }
+
+  if (isOldFormat1 || isOldFormat2) {
+    // 混合格式，旧格式优先（向后兼容）
+    return isOldFormat1 ? -1 : 1;
+  }
+
+  // 都是新格式，使用完整解析
+  const parsed1 = parseOpId(opId1);
+  const parsed2 = parseOpId(opId2);
+
+  if (parsed1.timestamp !== parsed2.timestamp) {
+    return parsed1.timestamp - parsed2.timestamp;
+  }
+
+  if (parsed1.counter !== parsed2.counter) {
+    return parsed1.counter - parsed2.counter;
+  }
+
+  return parsed1.userId.localeCompare(parsed2.userId);
+}
+
 // 2️⃣ 插入字符
-export function insertChar(afterId, ch) {
+export function insertChar(afterId, ch, awareness = null) {
   const ychars = getYChars();
 
-  // 使用正常时间戳，让后插入的排在后面
-  const opId = `${Date.now()}@client`;
+  // 获取用户标识
+  let userId = "unknown";
+  if (awareness) {
+    const localState = awareness.getLocalState();
+    userId = localState?.user?.id || localState?.user?.name || "unknown";
+  }
+
+  const opId = `${Date.now()}_${localCounter}@${userId}`;
+  localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
+
   const newChar = new Y.Map();
   newChar.set("opId", opId);
   newChar.set("ch", ch);
   newChar.set("deleted", false);
+  newChar.set("userId", userId);
 
   let index;
   if (afterId) {
@@ -42,18 +100,17 @@ export function insertChar(afterId, ch) {
     }
   } else {
     // afterId为null时，插入到开头，但要考虑时间戳排序
-    const currentTimestamp = parseInt(opId.split("@")[0]);
+    const currentOpId = opId;
     const chars = ychars.toArray();
     let insertIndex = 0;
 
-    // 向后查找，直到找到时间戳更大的字符
+    // 向后查找，直到找到opId更大的字符
     while (insertIndex < chars.length) {
       const nextChar = chars[insertIndex];
       const nextOpId = getProp(nextChar, "opId");
-      const nextTimestamp = parseInt(nextOpId.split("@")[0]);
 
-      // 如果下一个字符的时间戳更大，则插入在它之前
-      if (nextTimestamp > currentTimestamp) {
+      // 使用智能比较函数
+      if (compareOpIds(nextOpId, currentOpId) > 0) {
         break;
       }
       insertIndex++;
@@ -64,10 +121,16 @@ export function insertChar(afterId, ch) {
 
   ychars.insert(index, [newChar]);
 }
-let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
-let formatOpCounter = 0; // 用于确保格式操作的唯一性
-export function insertText(afterId, text) {
+
+export function insertText(afterId, text, awareness = null) {
   const ychars = getYChars();
+
+  // 获取用户标识
+  let userId = "unknown";
+  if (awareness) {
+    const localState = awareness.getLocalState();
+    userId = localState?.user?.id || localState?.user?.name || "unknown";
+  }
 
   // 将文本拆分成单个字符
   const charsArr = text.split("");
@@ -77,15 +140,16 @@ export function insertText(afterId, text) {
     const ch = charsArr[i];
 
     // 生成唯一 opId，使用正常时间戳 + 递增 counter，保证唯一且可排序
-    const opId = `${Date.now()}_${localCounter}@client`;
+    const opId = `${Date.now()}_${localCounter}@${userId}`;
     localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
 
     const newChar = new Y.Map();
     newChar.set("opId", opId);
     newChar.set("ch", ch);
     newChar.set("deleted", false);
+    newChar.set("userId", userId);
 
-    // 计算插入位置 - 修复逻辑
+    // 计算插入位置
     let index;
     if (currentAfterId) {
       // 找到afterId字符的位置
@@ -100,8 +164,22 @@ export function insertText(afterId, text) {
         index = afterIndex + 1;
       }
     } else {
-      // afterId为null时，插入到开头
-      index = 0;
+      // afterId为null时，使用智能比较进行排序
+      const currentOpId = opId;
+      const chars = ychars.toArray();
+      let insertIndex = 0;
+
+      while (insertIndex < chars.length) {
+        const nextChar = chars[insertIndex];
+        const nextOpId = getProp(nextChar, "opId");
+
+        if (compareOpIds(nextOpId, currentOpId) > 0) {
+          break;
+        }
+        insertIndex++;
+      }
+
+      index = insertIndex;
     }
 
     // 插入当前字符操作

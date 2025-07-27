@@ -38,6 +38,17 @@
     "test:concurrent": "npm run test:crdt -- --testNamePattern=\"并发插入完整测试套件\"",
     "test:concurrent:save": "node save-concurrent-tests.js",
     "benchmark:crdt_dual_user": "node benchmark/scenarios/crdt_dual_user.js",
+    "benchmark:crdt_dual_user:1": "node benchmark/scenarios/crdt_dual_user.js benchmark1",
+    "benchmark:crdt_dual_user:2": "node benchmark/scenarios/crdt_dual_user.js benchmark2",
+    "benchmark:crdt_dual_user:3": "node benchmark/scenarios/crdt_dual_user.js benchmark3",
+    "benchmark:crdt_dual_user:4": "node benchmark/scenarios/crdt_dual_user.js benchmark4",
+    "benchmark:crdt_dual_user:all": "node benchmark/scenarios/crdt_dual_user.js all",
+    "benchmark:analyze:multi": "node benchmark/runMultiBenchmarkAnalysis.js",
+    "benchmark:full:multi": "npm run benchmark:crdt_dual_user:all && npm run benchmark:analyze:multi",
+    "benchmark:suite": "node benchmark/scenarios/crdt_benchmark_suite.js",
+    "benchmark:suite:analyze": "npm run benchmark:suite && npm run benchmark:analyze",
+    "benchmark:analyze": "node benchmark/runAnalysis.js",
+    "benchmark:full": "npm run benchmark:crdt_dual_user && npm run benchmark:analyze",
     "eject": "react-scripts eject"
   },
   "devDependencies": {

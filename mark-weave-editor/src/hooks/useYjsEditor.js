@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-21 03:51:12
+ * @LastEditTime: 2025-07-27 07:29:52
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -272,7 +272,9 @@ export function useYjsEditor(docId, editorRef) {
                   // 🚀 直接从 slice 中读取文本
                   console.log(
                     "step.slice.content",
-                    step.slice.content,
+                    insertPos,
+                    afterId,
+                    step.slice.content.content[0].text,
                     step.from,
                     step.to
                   );
@@ -284,9 +286,9 @@ export function useYjsEditor(docId, editorRef) {
                   console.log("text", text); //取出本次要插入的内容
                   // 根据文本长度决定调用 insertText 或 insertChar
                   if (text.length > 1) {
-                    insertText(afterId, text);
+                    insertText(afterId, text, aw);
                   } else {
-                    insertChar(afterId, text);
+                    insertChar(afterId, text, aw);
                   }
                 } else if (
                   step.from !== step.to &&

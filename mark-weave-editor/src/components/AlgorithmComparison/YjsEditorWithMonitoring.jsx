@@ -50,11 +50,46 @@ const YjsEditorWithMonitoring = forwardRef(({
 
   // 初始化监控器
   useEffect(() => {
+    console.log("🔧 [DEBUG] useEffect 运行，检查监控器状态:", {
+      hasMonitorRef: !!monitorRef.current,
+      hasYdoc: !!ydoc,
+      hasProvider: !!provider,
+      hasAwareness: !!awareness,
+      isMonitoring
+    });
+
     if (!monitorRef.current) {
+      console.log("🔧 [DEBUG] 创建新的 YjsPerformanceMonitor");
       monitorRef.current = new YjsPerformanceMonitor();
+      // 挂载到 window 上，供 benchmarkApi.js 访问
+      window.crdtMonitor = monitorRef.current;
+      console.log("🔧 [DEBUG] window.crdtMonitor 已挂载:", !!window.crdtMonitor);
     }
-    // 自动开始监控
-    if (ydoc && provider && awareness && isConnected && !isMonitoring) {
+
+    // 挂载 Yjs 相关对象到 window，供 Playwright 检测
+    if (ydoc) window.ydoc = ydoc;
+    if (provider) window.provider = provider;
+    if (awareness) window.awareness = awareness;
+
+    // 暴露强制初始化函数给 Playwright
+    window.forceInitCrdtMonitor = () => {
+      if (!monitorRef.current) {
+        console.log("🔧 [FORCE] 强制创建监控器");
+        monitorRef.current = new YjsPerformanceMonitor();
+      }
+      // 无论监控器是否已存在，都要确保挂载到 window 上
+      window.crdtMonitor = monitorRef.current;
+      console.log("🔧 [FORCE] 监控器已挂载到 window.crdtMonitor:", !!window.crdtMonitor);
+
+      if (ydoc && provider && awareness && !isMonitoring) {
+        console.log("🔧 [FORCE] 强制开始监控");
+        handleStartMonitoring();
+      }
+      return !!window.crdtMonitor;
+    };
+
+    // 自动开始监控 - 移除 isConnected 限制，确保监控器总是可用
+    if (ydoc && provider && awareness && !isMonitoring) {
       handleStartMonitoring();
     }
     return () => {
@@ -64,8 +99,16 @@ const YjsEditorWithMonitoring = forwardRef(({
       if (refreshTimer.current) {
         clearInterval(refreshTimer.current);
       }
+      // 清理 window 上的引用
+      if (window.crdtMonitor === monitorRef.current) {
+        delete window.crdtMonitor;
+      }
+      // 清理 Yjs 对象引用
+      if (window.ydoc === ydoc) delete window.ydoc;
+      if (window.provider === provider) delete window.provider;
+      if (window.awareness === awareness) delete window.awareness;
     };
-  }, [ydoc, provider, awareness, isConnected]);
+  }, [ydoc, provider, awareness]);
 
   // 监控数据刷新 - 只在有实际变化时更新
   useEffect(() => {
@@ -201,8 +244,8 @@ const YjsEditorWithMonitoring = forwardRef(({
 
   const handleStartMonitoring = () => {
     // 🔥 修复：使用hook返回的ydoc，确保与provider一致
-    if (!ydoc || !awareness || !provider || !isConnected) {
-      message.error('Editor not fully initialized or not connected, please try again later');
+    if (!ydoc || !awareness || !provider) {
+      message.error('Editor not fully initialized, please try again later');
       return;
     }
 

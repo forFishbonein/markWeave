@@ -198,21 +198,21 @@ class YjsPerformanceMonitor {
 
         if (hash !== null) {
           this.pendingE2E.set(hash, timestamp);
-          console.log(
-            `📤 [E2E] 发送消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, synced: ${this.provider.synced}`
-          );
+          // console.log(
+          //   `📤 [E2E] 发送消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, synced: ${this.provider.synced}`
+          // );
         } else {
-          console.log(`📤 [E2E] 发送消息但跳过E2E计算:`, {
-            dataType: typeof data,
-            isUint8Array: data instanceof Uint8Array,
-            isArrayBuffer: data instanceof ArrayBuffer,
-            isString: typeof data === "string",
-            size,
-            providerSynced: this.provider.synced,
-          });
+          // console.log(`📤 [E2E] 发送消息但跳过E2E计算:`, {
+          //   dataType: typeof data,
+          //   isUint8Array: data instanceof Uint8Array,
+          //   isArrayBuffer: data instanceof ArrayBuffer,
+          //   isString: typeof data === "string",
+          //   size,
+          //   providerSynced: this.provider.synced,
+          // });
         }
 
-        console.log(`📤 发送数据: ${size}字节`);
+        // console.log(`📤 发送数据: ${size}字节`);
         return this.originalSend(data);
       };
 
@@ -244,11 +244,11 @@ class YjsPerformanceMonitor {
         if (hash !== null) {
           const sendTime = this.pendingE2E.get(hash);
 
-          console.log(
-            `📥 [E2E] 接收消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, 有发送时间: ${!!sendTime}, synced: ${
-              this.provider.synced
-            }`
-          );
+          // console.log(
+          //   `📥 [E2E] 接收消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, 有发送时间: ${!!sendTime}, synced: ${
+          //     this.provider.synced
+          //   }`
+          // );
 
           if (sendTime) {
             const e2eLatency = timestamp - sendTime;
@@ -272,14 +272,14 @@ class YjsPerformanceMonitor {
                   this.metrics.endToEndLatencies.slice(-200);
               }
 
-              console.log(
-                `🌐 [E2E] WebSocket端到端延迟: ${e2eLatency.toFixed(
-                  1
-                )}ms, 哈希: ${hash}`
-              );
-              console.log(
-                `📊 [E2E] 端到端延迟数组长度: ${this.metrics.endToEndLatencies.length}`
-              );
+              // console.log(
+              //   `🌐 [E2E] WebSocket端到端延迟: ${e2eLatency.toFixed(
+              //     1
+              //   )}ms, 哈希: ${hash}`
+              // );
+              // console.log(
+              //   `📊 [E2E] 端到端延迟数组长度: ${this.metrics.endToEndLatencies.length}`
+              // );
             } else {
               console.log(
                 `⚠️ [E2E] 延迟异常: ${e2eLatency.toFixed(1)}ms, 哈希: ${hash}`
@@ -292,17 +292,17 @@ class YjsPerformanceMonitor {
             console.log(`📥 [E2E] 收到未知消息，哈希: ${hash}`);
           }
         } else {
-          console.log(`📥 [E2E] 接收消息但跳过E2E计算:`, {
-            dataType: typeof event.data,
-            isUint8Array: event.data instanceof Uint8Array,
-            isArrayBuffer: event.data instanceof ArrayBuffer,
-            isString: typeof event.data === "string",
-            size,
-            providerSynced: this.provider.synced,
-          });
+          // console.log(`📥 [E2E] 接收消息但跳过E2E计算:`, {
+          //   dataType: typeof event.data,
+          //   isUint8Array: event.data instanceof Uint8Array,
+          //   isArrayBuffer: event.data instanceof ArrayBuffer,
+          //   isString: typeof event.data === "string",
+          //   size,
+          //   providerSynced: this.provider.synced,
+          // });
         }
 
-        console.log(`📥 接收数据: ${size}字节`);
+        // console.log(`📥 接收数据: ${size}字节`);
       });
     } else {
       console.error(`❌ [E2E] 无法拦截WebSocket:`, {
@@ -319,13 +319,13 @@ class YjsPerformanceMonitor {
     const timestamp = performance.now();
     const updateSize = update.length || 0;
 
-    console.log(`📄 [CRDT] 文档更新事件触发:`, {
-      updateSize,
-      origin,
-      timestamp,
-      hasUpdate: !!update,
-      updateType: typeof update,
-    });
+    // console.log(`📄 [CRDT] 文档更新事件触发:`, {
+    //   updateSize,
+    //   origin,
+    //   timestamp,
+    //   hasUpdate: !!update,
+    //   updateType: typeof update,
+    // });
 
     this.metrics.documentUpdates.push({
       timestamp,
@@ -352,11 +352,11 @@ class YjsPerformanceMonitor {
           source: "keyboard_to_update",
         });
 
-        console.log(
-          `📝 [CRDT] 本地操作延迟: ${localOperationLatency.toFixed(
-            1
-          )}ms, 大小: ${updateSize}字节, 来源: ${origin}`
-        );
+        // console.log(
+        //   `📝 [CRDT] 本地操作延迟: ${localOperationLatency.toFixed(
+        //     1
+        //   )}ms, 大小: ${updateSize}字节, 来源: ${origin}`
+        // );
       }
     } else if (origin && typeof origin === "object") {
       // 其他用户的操作，通过 WebSocket 同步过来的：计算网络接收延迟
@@ -524,12 +524,12 @@ class YjsPerformanceMonitor {
 
         const predictedOpId = `${Date.now()}@client`;
         this.operationSendTimestamps.set(predictedOpId, timestamp);
-        console.log(
-          `🔍 [E2E] 预测本地opId: ${predictedOpId}, 时间戳: ${timestamp}`
-        );
-        console.log(
-          `📊 [E2E] 本地操作记录数量: ${this.operationSendTimestamps.size}`
-        );
+        // console.log(
+        //   `🔍 [E2E] 预测本地opId: ${predictedOpId}, 时间戳: ${timestamp}`
+        // );
+        // console.log(
+        //   `📊 [E2E] 本地操作记录数量: ${this.operationSendTimestamps.size}`
+        // );
       } else {
         console.log(`⌨️ [DEBUG] 非打印字符，不记录: ${event.key}`);
       }

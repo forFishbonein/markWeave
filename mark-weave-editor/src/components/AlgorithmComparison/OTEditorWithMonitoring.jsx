@@ -68,6 +68,8 @@ const OTEditorWithMonitoring = forwardRef(({
     // OT 客户端连接成功时，初始化性能监控器
     if (otClient && isConnected && !performanceMonitorRef.current) {
       performanceMonitorRef.current = new OTPerformanceMonitor();
+      // 挂载到 window 上，供 benchmarkApi.js 访问
+      window.otMonitor = performanceMonitorRef.current;
       console.log("✅ [OT监控] 初始化性能监控器");
     }
     // 自动开始监控
@@ -76,6 +78,10 @@ const OTEditorWithMonitoring = forwardRef(({
     }
     return () => {
       cleanup();
+      // 清理 window 上的引用
+      if (window.otMonitor === performanceMonitorRef.current) {
+        delete window.otMonitor;
+      }
     };
   }, [otClient, isConnected]);
 
