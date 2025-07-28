@@ -2,25 +2,91 @@
   "benchmark": "benchmark1",
   "name": "基础并发输入测试",
   "description": "最基础的并发输入，测试OT核心冲突解决能力",
-  "timestamp": "2025-07-28T16:19:35.148Z",
+  "timestamp": "2025-07-28T18:42:47.914Z",
   "userA": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 15.55259999999404,
+      "isConnected": true,
+      "windowId": "ot-1753728152334-dua5dmsuc",
+      "operationsCount": 16,
+      "totalOperationSize": 10918,
+      "opsPerSecond": 1.0287668942817363,
+      "avgOperationSize": 682.375,
+      "keystrokes": 7,
+      "keystrokesPerSecond": 0.4500855162482596,
+      "pendingOperations": 0,
+      "avgLatency": 118.90625,
+      "p95Latency": 334.2000000178814,
+      "avgNetworkLatency": 0,
+      "latencySamples": 16,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 0,
+      "avgE2ELatency": 191.1571428648063,
+      "p95E2ELatency": 264.30000001192093,
+      "e2eSamples": 7,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "limited",
+        "confidence": "low"
+      },
+      "bytesSent": 0,
+      "bytesReceived": 0,
+      "bytesPerSecond": 0,
+      "messagesSent": 0,
+      "messagesReceived": 0,
+      "messagesPerSecond": 0,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 15552.59999999404,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.TeaAAAAAAABAAAAAAAnAAAAAAAwAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAAhBBiWHello wWT",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAB23BWdT",
     "email": "haowhenhai@163.com"
   },
   "userB": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 6.01340000000596,
+      "isConnected": true,
+      "windowId": "ot-1753728152438-pj1wxj5pw",
+      "operationsCount": 2,
+      "totalOperationSize": 1258,
+      "opsPerSecond": 0.33259054777630254,
+      "avgOperationSize": 629,
+      "keystrokes": 7,
+      "keystrokesPerSecond": 1.1640669172170588,
+      "pendingOperations": 7,
+      "avgLatency": 50,
+      "p95Latency": 75,
+      "avgNetworkLatency": 0,
+      "latencySamples": 2,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 0,
+      "avgE2ELatency": 0,
+      "p95E2ELatency": 0,
+      "e2eSamples": 0,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "estimated",
+        "confidence": "low"
+      },
+      "bytesSent": 0,
+      "bytesReceived": 0,
+      "bytesPerSecond": 0,
+      "messagesSent": 0,
+      "messagesReceived": 0,
+      "messagesPerSecond": 0,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 6013.4000000059605,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": false
     },
-    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.TeaAAAAAAABAAAAAAAnAAAAAAAwAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABhBBiWHello wWTAAAAAAAAAAAAAABBBBBBB",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAB23BWdTAAAAAAAAAAAAAABBBBBBB",
     "email": "haowhenhai@gmail.com"
   },
   "testConfig": {

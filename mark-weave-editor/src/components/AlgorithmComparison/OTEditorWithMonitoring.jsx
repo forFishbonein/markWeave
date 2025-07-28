@@ -120,12 +120,12 @@ const OTEditorWithMonitoring = forwardRef(({
     }
     return () => {
       cleanup();
-      // 清理 window 上的引用
-      if (window.otMonitor === performanceMonitorRef.current) {
-        delete window.otMonitor;
+      // 🔥 修复：不在unmount时清空全局引用，避免StrictMode双重挂载问题
+      // 只停止监控，保留window引用
+      if (performanceMonitorRef.current) {
+        performanceMonitorRef.current.stopMonitoring();
       }
-      delete window.otClient;
-      delete window.otReady;
+      // 不清空window.otMonitor，让它在重新挂载时继续可用
     };
   }, [otClient, isConnected]);
 
