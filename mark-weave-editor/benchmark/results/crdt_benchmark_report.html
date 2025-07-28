@@ -1,53 +1,4 @@
-const MultiBenchmarkAnalyzer = require("./analysis/multiBenchmarkAnalyzer");
-const path = require("path");
 
-async function runMultiBenchmarkAnalysis() {
-  console.log("🚀 开始多基准测试分析...\n");
-
-  // 创建分析器实例
-  const analyzer = new MultiBenchmarkAnalyzer();
-
-  // 加载所有基准测试结果
-  console.log("📁 加载基准测试结果...");
-  const loadSuccess = analyzer.loadAllResults();
-
-  if (!loadSuccess) {
-    console.error("❌ 无法加载基准测试结果，请确保已运行基准测试");
-    return;
-  }
-
-  // 分析所有基准测试
-  console.log("\n🔍 分析基准测试数据...");
-  const analysis = analyzer.analyzeAllBenchmarks();
-
-  // 保存分析结果
-  console.log("\n💾 保存分析结果...");
-  analyzer.saveAnalysis();
-
-  // 生成图表数据
-  console.log("\n📊 生成图表数据...");
-  const chartData = analyzer.generateChartData();
-
-  // 创建HTML报告
-  console.log("\n📄 生成HTML报告...");
-
-  // 创建多基准测试的HTML报告
-  const htmlContent = generateMultiBenchmarkReport(analysis, chartData);
-
-  const reportPath = path.join(__dirname, "results/crdt_benchmark_report.html");
-  require("fs").writeFileSync(reportPath, htmlContent, "utf8");
-
-  console.log(`✅ HTML报告已生成: ${reportPath}`);
-  console.log("\n🎉 多基准测试分析完成！");
-}
-
-function generateMultiBenchmarkReport(analysis, chartData) {
-  const benchmarkNames = Object.keys(analysis.benchmarks);
-  const benchmarkLabels = benchmarkNames.map(
-    (name) => analysis.benchmarks[name].name
-  );
-
-  return `
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -173,21 +124,19 @@ function generateMultiBenchmarkReport(analysis, chartData) {
         <div class="summary-grid">
             <div class="summary-card">
                 <h3>总基准测试数</h3>
-                <p>${analysis.summary.totalBenchmarks}</p>
+                <p>4</p>
             </div>
             <div class="summary-card">
                 <h3>整体平均延迟</h3>
-                <p>${analysis.summary.overallAvgLatency.toFixed(2)} ms</p>
+                <p>7.62 ms</p>
             </div>
             <div class="summary-card">
                 <h3>整体平均带宽</h3>
-                <p>${analysis.summary.overallAvgBandwidth.toFixed(2)} KB/s</p>
+                <p>7.52 KB/s</p>
             </div>
             <div class="summary-card">
                 <h3>整体操作频率</h3>
-                <p>${analysis.summary.overallAvgOperationsPerSecond.toFixed(
-                  2
-                )} ops/s</p>
+                <p>23.71 ops/s</p>
             </div>
         </div>
 
@@ -207,98 +156,159 @@ function generateMultiBenchmarkReport(analysis, chartData) {
 
         <h2>各基准测试详细结果</h2>
         <div class="benchmark-details">
-            ${Object.keys(analysis.benchmarks)
-              .map((benchmarkKey) => {
-                const benchmark = analysis.benchmarks[benchmarkKey];
-                return `
+            
                 <div class="benchmark-card">
-                    <h3>${benchmark.name}</h3>
-                    <p><strong>描述:</strong> ${benchmark.description}</p>
-                    <p><strong>测试类型:</strong> ${benchmark.testType}</p>
-                    <p><strong>时间戳:</strong> ${new Date(
-                      benchmark.timestamp
-                    ).toLocaleString()}</p>
+                    <h3>基础并发输入测试</h3>
+                    <p><strong>描述:</strong> 最基础的并发输入，测试CRDT核心冲突解决能力</p>
+                    <p><strong>测试类型:</strong> concurrent_input</p>
+                    <p><strong>时间戳:</strong> 2025/7/28 00:46:22</p>
 
                     <div class="metrics-grid">
                         <div class="metric">
                             <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">${benchmark.summary.avgLatency.toFixed(
-                              2
-                            )} ms</div>
+                            <div class="metric-value">5.71 ms</div>
                         </div>
                         <div class="metric">
                             <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">${benchmark.summary.avgP95Latency.toFixed(
-                              2
-                            )} ms</div>
+                            <div class="metric-value">14.07 ms</div>
                         </div>
                         <div class="metric">
                             <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">${benchmark.summary.avgBandwidth.toFixed(
-                              2
-                            )} KB/s</div>
+                            <div class="metric-value">3.10 KB/s</div>
                         </div>
                         <div class="metric">
                             <div class="metric-label">操作频率</div>
-                            <div class="metric-value">${benchmark.summary.avgOperationsPerSecond.toFixed(
-                              2
-                            )} ops/s</div>
+                            <div class="metric-value">25.20 ops/s</div>
                         </div>
                         <div class="metric">
                             <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">${benchmark.summary.avgE2ELatency.toFixed(
-                              2
-                            )} ms</div>
+                            <div class="metric-value">9.00 ms</div>
                         </div>
                         <div class="metric">
                             <div class="metric-label">协作者数</div>
-                            <div class="metric-value">${
-                              benchmark.summary.totalCollaborators
-                            }</div>
+                            <div class="metric-value">2</div>
                         </div>
                     </div>
                 </div>
-                `;
-              })
-              .join("")}
+                
+                <div class="benchmark-card">
+                    <h3>长文本协作测试</h3>
+                    <p><strong>描述:</strong> 长文本连续输入，测试持续性能和稳定性</p>
+                    <p><strong>测试类型:</strong> long_text_collaboration</p>
+                    <p><strong>时间戳:</strong> 2025/7/28 00:46:43</p>
+
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">平均延迟</div>
+                            <div class="metric-value">7.64 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">P95延迟</div>
+                            <div class="metric-value">14.05 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">带宽使用</div>
+                            <div class="metric-value">10.71 KB/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">操作频率</div>
+                            <div class="metric-value">19.63 ops/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">E2E延迟</div>
+                            <div class="metric-value">3.81 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">协作者数</div>
+                            <div class="metric-value">2</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="benchmark-card">
+                    <h3>富文本格式协作测试</h3>
+                    <p><strong>描述:</strong> 不同用户插入不同文本，但对同一段文本应用格式</p>
+                    <p><strong>测试类型:</strong> text_format_collaboration</p>
+                    <p><strong>时间戳:</strong> 2025/7/28 00:46:59</p>
+
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">平均延迟</div>
+                            <div class="metric-value">8.51 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">P95延迟</div>
+                            <div class="metric-value">14.27 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">带宽使用</div>
+                            <div class="metric-value">8.91 KB/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">操作频率</div>
+                            <div class="metric-value">27.80 ops/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">E2E延迟</div>
+                            <div class="metric-value">16.95 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">协作者数</div>
+                            <div class="metric-value">1</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="benchmark-card">
+                    <h3>格式范围重叠测试</h3>
+                    <p><strong>描述:</strong> 两个用户都做bold操作，但选中的文本范围有重叠</p>
+                    <p><strong>测试类型:</strong> format_range_overlap</p>
+                    <p><strong>时间戳:</strong> 2025/7/28 00:47:20</p>
+
+                    <div class="metrics-grid">
+                        <div class="metric">
+                            <div class="metric-label">平均延迟</div>
+                            <div class="metric-value">8.62 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">P95延迟</div>
+                            <div class="metric-value">14.28 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">带宽使用</div>
+                            <div class="metric-value">7.36 KB/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">操作频率</div>
+                            <div class="metric-value">22.20 ops/s</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">E2E延迟</div>
+                            <div class="metric-value">4.68 ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">协作者数</div>
+                            <div class="metric-value">1</div>
+                        </div>
+                    </div>
+                </div>
+                
         </div>
 
         <h2>性能建议</h2>
         <div class="recommendations">
-            ${
-              analysis.recommendations.length > 0
-                ? analysis.recommendations
-                    .map(
-                      (rec) => `
-                    <div class="recommendation priority-${rec.priority}">
-                        <strong>${rec.type.toUpperCase()} - ${rec.priority.toUpperCase()}</strong><br>
-                        ${rec.message}<br>
-                        <em>相关基准测试: ${rec.benchmark}</em>
-                    </div>
-                `
-                    )
-                    .join("")
-                : "<p>所有基准测试表现良好，无需特别优化建议。</p>"
-            }
+            <p>所有基准测试表现良好，无需特别优化建议。</p>
         </div>
 
         <h2>最佳/最差性能基准测试</h2>
         <div class="benchmark-details">
             <div class="benchmark-card">
-                <h3>🏆 最佳性能: ${
-                  analysis.summary.bestPerformingBenchmark.name
-                }</h3>
-                <p>平均延迟: ${analysis.summary.bestPerformingBenchmark.avgLatency.toFixed(
-                  2
-                )} ms</p>
+                <h3>🏆 最佳性能: benchmark1</h3>
+                <p>平均延迟: 5.71 ms</p>
             </div>
             <div class="benchmark-card">
-                <h3>⚠️ 最差性能: ${
-                  analysis.summary.worstPerformingBenchmark.name
-                }</h3>
-                <p>平均延迟: ${analysis.summary.worstPerformingBenchmark.avgLatency.toFixed(
-                  2
-                )} ms</p>
+                <h3>⚠️ 最差性能: benchmark4</h3>
+                <p>平均延迟: 8.62 ms</p>
             </div>
         </div>
     </div>
@@ -308,22 +318,18 @@ function generateMultiBenchmarkReport(analysis, chartData) {
         new Chart(document.getElementById('latencyChart'), {
             type: 'bar',
             data: {
-                labels: ${JSON.stringify(benchmarkLabels)},
+                labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [
                     {
                         label: '平均延迟 (ms)',
-                        data: ${JSON.stringify(
-                          chartData.latencyComparison.datasets[0].data
-                        )},
+                        data: [5.70571008147297,7.635926772473822,8.513434029409783,8.623459692839377],
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgba(54, 162, 235, 1)',
                         borderWidth: 1
                     },
                     {
                         label: 'P95延迟 (ms)',
-                        data: ${JSON.stringify(
-                          chartData.latencyComparison.datasets[1].data
-                        )},
+                        data: [14.072535959172303,14.052825359502155,14.265382684094423,14.27619180388638],
                         backgroundColor: 'rgba(255, 99, 132, 0.5)',
                         borderColor: 'rgba(255, 99, 132, 1)',
                         borderWidth: 1
@@ -354,12 +360,10 @@ function generateMultiBenchmarkReport(analysis, chartData) {
         new Chart(document.getElementById('bandwidthChart'), {
             type: 'bar',
             data: {
-                labels: ${JSON.stringify(benchmarkLabels)},
+                labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [{
                     label: '带宽使用 (KB/s)',
-                    data: ${JSON.stringify(
-                      chartData.bandwidthComparison.datasets[0].data
-                    )},
+                    data: [3.1016576174455475,10.712186277602505,8.912774956081808,7.361732549363435],
                     backgroundColor: 'rgba(75, 192, 192, 0.5)',
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
@@ -389,12 +393,10 @@ function generateMultiBenchmarkReport(analysis, chartData) {
         new Chart(document.getElementById('operationsChart'), {
             type: 'bar',
             data: {
-                labels: ${JSON.stringify(benchmarkLabels)},
+                labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [{
                     label: '操作频率 (ops/s)',
-                    data: ${JSON.stringify(
-                      chartData.operationsComparison.datasets[0].data
-                    )},
+                    data: [25.196638643795357,19.625956384643345,27.80021735956425,22.19722737555581],
                     backgroundColor: 'rgba(255, 205, 86, 0.5)',
                     borderColor: 'rgba(255, 205, 86, 1)',
                     borderWidth: 1
@@ -422,8 +424,4 @@ function generateMultiBenchmarkReport(analysis, chartData) {
     </script>
 </body>
 </html>
-  `;
-}
-
-// 运行分析
-runMultiBenchmarkAnalysis().catch(console.error);
+  

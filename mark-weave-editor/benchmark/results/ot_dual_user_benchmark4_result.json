@@ -1,0 +1,41 @@
+{
+  "benchmark": "benchmark4",
+  "name": "格式范围重叠测试",
+  "description": "两个用户都做bold操作，但选中的文本范围有重叠",
+  "timestamp": "2025-07-28T15:35:21.210Z",
+  "userA": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello wThis is a shared document for collaborative testing.",
+    "email": "haowhenhai@163.com"
+  },
+  "userB": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.We are testing the collaborative editing system.",
+    "email": "haowhenhai@gmail.com"
+  },
+  "testConfig": {
+    "name": "格式范围重叠测试",
+    "userA": {
+      "insertText": "This is a shared document for collaborative testing.",
+      "formatTarget": "shared document",
+      "format": "bold"
+    },
+    "userB": {
+      "insertText": "We are testing the collaborative editing system.",
+      "formatTarget": "document for collaborative",
+      "format": "bold"
+    },
+    "description": "两个用户都做bold操作，但选中的文本范围有重叠",
+    "testType": "format_range_overlap"
+  }
+}

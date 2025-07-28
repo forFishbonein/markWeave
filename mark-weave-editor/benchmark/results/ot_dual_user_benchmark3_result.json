@@ -1,0 +1,41 @@
+{
+  "benchmark": "benchmark3",
+  "name": "富文本格式协作测试",
+  "description": "不同用户插入不同文本，但对同一段文本应用格式",
+  "timestamp": "2025-07-28T15:34:55.454Z",
+  "userA": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello w",
+    "email": "haowhenhai@163.com"
+  },
+  "userB": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.",
+    "email": "haowhenhai@gmail.com"
+  },
+  "testConfig": {
+    "name": "富文本格式协作测试",
+    "userA": {
+      "insertText": "Hello world! This is user A's content.",
+      "formatTarget": "Hello world!",
+      "format": "bold"
+    },
+    "userB": {
+      "insertText": "Testing OT collaboration from user B.",
+      "formatTarget": "Hello world!",
+      "format": "italic"
+    },
+    "description": "不同用户插入不同文本，但对同一段文本应用格式",
+    "testType": "text_format_collaboration"
+  }
+}

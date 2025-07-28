@@ -877,7 +877,14 @@ class OTPerformanceMonitor {
    * 获取真实性能统计
    */
   getAggregatedMetrics() {
+    console.log("🔍 [OT监控] getAggregatedMetrics 被调用");
+    console.log("🔍 [OT监控] isMonitoring:", this.isMonitoring);
+    console.log("🔍 [OT监控] startTime:", this.startTime);
+    console.log("🔍 [OT监控] otClientExists:", !!this.otClient);
+    console.log("🔍 [OT监控] otClientConnected:", this.otClient?.isConnected);
+
     if (!this.isMonitoring || !this.startTime) {
+      console.log("❌ [OT监控] 监控未启动或开始时间为空，返回null");
       return null;
     }
 

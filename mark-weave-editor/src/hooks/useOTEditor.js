@@ -36,7 +36,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
   useEffect(() => {
     console.log("🔧 [OT] 当前文档ID:", docId, "集合:", collection);
 
-    if (!editorRef.current || !docId || isInitializedRef.current) return;
+    if (!docId || isInitializedRef.current) return;
 
     console.log("🚀 [OT] 初始化OT编辑器", { docId, collection });
     initializeOTEditor();
@@ -129,6 +129,11 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           });
         }
       };
+
+      // 连接到OT服务器
+      console.log("🔌 [OT] 开始连接到OT服务器...");
+      await client.connect("ws://localhost:1235");
+      console.log("✅ [OT] 连接请求已发送");
 
       // 注册连接事件监听器
       client.on("connected", (data) => {

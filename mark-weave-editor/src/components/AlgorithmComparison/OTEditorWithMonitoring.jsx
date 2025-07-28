@@ -36,6 +36,8 @@ const OTEditorWithMonitoring = forwardRef(({
   showMetrics = true,
   onMetricsUpdate = null
 }, ref) => {
+
+  console.log("🔍 [OT编辑器组件] 初始化参数:", { docId, collection });
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [performanceData, setPerformanceData] = useState(null);
   const [latencyHistory, setLatencyHistory] = useState([]);
@@ -45,11 +47,30 @@ const OTEditorWithMonitoring = forwardRef(({
   const refreshTimer = useRef(null);
 
   // 使用OT编辑器Hook - 获取协作状态
-  const [editorView, otClient, isConnected, editorUtils] = useOTEditor(
-    docId,
-    collection,
-    editorRef
-  );
+  let editorView, otClient, isConnected, editorUtils;
+
+  try {
+    [editorView, otClient, isConnected, editorUtils] = useOTEditor(
+      docId,
+      collection,
+      editorRef
+    );
+
+    // 添加调试信息
+    console.log("🔍 [OT编辑器] Hook状态:", {
+      hasEditorRef: !!editorRef.current,
+      docId,
+      hasOtClient: !!otClient,
+      isConnected
+    });
+  } catch (error) {
+    console.error("❌ [OT编辑器] Hook初始化失败:", error);
+    // 设置默认值
+    editorView = null;
+    otClient = null;
+    isConnected = false;
+    editorUtils = {};
+  }
 
   // 获取多窗口协作状态
   const collaborationState = editorUtils?.getCollaborationState ? editorUtils.getCollaborationState() : {
@@ -65,14 +86,35 @@ const OTEditorWithMonitoring = forwardRef(({
   }));
 
   useEffect(() => {
-    // OT 客户端连接成功时，初始化性能监控器
-    if (otClient && isConnected && !performanceMonitorRef.current) {
+    console.log("🔍 [OT监控] useEffect 触发", {
+      hasOtClient: !!otClient,
+      isConnected,
+      hasMonitor: !!performanceMonitorRef.current
+    });
+
+    // 显式暴露OT客户端到window对象
+    if (otClient) {
+      window.otClient = otClient;
+      window.otReady = true;
+      console.log("✅ [OT监控] OT客户端已挂载到window对象");
+    }
+
+    // 只要有OT客户端就初始化性能监控器（不依赖连接状态）
+    if (otClient && !performanceMonitorRef.current) {
       performanceMonitorRef.current = new OTPerformanceMonitor();
       // 挂载到 window 上，供 benchmarkApi.js 访问
       window.otMonitor = performanceMonitorRef.current;
       console.log("✅ [OT监控] 初始化性能监控器");
     }
-    // 自动开始监控
+
+    // 强制初始化监控器（即使otClient为null）
+    if (!performanceMonitorRef.current) {
+      console.log("⚠️ [OT监控] otClient为null，强制初始化监控器");
+      performanceMonitorRef.current = new OTPerformanceMonitor();
+      window.otMonitor = performanceMonitorRef.current;
+      console.log("✅ [OT监控] 强制初始化性能监控器完成");
+    }
+    // 连接成功时自动开始监控
     if (otClient && isConnected && !isMonitoring) {
       handleStartMonitoring();
     }
@@ -82,6 +124,8 @@ const OTEditorWithMonitoring = forwardRef(({
       if (window.otMonitor === performanceMonitorRef.current) {
         delete window.otMonitor;
       }
+      delete window.otClient;
+      delete window.otReady;
     };
   }, [otClient, isConnected]);
 

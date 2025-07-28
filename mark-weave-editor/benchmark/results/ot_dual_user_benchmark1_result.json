@@ -1,0 +1,33 @@
+{
+  "benchmark": "benchmark1",
+  "name": "基础并发输入测试",
+  "description": "最基础的并发输入，测试OT核心冲突解决能力",
+  "timestamp": "2025-07-28T16:19:35.148Z",
+  "userA": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.TeaAAAAAAABAAAAAAAnAAAAAAAwAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAAhBBiWHello wWT",
+    "email": "haowhenhai@163.com"
+  },
+  "userB": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.TeaAAAAAAABAAAAAAAnAAAAAAAwAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABAAAAAAABhBBiWHello wWTAAAAAAAAAAAAAABBBBBBB",
+    "email": "haowhenhai@gmail.com"
+  },
+  "testConfig": {
+    "name": "基础并发输入测试",
+    "userA": "AAAAAAA",
+    "userB": "BBBBBBB",
+    "description": "最基础的并发输入，测试OT核心冲突解决能力",
+    "testType": "concurrent_input"
+  }
+}

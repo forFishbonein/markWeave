@@ -1,0 +1,187 @@
+{
+  "timestamp": "2025-07-28T15:35:24.213Z",
+  "totalBenchmarks": 4,
+  "results": {
+    "benchmark1": {
+      "benchmark": "benchmark1",
+      "name": "基础并发输入测试",
+      "description": "最基础的并发输入，测试OT核心冲突解决能力",
+      "timestamp": "2025-07-28T15:34:07.830Z",
+      "userA": {
+        "stats": {
+          "monitoringDuration": 15.568200000017882,
+          "isConnected": true,
+          "windowId": "ot-1753716832248-lrujlwzpg",
+          "operationsCount": 16,
+          "totalOperationSize": 4914,
+          "opsPerSecond": 1.027736026000541,
+          "avgOperationSize": 307.125,
+          "keystrokes": 7,
+          "keystrokesPerSecond": 0.4496345113752367,
+          "pendingOperations": 0,
+          "avgLatency": 209.33125000074506,
+          "p95Latency": 534.5999999940395,
+          "avgNetworkLatency": 0,
+          "latencySamples": 16,
+          "recentLatencySamples": 0,
+          "networkLatencySamples": 0,
+          "avgE2ELatency": 397.6142857117312,
+          "p95E2ELatency": 467.90000000596046,
+          "e2eSamples": 7,
+          "dataQuality": {
+            "timeWindow": 4000,
+            "minSamples": 12,
+            "calculationMethod": "limited",
+            "confidence": "low"
+          },
+          "bytesSent": 0,
+          "bytesReceived": 0,
+          "bytesPerSecond": 0,
+          "messagesSent": 0,
+          "messagesReceived": 0,
+          "messagesPerSecond": 0,
+          "activeConnections": 1,
+          "conflictResolutions": 0,
+          "uptime": 15568.200000017881,
+          "dataSource": "real-websocket-monitoring",
+          "hasRealNetworkData": true,
+          "hasRealLatencyData": true
+        },
+        "content": "BAAAAAAAAW",
+        "email": "haowhenhai@163.com"
+      },
+      "userB": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAWAAAAAAAAAAAAAABBBBBBB",
+        "email": "haowhenhai@gmail.com"
+      },
+      "testConfig": {
+        "name": "基础并发输入测试",
+        "userA": "AAAAAAA",
+        "userB": "BBBBBBB",
+        "description": "最基础的并发输入，测试OT核心冲突解决能力",
+        "testType": "concurrent_input"
+      }
+    },
+    "benchmark2": {
+      "benchmark": "benchmark2",
+      "name": "长文本协作测试",
+      "description": "长文本连续输入，测试持续性能和稳定性",
+      "timestamp": "2025-07-28T15:34:27.795Z",
+      "userA": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAAWThis is le, another ser ii resuu rehtona ,ela longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+        "email": "haowhenhai@163.com"
+      },
+      "userB": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+        "email": "haowhenhai@gmail.com"
+      },
+      "testConfig": {
+        "name": "长文本协作测试",
+        "userA": "This is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+        "userB": "Meanwhile, another user is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+        "description": "长文本连续输入，测试持续性能和稳定性",
+        "testType": "long_text_collaboration"
+      }
+    },
+    "benchmark3": {
+      "benchmark": "benchmark3",
+      "name": "富文本格式协作测试",
+      "description": "不同用户插入不同文本，但对同一段文本应用格式",
+      "timestamp": "2025-07-28T15:34:55.454Z",
+      "userA": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello w",
+        "email": "haowhenhai@163.com"
+      },
+      "userB": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.",
+        "email": "haowhenhai@gmail.com"
+      },
+      "testConfig": {
+        "name": "富文本格式协作测试",
+        "userA": {
+          "insertText": "Hello world! This is user A's content.",
+          "formatTarget": "Hello world!",
+          "format": "bold"
+        },
+        "userB": {
+          "insertText": "Testing OT collaboration from user B.",
+          "formatTarget": "Hello world!",
+          "format": "italic"
+        },
+        "description": "不同用户插入不同文本，但对同一段文本应用格式",
+        "testType": "text_format_collaboration"
+      }
+    },
+    "benchmark4": {
+      "benchmark": "benchmark4",
+      "name": "格式范围重叠测试",
+      "description": "两个用户都做bold操作，但选中的文本范围有重叠",
+      "timestamp": "2025-07-28T15:35:21.210Z",
+      "userA": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello wThis is a shared document for collaborative testing.",
+        "email": "haowhenhai@163.com"
+      },
+      "userB": {
+        "stats": {
+          "error": "监控器不存在",
+          "debug": {
+            "monitorExists": false
+          }
+        },
+        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.We are testing the collaborative editing system.",
+        "email": "haowhenhai@gmail.com"
+      },
+      "testConfig": {
+        "name": "格式范围重叠测试",
+        "userA": {
+          "insertText": "This is a shared document for collaborative testing.",
+          "formatTarget": "shared document",
+          "format": "bold"
+        },
+        "userB": {
+          "insertText": "We are testing the collaborative editing system.",
+          "formatTarget": "document for collaborative",
+          "format": "bold"
+        },
+        "description": "两个用户都做bold操作，但选中的文本范围有重叠",
+        "testType": "format_range_overlap"
+      }
+    }
+  }
+}

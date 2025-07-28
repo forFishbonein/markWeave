@@ -1,0 +1,141 @@
+{
+  "title": "OT性能分析报告",
+  "timestamp": "2025-07-28T13:23:28.592Z",
+  "summary": {
+    "totalTests": 4,
+    "successfulTests": 4,
+    "failedTests": 0,
+    "averageLatency": 0,
+    "averageThroughput": 0,
+    "totalBytesTransferred": 0,
+    "totalMessages": 0
+  },
+  "benchmarks": {
+    "benchmark1": {
+      "status": "success",
+      "name": "基础并发输入测试",
+      "description": "最基础的并发输入，测试OT核心冲突解决能力",
+      "timestamp": "2025-07-28T13:22:22.150Z",
+      "userA": {
+        "status": "no_data"
+      },
+      "userB": {
+        "status": "no_data"
+      },
+      "synchronization": {
+        "contentLengthA": 10,
+        "contentLengthB": 7,
+        "lengthDifference": 3,
+        "syncQuality": 70,
+        "isSynchronized": false,
+        "contentA": " uTAAAAAAA",
+        "contentB": "BBBBBBB"
+      }
+    },
+    "benchmark2": {
+      "status": "success",
+      "name": "长文本协作测试",
+      "description": "长文本连续输入，测试持续性能和稳定性",
+      "timestamp": "2025-07-28T13:22:36.346Z",
+      "userA": {
+        "status": "no_data"
+      },
+      "userB": {
+        "status": "no_data"
+      },
+      "synchronization": {
+        "contentLengthA": 178,
+        "contentLengthB": 530,
+        "lengthDifference": 352,
+        "syncQuality": 33.58490566037736,
+        "isSynchronized": false,
+        "contentA": "This is a longer text that simulates real documen editting. It contains mutiple lentensces an shoudd tesl the tsystem's abiity tlo handle continuou input from smultipe uselrs. uT",
+        "contentB": "This issi  a longer text that simulates real documen editting. It contains mutiple  entennces an shouud tess the  system's abiity tto handle continuou input from  multipe useers..srsu ellpitlummorf tupni ssuounitnoc eldnah o ytilliba s'metsyseht ttet dllohs ddna secetnesselpitllum sniatnoc tI .gniide ttnemucod laer setalumis taht txet regnol a sihT uTMeanwhile, another user is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously."
+      }
+    },
+    "benchmark3": {
+      "status": "success",
+      "name": "富文本格式协作测试",
+      "description": "不同用户插入不同文本，但对同一段文本应用格式",
+      "timestamp": "2025-07-28T13:22:55.549Z",
+      "userA": {
+        "status": "no_data"
+      },
+      "userB": {
+        "status": "no_data"
+      },
+      "synchronization": {
+        "contentLengthA": 39,
+        "contentLengthB": 114,
+        "lengthDifference": 75,
+        "syncQuality": 34.210526315789465,
+        "isSynchronized": false,
+        "contentA": "Hello world! This is userA's c ntento.T",
+        "contentB": "Hello wworld! This is userA's ccntentt..netnoo s'A  resu si sihT !dlro olleHTTesting OT collaboration from user B."
+      }
+    },
+    "benchmark4": {
+      "status": "success",
+      "name": "格式范围重叠测试",
+      "description": "两个用户都做bold操作，但选中的文本范围有重叠",
+      "timestamp": "2025-07-28T13:23:15.229Z",
+      "userA": {
+        "status": "no_data"
+      },
+      "userB": {
+        "status": "no_data"
+      },
+      "synchronization": {
+        "contentLengthA": 54,
+        "contentLengthB": 48,
+        "lengthDifference": 6,
+        "syncQuality": 88.88888888888889,
+        "isSynchronized": false,
+        "contentA": "TTThis is a shared document for collaborative testing.",
+        "contentB": "We are testing the collaborative editing system."
+      }
+    }
+  },
+  "recommendations": [
+    {
+      "type": "throughput",
+      "priority": "medium",
+      "message": "操作吞吐量较低，建议检查客户端性能",
+      "metric": 0,
+      "threshold": 1
+    },
+    {
+      "type": "synchronization",
+      "priority": "high",
+      "message": "benchmark1 同步质量较差，可能存在冲突解决问题",
+      "benchmark": "benchmark1",
+      "syncQuality": 70
+    },
+    {
+      "type": "synchronization",
+      "priority": "high",
+      "message": "benchmark2 同步质量较差，可能存在冲突解决问题",
+      "benchmark": "benchmark2",
+      "syncQuality": 33.58490566037736
+    },
+    {
+      "type": "synchronization",
+      "priority": "high",
+      "message": "benchmark3 同步质量较差，可能存在冲突解决问题",
+      "benchmark": "benchmark3",
+      "syncQuality": 34.210526315789465
+    },
+    {
+      "type": "synchronization",
+      "priority": "high",
+      "message": "benchmark4 同步质量较差，可能存在冲突解决问题",
+      "benchmark": "benchmark4",
+      "syncQuality": 88.88888888888889
+    }
+  ],
+  "metadata": {
+    "algorithm": "OT (Operational Transformation)",
+    "testFramework": "Playwright",
+    "analysisTool": "OTAnalyzer"
+  }
+}

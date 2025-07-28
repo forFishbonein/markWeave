@@ -1,0 +1,33 @@
+{
+  "benchmark": "benchmark2",
+  "name": "长文本协作测试",
+  "description": "长文本连续输入，测试持续性能和稳定性",
+  "timestamp": "2025-07-28T15:34:27.795Z",
+  "userA": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAAWThis is le, another ser ii resuu rehtona ,ela longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+    "email": "haowhenhai@163.com"
+  },
+  "userB": {
+    "stats": {
+      "error": "监控器不存在",
+      "debug": {
+        "monitorExists": false
+      }
+    },
+    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+    "email": "haowhenhai@gmail.com"
+  },
+  "testConfig": {
+    "name": "长文本协作测试",
+    "userA": "This is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+    "userB": "Meanwhile, another user is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+    "description": "长文本连续输入，测试持续性能和稳定性",
+    "testType": "long_text_collaboration"
+  }
+}
