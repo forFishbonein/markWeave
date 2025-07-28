@@ -52,7 +52,7 @@
     "benchmark:analyze:ot": "node benchmark/runOTAnalysis.js",
     "benchmark:analyze:multi": "node benchmark/runMultiBenchmarkAnalysis.js",
     "benchmark:full:ot": "npm run benchmark:ot_dual_user:all && npm run benchmark:analyze:ot",
-    "benchmark:full:multi": "npm run benchmark:crdt_dual_user:all && npm run benchmark:analyze:multi",
+    "benchmark:full:crdt": "npm run benchmark:crdt_dual_user:all && npm run benchmark:analyze:multi",
     "benchmark:suite": "node benchmark/scenarios/crdt_benchmark_suite.js",
     "benchmark:suite:analyze": "npm run benchmark:suite && npm run benchmark:analyze",
     "benchmark:analyze": "node benchmark/runAnalysis.js",

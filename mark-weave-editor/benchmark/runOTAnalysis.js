@@ -330,7 +330,10 @@ class OTAnalyzer {
     const avgLatency =
       benchmarks.length > 0
         ? benchmarks.reduce(
-            (sum, b) => sum + (b.userA?.latency || 0) + (b.userB?.latency || 0),
+            (sum, b) =>
+              sum +
+              (b.userA?.performance?.latency?.average || 0) +
+              (b.userB?.performance?.latency?.average || 0),
             0
           ) /
           (benchmarks.length * 2)
@@ -339,7 +342,9 @@ class OTAnalyzer {
       benchmarks.length > 0
         ? benchmarks.reduce(
             (sum, b) =>
-              sum + (b.userA?.bandwidth || 0) + (b.userB?.bandwidth || 0),
+              sum +
+              (b.userA?.performance?.network?.bytesSent || 0) +
+              (b.userB?.performance?.network?.bytesSent || 0),
             0
           ) /
           (benchmarks.length * 2)
@@ -348,7 +353,9 @@ class OTAnalyzer {
       benchmarks.length > 0
         ? benchmarks.reduce(
             (sum, b) =>
-              sum + (b.userA?.operations || 0) + (b.userB?.operations || 0),
+              sum +
+              (b.userA?.performance?.throughput?.operationsPerSecond || 0) +
+              (b.userB?.performance?.throughput?.operationsPerSecond || 0),
             0
           ) /
           (benchmarks.length * 2)
@@ -357,7 +364,10 @@ class OTAnalyzer {
     // 找到最佳和最差性能
     const latencyData = benchmarks.map((b) => ({
       name: b.name,
-      latency: ((b.userA?.latency || 0) + (b.userB?.latency || 0)) / 2,
+      latency:
+        ((b.userA?.performance?.latency?.average || 0) +
+          (b.userB?.performance?.latency?.average || 0)) /
+        2,
     }));
     const bestPerformance = latencyData.reduce(
       (min, b) => (b.latency < min.latency ? b : min),
@@ -370,11 +380,11 @@ class OTAnalyzer {
 
     return `
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OT多基准测试性能分析报告</title>
+    <title>OT Multi-Benchmark Performance Analysis Report</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -489,28 +499,28 @@ class OTAnalyzer {
 </head>
 <body>
     <div class="container">
-        <h1>OT多基准测试性能分析报告</h1>
+        <h1>OT Multi-Benchmark Performance Analysis Report</h1>
 
         <div class="summary-grid">
             <div class="summary-card">
-                <h3>总基准测试数</h3>
+                <h3>Total Benchmarks</h3>
                 <p>${benchmarks.length}</p>
             </div>
             <div class="summary-card">
-                <h3>整体平均延迟</h3>
+                <h3>Average Latency</h3>
                 <p>${avgLatency.toFixed(2)} ms</p>
             </div>
             <div class="summary-card">
-                <h3>整体平均带宽</h3>
+                <h3>Average Bandwidth</h3>
                 <p>${avgBandwidth.toFixed(2)} KB/s</p>
             </div>
             <div class="summary-card">
-                <h3>整体操作频率</h3>
+                <h3>Average Operations</h3>
                 <p>${avgOperations.toFixed(2)} ops/s</p>
             </div>
         </div>
 
-        <h2>基准测试性能对比</h2>
+        <h2>Benchmark Performance Comparison</h2>
 
         <div class="chart-container">
             <canvas id="latencyChart" width="400" height="200"></canvas>
@@ -524,7 +534,7 @@ class OTAnalyzer {
             <canvas id="operationsChart" width="400" height="200"></canvas>
         </div>
 
-        <h2>各基准测试详细结果</h2>
+        <h2>Detailed Benchmark Results</h2>
         <div class="benchmark-details">
             ${benchmarks
               .map(
@@ -541,42 +551,56 @@ class OTAnalyzer {
 
                     <div class="metrics-grid">
                         <div class="metric">
-                            <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">${(
-                              (benchmark.userA?.latency || 0) +
-                              (benchmark.userB?.latency || 0) / 2
-                            ).toFixed(2)} ms</div>
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value">${
+                              ((benchmark.userA?.performance?.latency
+                                ?.average || 0) +
+                                (benchmark.userB?.performance?.latency
+                                  ?.average || 0)) /
+                              2
+                            } ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">${(
-                              (benchmark.userA?.p95Latency || 0) +
-                              (benchmark.userB?.p95Latency || 0) / 2
-                            ).toFixed(2)} ms</div>
+                            <div class="metric-label">P95 Latency</div>
+                            <div class="metric-value">${
+                              ((benchmark.userA?.performance?.latency?.p95 ||
+                                0) +
+                                (benchmark.userB?.performance?.latency?.p95 ||
+                                  0)) /
+                              2
+                            } ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">${(
-                              (benchmark.userA?.bandwidth || 0) +
-                              (benchmark.userB?.bandwidth || 0) / 2
-                            ).toFixed(2)} KB/s</div>
+                            <div class="metric-label">Bandwidth Usage</div>
+                            <div class="metric-value">${
+                              ((benchmark.userA?.performance?.network
+                                ?.bytesSent || 0) +
+                                (benchmark.userB?.performance?.network
+                                  ?.bytesSent || 0)) /
+                              2
+                            } bytes</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">操作频率</div>
-                            <div class="metric-value">${(
-                              (benchmark.userA?.operations || 0) +
-                              (benchmark.userB?.operations || 0) / 2
-                            ).toFixed(2)} ops/s</div>
+                            <div class="metric-label">Operation Rate</div>
+                            <div class="metric-value">${
+                              ((benchmark.userA?.performance?.throughput
+                                ?.operationsPerSecond || 0) +
+                                (benchmark.userB?.performance?.throughput
+                                  ?.operationsPerSecond || 0)) /
+                              2
+                            } ops/s</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">${(
-                              (benchmark.userA?.e2eLatency || 0) +
-                              (benchmark.userB?.e2eLatency || 0) / 2
-                            ).toFixed(2)} ms</div>
+                            <div class="metric-label">Total Operations</div>
+                            <div class="metric-value">${
+                              (benchmark.userA?.performance?.operations
+                                ?.total || 0) +
+                              (benchmark.userB?.performance?.operations
+                                ?.total || 0)
+                            }</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">协作者数</div>
+                            <div class="metric-label">Collaborators</div>
                             <div class="metric-value">2</div>
                         </div>
                     </div>
@@ -586,7 +610,7 @@ class OTAnalyzer {
               .join("")}
         </div>
 
-        <h2>性能建议</h2>
+        <h2>Performance Recommendations</h2>
         <div class="recommendations">
             ${
               report.recommendations.length > 0
@@ -607,15 +631,17 @@ class OTAnalyzer {
             }
         </div>
 
-        <h2>最佳/最差性能基准测试</h2>
+        <h2>Best/Worst Performance Benchmarks</h2>
         <div class="benchmark-details">
             <div class="benchmark-card">
-                <h3>🏆 最佳性能: ${bestPerformance.name}</h3>
-                <p>平均延迟: ${bestPerformance.latency.toFixed(2)} ms</p>
+                <h3>🏆 Best Performance: ${bestPerformance.name}</h3>
+                <p>Average Latency: ${bestPerformance.latency.toFixed(2)} ms</p>
             </div>
             <div class="benchmark-card">
-                <h3>⚠️ 最差性能: ${worstPerformance.name}</h3>
-                <p>平均延迟: ${worstPerformance.latency.toFixed(2)} ms</p>
+                <h3>⚠️ Worst Performance: ${worstPerformance.name}</h3>
+                <p>Average Latency: ${worstPerformance.latency.toFixed(
+                  2
+                )} ms</p>
             </div>
         </div>
     </div>
@@ -628,13 +654,13 @@ class OTAnalyzer {
                 labels: [${benchmarks.map((b) => `"${b.name}"`).join(",")}],
                 datasets: [
                     {
-                        label: '平均延迟 (ms)',
+                        label: 'Average Latency (ms)',
                         data: [${benchmarks
-                          .map((b) =>
-                            (
-                              (b.userA?.latency || 0) +
-                              (b.userB?.latency || 0) / 2
-                            ).toFixed(2)
+                          .map(
+                            (b) =>
+                              ((b.userA?.performance?.latency?.average || 0) +
+                                (b.userB?.performance?.latency?.average || 0)) /
+                              2
                           )
                           .join(",")}],
                         backgroundColor: 'rgba(231, 76, 60, 0.5)',
@@ -642,13 +668,13 @@ class OTAnalyzer {
                         borderWidth: 1
                     },
                     {
-                        label: 'P95延迟 (ms)',
+                        label: 'P95 Latency (ms)',
                         data: [${benchmarks
-                          .map((b) =>
-                            (
-                              (b.userA?.p95Latency || 0) +
-                              (b.userB?.p95Latency || 0) / 2
-                            ).toFixed(2)
+                          .map(
+                            (b) =>
+                              ((b.userA?.performance?.latency?.p95 || 0) +
+                                (b.userB?.performance?.latency?.p95 || 0)) /
+                              2
                           )
                           .join(",")}],
                         backgroundColor: 'rgba(155, 89, 182, 0.5)',
@@ -683,13 +709,13 @@ class OTAnalyzer {
             data: {
                 labels: [${benchmarks.map((b) => `"${b.name}"`).join(",")}],
                 datasets: [{
-                    label: '带宽使用 (KB/s)',
+                    label: 'Bandwidth Usage (bytes)',
                     data: [${benchmarks
-                      .map((b) =>
-                        (
-                          (b.userA?.bandwidth || 0) +
-                          (b.userB?.bandwidth || 0) / 2
-                        ).toFixed(2)
+                      .map(
+                        (b) =>
+                          ((b.userA?.performance?.network?.bytesSent || 0) +
+                            (b.userB?.performance?.network?.bytesSent || 0)) /
+                          2
                       )
                       .join(",")}],
                     backgroundColor: 'rgba(52, 152, 219, 0.5)',
@@ -702,7 +728,7 @@ class OTAnalyzer {
                 plugins: {
                     title: {
                         display: true,
-                        text: '带宽使用对比'
+                        text: 'Bandwidth Usage Comparison'
                     }
                 },
                 scales: {
@@ -710,7 +736,7 @@ class OTAnalyzer {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '带宽 (KB/s)'
+                            text: 'Bandwidth (KB/s)'
                         }
                     }
                 }
@@ -723,13 +749,15 @@ class OTAnalyzer {
             data: {
                 labels: [${benchmarks.map((b) => `"${b.name}"`).join(",")}],
                 datasets: [{
-                    label: '操作频率 (ops/s)',
+                    label: 'Operation Rate (ops/s)',
                     data: [${benchmarks
-                      .map((b) =>
-                        (
-                          (b.userA?.operations || 0) +
-                          (b.userB?.operations || 0) / 2
-                        ).toFixed(2)
+                      .map(
+                        (b) =>
+                          ((b.userA?.performance?.throughput
+                            ?.operationsPerSecond || 0) +
+                            (b.userB?.performance?.throughput
+                              ?.operationsPerSecond || 0)) /
+                          2
                       )
                       .join(",")}],
                     backgroundColor: 'rgba(46, 204, 113, 0.5)',
@@ -742,7 +770,7 @@ class OTAnalyzer {
                 plugins: {
                     title: {
                         display: true,
-                        text: '操作频率对比'
+                        text: 'Operation Rate Comparison'
                     }
                 },
                 scales: {
@@ -750,7 +778,7 @@ class OTAnalyzer {
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '操作频率 (ops/s)'
+                            text: 'Operation Rate (ops/s)'
                         }
                     }
                 }

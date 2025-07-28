@@ -190,6 +190,11 @@ class OTPerformanceMonitor {
         windowId: this.windowId,
       });
 
+      // 🔥 修复：更新真实网络统计
+      this.realNetworkStats.messagesSent++;
+      this.realNetworkStats.bytesSent += size;
+      this.metrics.realNetworkBytes.sent += size;
+
       // 🔥 计算CRC32哈希并记录发送时间 - 支持多种数据格式
       let hash = null;
       if (data instanceof Uint8Array) {
@@ -275,6 +280,11 @@ class OTPerformanceMonitor {
         size,
         windowId: this.windowId,
       });
+
+      // 🔥 修复：更新真实网络统计
+      this.realNetworkStats.messagesReceived++;
+      this.realNetworkStats.bytesReceived += size;
+      this.metrics.realNetworkBytes.received += size;
 
       // 🔥 计算CRC32哈希并计算端到端延迟 - 支持多种数据格式
       let hash = null;

@@ -2,25 +2,91 @@
   "benchmark": "benchmark3",
   "name": "富文本格式协作测试",
   "description": "不同用户插入不同文本，但对同一段文本应用格式",
-  "timestamp": "2025-07-28T15:34:55.454Z",
+  "timestamp": "2025-07-28T18:52:45.715Z",
   "userA": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 33.65609999999404,
+      "isConnected": true,
+      "windowId": "ot-1753728702494-u0wjk6h11",
+      "operationsCount": 130,
+      "totalOperationSize": 124541,
+      "opsPerSecond": 3.862598459121022,
+      "avgOperationSize": 958.0076923076923,
+      "keystrokes": 220,
+      "keystrokesPerSecond": 6.536705084666345,
+      "pendingOperations": 0,
+      "avgLatency": 77.06076923081508,
+      "p95Latency": 321.80000001192093,
+      "avgNetworkLatency": 3.0499999970197678,
+      "latencySamples": 130,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 6,
+      "avgE2ELatency": 279.82530120805086,
+      "p95E2ELatency": 1047.5999999940395,
+      "e2eSamples": 83,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "historical",
+        "confidence": "medium"
+      },
+      "bytesSent": 56394,
+      "bytesReceived": 120499,
+      "bytesPerSecond": 5255.8971479176535,
+      "messagesSent": 223,
+      "messagesReceived": 440,
+      "messagesPerSecond": 19.69925214151721,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 33656.09999999404,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello w",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorld! Thi is uss A'srecontent. while,BHello wWdT",
     "email": "haowhenhai@163.com"
   },
   "userB": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 53.77339999997616,
+      "isConnected": true,
+      "windowId": "ot-1753728702498-fzcwq8els",
+      "operationsCount": 533,
+      "totalOperationSize": 457776,
+      "opsPerSecond": 9.911963907810113,
+      "avgOperationSize": 858.8667917448405,
+      "keystrokes": 221,
+      "keystrokesPerSecond": 4.109838693482242,
+      "pendingOperations": 37,
+      "avgLatency": 60.61669793579637,
+      "p95Latency": 136.89999997615814,
+      "avgNetworkLatency": 2.1499999860922494,
+      "latencySamples": 533,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 6,
+      "avgE2ELatency": 415.46599999815226,
+      "p95E2ELatency": 4557.699999988079,
+      "e2eSamples": 200,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "historical",
+        "confidence": "medium"
+      },
+      "bytesSent": 56799,
+      "bytesReceived": 340298,
+      "bytesPerSecond": 7384.636269980624,
+      "messagesSent": 224,
+      "messagesReceived": 523,
+      "messagesPerSecond": 13.89162671507346,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 53773.39999997616,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwTesting OT collaboration from user B.hile,BWdT",
     "email": "haowhenhai@gmail.com"
   },
   "testConfig": {

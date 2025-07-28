@@ -2,25 +2,91 @@
   "benchmark": "benchmark4",
   "name": "格式范围重叠测试",
   "description": "两个用户都做bold操作，但选中的文本范围有重叠",
-  "timestamp": "2025-07-28T15:35:21.210Z",
+  "timestamp": "2025-07-28T18:53:11.456Z",
   "userA": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 59.403,
+      "isConnected": true,
+      "windowId": "ot-1753728702494-u0wjk6h11",
+      "operationsCount": 130,
+      "totalOperationSize": 124541,
+      "opsPerSecond": 2.1884416611955624,
+      "avgOperationSize": 958.0076923076923,
+      "keystrokes": 274,
+      "keystrokesPerSecond": 4.612561655135263,
+      "pendingOperations": 1,
+      "avgLatency": 77.06076923081508,
+      "p95Latency": 321.80000001192093,
+      "avgNetworkLatency": 3.0499999970197678,
+      "latencySamples": 130,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 6,
+      "avgE2ELatency": 279.82530120805086,
+      "p95E2ELatency": 1047.5999999940395,
+      "e2eSamples": 83,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "historical",
+        "confidence": "medium"
+      },
+      "bytesSent": 70016,
+      "bytesReceived": 130073,
+      "bytesPerSecond": 3368.331565745838,
+      "messagesSent": 276,
+      "messagesReceived": 546,
+      "messagesPerSecond": 13.837684965405789,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 59403,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello wThis is a shared document for collaborative testing.",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorThis is a shared document for collaborative testing.ld! Thi is uss A'srecontent. while,BHello wWdT",
     "email": "haowhenhai@163.com"
   },
   "userB": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 79.51859999999404,
+      "isConnected": true,
+      "windowId": "ot-1753728702498-fzcwq8els",
+      "operationsCount": 533,
+      "totalOperationSize": 457776,
+      "opsPerSecond": 6.702834305433445,
+      "avgOperationSize": 858.8667917448405,
+      "keystrokes": 269,
+      "keystrokesPerSecond": 3.382856338014253,
+      "pendingOperations": 48,
+      "avgLatency": 60.61669793579637,
+      "p95Latency": 136.89999997615814,
+      "avgNetworkLatency": 2.1499999860922494,
+      "latencySamples": 533,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 6,
+      "avgE2ELatency": 415.46599999815226,
+      "p95E2ELatency": 4557.699999988079,
+      "e2eSamples": 200,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "historical",
+        "confidence": "medium"
+      },
+      "bytesSent": 69107,
+      "bytesReceived": 348698,
+      "bytesPerSecond": 5254.179525293847,
+      "messagesSent": 272,
+      "messagesReceived": 619,
+      "messagesPerSecond": 11.204925640039775,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 79518.59999999404,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.We are testing the collaborative editing system.",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwWe are testing the collaborative editing system.Testing OT collaboration from user B.hile,BWdT",
     "email": "haowhenhai@gmail.com"
   },
   "testConfig": {

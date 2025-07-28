@@ -1,41 +1,41 @@
 {
   "title": "OT性能分析报告",
-  "timestamp": "2025-07-28T15:44:32.996Z",
+  "timestamp": "2025-07-28T19:00:36.441Z",
   "summary": {
     "totalTests": 4,
     "successfulTests": 4,
     "failedTests": 0,
-    "averageLatency": 209.33125000074506,
-    "averageThroughput": 1.027736026000541,
-    "totalBytesTransferred": 0,
-    "totalMessages": 0
+    "averageLatency": 81.52926653399993,
+    "averageThroughput": 5.887270352595346,
+    "totalBytesTransferred": 350016,
+    "totalMessages": 1381
   },
   "benchmarks": {
     "benchmark1": {
       "status": "success",
       "name": "基础并发输入测试",
       "description": "最基础的并发输入，测试OT核心冲突解决能力",
-      "timestamp": "2025-07-28T15:34:07.830Z",
+      "timestamp": "2025-07-28T18:51:57.956Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "BAAAAAAAAW",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdT",
         "performance": {
           "latency": {
-            "average": 209.33125000074506,
-            "p95": 534.5999999940395,
+            "average": 133.13125000149012,
+            "p95": 380.69999998807907,
             "samples": 16
           },
           "throughput": {
-            "operationsPerSecond": 1.027736026000541,
-            "keystrokesPerSecond": 0.4496345113752367,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 1.0364641027139927,
+            "keystrokesPerSecond": 0.4534530449373718,
+            "messagesPerSecond": 1.0364641027139927
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 1888,
+            "bytesReceived": 5995,
+            "messagesSent": 8,
+            "messagesReceived": 8
           },
           "operations": {
             "total": 16,
@@ -43,8 +43,8 @@
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 15.568200000017882,
-            "uptime": 15568.200000017881,
+            "duration": 15.43709999999404,
+            "uptime": 15437.09999999404,
             "isConnected": true
           }
         }
@@ -52,325 +52,297 @@
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "BAWAAAAAAAAAAAAAABBBBBBB",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABBB23BWdTAAAAAAAAAAAAAABBBBBBB",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 50,
+            "p95": 75,
+            "samples": 2
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 0.3324578609671107,
+            "keystrokesPerSecond": 1.1636025133848875,
+            "messagesPerSecond": 3.8232654011217733
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 1905,
+            "bytesReceived": 2138,
+            "messagesSent": 8,
+            "messagesReceived": 15
           },
           "operations": {
-            "total": 0,
-            "pending": 0,
+            "total": 2,
+            "pending": 7,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 6.015799999982119,
+            "uptime": 6015.799999982119,
+            "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 10,
-        "contentLengthB": 24,
+        "contentLengthA": 128,
+        "contentLengthB": 142,
         "lengthDifference": 14,
-        "syncQuality": 41.666666666666664,
-        "isSynchronized": false,
-        "contentA": "BAAAAAAAAW",
-        "contentB": "BAWAAAAAAAAAAAAAABBBBBBB"
+        "syncQuality": 90.14084507042254,
+        "isSynchronized": true,
+        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdT",
+        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABBB23BWdTAAAAAAAAAAAAAABBBBBBB"
       }
     },
     "benchmark2": {
       "status": "success",
       "name": "长文本协作测试",
       "description": "长文本连续输入，测试持续性能和稳定性",
-      "timestamp": "2025-07-28T15:34:27.795Z",
+      "timestamp": "2025-07-28T18:52:18.069Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "BAAAAAAAAWThis is le, another ser ii resuu rehtona ,ela longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdTThis is a l anothr usee is alss edittng tte same ddocumen. Thii createe a reaaisticccollabooativeeditinnig scenaro wheee multtple peopll work  n the ssme conent ss imultaneusly..ylsuooenatlumitnettnoc emaa eht nookrow eepoep elpiilum errhw oiiranecs gtidee  vitarrballoc  itsiller a sstaerc sshT .ttnemuco emas ehh gniiide oola si rrsu reehtona ongeeanwhile,,elihwnaer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 133.13125000149012,
+            "p95": 380.69999998807907,
+            "samples": 16
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 2.6628942331696765,
+            "keystrokesPerSecond": 30.29042190230507,
+            "messagesPerSecond": 90.87126570691521
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 46633,
+            "bytesReceived": 41443,
+            "messagesSent": 184,
+            "messagesReceived": 362
           },
           "operations": {
-            "total": 0,
-            "pending": 0,
+            "total": 16,
+            "pending": 119,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 6.0085,
+            "uptime": 6008.5,
+            "isConnected": true
           }
         }
       },
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwhile,BWdT",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 60.61669793579637,
+            "p95": 136.89999997615814,
+            "samples": 533
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 20.40050829035185,
+            "keystrokesPerSecond": 7.042576970778126,
+            "messagesPerSecond": 21.319105286540303
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 47274,
+            "bytesReceived": 322474,
+            "messagesSent": 186,
+            "messagesReceived": 371
           },
           "operations": {
-            "total": 0,
+            "total": 533,
             "pending": 0,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 26.12679999998212,
+            "uptime": 26126.79999998212,
+            "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 221,
-        "contentLengthB": 188,
-        "lengthDifference": 33,
-        "syncQuality": 85.06787330316742,
+        "contentLengthA": 655,
+        "contentLengthB": 306,
+        "lengthDifference": 349,
+        "syncQuality": 46.717557251908396,
         "isSynchronized": false,
-        "contentA": "BAAAAAAAAWThis is le, another ser ii resuu rehtona ,ela longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
-        "contentB": "BAAAAAAAABle, another ser ius alsoMeanwhiW editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously."
+        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdTThis is a l anothr usee is alss edittng tte same ddocumen. Thii createe a reaaisticccollabooativeeditinnig scenaro wheee multtple peopll work  n the ssme conent ss imultaneusly..ylsuooenatlumitnettnoc emaa eht nookrow eepoep elpiilum errhw oiiranecs gtidee  vitarrballoc  itsiller a sstaerc sshT .ttnemuco emas ehh gniiide oola si rrsu reehtona ongeeanwhile,,elihwnaer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwhile,BWdT"
       }
     },
     "benchmark3": {
       "status": "success",
       "name": "富文本格式协作测试",
       "description": "不同用户插入不同文本，但对同一段文本应用格式",
-      "timestamp": "2025-07-28T15:34:55.454Z",
+      "timestamp": "2025-07-28T18:52:45.715Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello w",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorld! Thi is uss A'srecontent. while,BHello wWdT",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 77.06076923081508,
+            "p95": 321.80000001192093,
+            "samples": 130
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 3.862598459121022,
+            "keystrokesPerSecond": 6.536705084666345,
+            "messagesPerSecond": 19.69925214151721
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 56394,
+            "bytesReceived": 120499,
+            "messagesSent": 223,
+            "messagesReceived": 440
           },
           "operations": {
-            "total": 0,
+            "total": 130,
             "pending": 0,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 33.65609999999404,
+            "uptime": 33656.09999999404,
+            "isConnected": true
           }
         }
       },
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwTesting OT collaboration from user B.hile,BWdT",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 60.61669793579637,
+            "p95": 136.89999997615814,
+            "samples": 533
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 9.911963907810113,
+            "keystrokesPerSecond": 4.109838693482242,
+            "messagesPerSecond": 13.89162671507346
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 56799,
+            "bytesReceived": 340298,
+            "messagesSent": 224,
+            "messagesReceived": 523
           },
           "operations": {
-            "total": 0,
-            "pending": 0,
+            "total": 533,
+            "pending": 37,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 53.77339999997616,
+            "uptime": 53773.39999997616,
+            "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 81,
-        "contentLengthB": 287,
-        "lengthDifference": 206,
-        "syncQuality": 28.222996515679444,
-        "isSynchronized": false,
-        "contentA": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello w",
-        "contentB": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B."
+        "contentLengthA": 345,
+        "contentLengthB": 343,
+        "lengthDifference": 2,
+        "syncQuality": 99.42028985507247,
+        "isSynchronized": true,
+        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorld! Thi is uss A'srecontent. while,BHello wWdT",
+        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwTesting OT collaboration from user B.hile,BWdT"
       }
     },
     "benchmark4": {
       "status": "success",
       "name": "格式范围重叠测试",
       "description": "两个用户都做bold操作，但选中的文本范围有重叠",
-      "timestamp": "2025-07-28T15:35:21.210Z",
+      "timestamp": "2025-07-28T18:53:11.456Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello wThis is a shared document for collaborative testing.",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorThis is a shared document for collaborative testing.ld! Thi is uss A'srecontent. while,BHello wWdT",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 77.06076923081508,
+            "p95": 321.80000001192093,
+            "samples": 130
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 2.1884416611955624,
+            "keystrokesPerSecond": 4.612561655135263,
+            "messagesPerSecond": 13.837684965405789
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 70016,
+            "bytesReceived": 130073,
+            "messagesSent": 276,
+            "messagesReceived": 546
           },
           "operations": {
-            "total": 0,
-            "pending": 0,
+            "total": 130,
+            "pending": 1,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 59.403,
+            "uptime": 59403,
+            "isConnected": true
           }
         }
       },
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.We are testing the collaborative editing system.",
+        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwWe are testing the collaborative editing system.Testing OT collaboration from user B.hile,BWdT",
         "performance": {
           "latency": {
-            "average": 0,
-            "p95": 0,
-            "samples": 0
+            "average": 60.61669793579637,
+            "p95": 136.89999997615814,
+            "samples": 533
           },
           "throughput": {
-            "operationsPerSecond": 0,
-            "keystrokesPerSecond": 0,
-            "messagesPerSecond": 0
+            "operationsPerSecond": 6.702834305433445,
+            "keystrokesPerSecond": 3.382856338014253,
+            "messagesPerSecond": 11.204925640039775
           },
           "network": {
-            "bytesSent": 0,
-            "bytesReceived": 0,
-            "messagesSent": 0,
-            "messagesReceived": 0
+            "bytesSent": 69107,
+            "bytesReceived": 348698,
+            "messagesSent": 272,
+            "messagesReceived": 619
           },
           "operations": {
-            "total": 0,
-            "pending": 0,
+            "total": 533,
+            "pending": 48,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 0,
-            "uptime": 0,
-            "isConnected": false
+            "duration": 79.51859999999404,
+            "uptime": 79518.59999999404,
+            "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 133,
-        "contentLengthB": 335,
-        "lengthDifference": 202,
-        "syncQuality": 39.701492537313435,
-        "isSynchronized": false,
-        "contentA": "BAAAAAAAABTle, another ser ius alsoMorld! Tis is huser As conte'nt.eanwhiWHello wThis is a shared document for collaborative testing.",
-        "contentB": "BAAAAAAAABle, another ser ius alsoMeanwhiW editingorld! Tis is  user As conteent..tntnoc s''A resusi sihhT !dlro the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.Testing OT collaboration from user B.We are testing the collaborative editing system."
+        "contentLengthA": 397,
+        "contentLengthB": 391,
+        "lengthDifference": 6,
+        "syncQuality": 98.48866498740554,
+        "isSynchronized": true,
+        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorThis is a shared document for collaborative testing.ld! Thi is uss A'srecontent. while,BHello wWdT",
+        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwWe are testing the collaborative editing system.Testing OT collaboration from user B.hile,BWdT"
       }
     }
   },
   "recommendations": [
     {
-      "type": "latency",
-      "priority": "high",
-      "message": "平均延迟较高，建议优化网络连接或减少操作频率",
-      "metric": 209.33125000074506,
-      "threshold": 100
-    },
-    {
-      "type": "synchronization",
-      "priority": "high",
-      "message": "benchmark1 同步质量较差，可能存在冲突解决问题",
-      "benchmark": "benchmark1",
-      "syncQuality": 41.666666666666664
-    },
-    {
       "type": "synchronization",
       "priority": "high",
       "message": "benchmark2 同步质量较差，可能存在冲突解决问题",
       "benchmark": "benchmark2",
-      "syncQuality": 85.06787330316742
-    },
-    {
-      "type": "synchronization",
-      "priority": "high",
-      "message": "benchmark3 同步质量较差，可能存在冲突解决问题",
-      "benchmark": "benchmark3",
-      "syncQuality": 28.222996515679444
-    },
-    {
-      "type": "synchronization",
-      "priority": "high",
-      "message": "benchmark4 同步质量较差，可能存在冲突解决问题",
-      "benchmark": "benchmark4",
-      "syncQuality": 39.701492537313435
+      "syncQuality": 46.717557251908396
     }
   ],
   "metadata": {

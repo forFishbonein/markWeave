@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OT多基准测试性能分析报告</title>
+    <title>OT Multi-Benchmark Performance Analysis Report</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -119,28 +119,28 @@
 </head>
 <body>
     <div class="container">
-        <h1>OT多基准测试性能分析报告</h1>
+        <h1>OT Multi-Benchmark Performance Analysis Report</h1>
 
         <div class="summary-grid">
             <div class="summary-card">
-                <h3>总基准测试数</h3>
+                <h3>Total Benchmarks</h3>
                 <p>4</p>
             </div>
             <div class="summary-card">
-                <h3>整体平均延迟</h3>
-                <p>0.00 ms</p>
+                <h3>Average Latency</h3>
+                <p>81.53 ms</p>
             </div>
             <div class="summary-card">
-                <h3>整体平均带宽</h3>
-                <p>0.00 KB/s</p>
+                <h3>Average Bandwidth</h3>
+                <p>43752.00 KB/s</p>
             </div>
             <div class="summary-card">
-                <h3>整体操作频率</h3>
-                <p>0.00 ops/s</p>
+                <h3>Average Operations</h3>
+                <p>5.89 ops/s</p>
             </div>
         </div>
 
-        <h2>基准测试性能对比</h2>
+        <h2>Benchmark Performance Comparison</h2>
 
         <div class="chart-container">
             <canvas id="latencyChart" width="400" height="200"></canvas>
@@ -154,38 +154,38 @@
             <canvas id="operationsChart" width="400" height="200"></canvas>
         </div>
 
-        <h2>各基准测试详细结果</h2>
+        <h2>Detailed Benchmark Results</h2>
         <div class="benchmark-details">
             
                 <div class="benchmark-card">
                     <h3>基础并发输入测试</h3>
                     <p><strong>描述:</strong> 最基础的并发输入，测试OT核心冲突解决能力</p>
                     <p><strong>测试类型:</strong> unknown</p>
-                    <p><strong>时间戳:</strong> 2025/7/28 23:34:07</p>
+                    <p><strong>时间戳:</strong> 2025/7/29 02:51:57</p>
 
                     <div class="metrics-grid">
                         <div class="metric">
-                            <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value">91.56562500074506 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">P95 Latency</div>
+                            <div class="metric-value">227.84999999403954 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">0.00 KB/s</div>
+                            <div class="metric-label">Bandwidth Usage</div>
+                            <div class="metric-value">1896.5 bytes</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">操作频率</div>
-                            <div class="metric-value">0.00 ops/s</div>
+                            <div class="metric-label">Operation Rate</div>
+                            <div class="metric-value">0.6844609818405517 ops/s</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Total Operations</div>
+                            <div class="metric-value">18</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">协作者数</div>
+                            <div class="metric-label">Collaborators</div>
                             <div class="metric-value">2</div>
                         </div>
                     </div>
@@ -195,31 +195,31 @@
                     <h3>长文本协作测试</h3>
                     <p><strong>描述:</strong> 长文本连续输入，测试持续性能和稳定性</p>
                     <p><strong>测试类型:</strong> unknown</p>
-                    <p><strong>时间戳:</strong> 2025/7/28 23:34:27</p>
+                    <p><strong>时间戳:</strong> 2025/7/29 02:52:18</p>
 
                     <div class="metrics-grid">
                         <div class="metric">
-                            <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value">96.87397396864324 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">P95 Latency</div>
+                            <div class="metric-value">258.7999999821186 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">0.00 KB/s</div>
+                            <div class="metric-label">Bandwidth Usage</div>
+                            <div class="metric-value">46953.5 bytes</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">操作频率</div>
-                            <div class="metric-value">0.00 ops/s</div>
+                            <div class="metric-label">Operation Rate</div>
+                            <div class="metric-value">11.531701261760764 ops/s</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Total Operations</div>
+                            <div class="metric-value">549</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">协作者数</div>
+                            <div class="metric-label">Collaborators</div>
                             <div class="metric-value">2</div>
                         </div>
                     </div>
@@ -229,31 +229,31 @@
                     <h3>富文本格式协作测试</h3>
                     <p><strong>描述:</strong> 不同用户插入不同文本，但对同一段文本应用格式</p>
                     <p><strong>测试类型:</strong> unknown</p>
-                    <p><strong>时间戳:</strong> 2025/7/28 23:34:55</p>
+                    <p><strong>时间戳:</strong> 2025/7/29 02:52:45</p>
 
                     <div class="metrics-grid">
                         <div class="metric">
-                            <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value">68.83873358330573 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">P95 Latency</div>
+                            <div class="metric-value">229.34999999403954 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">0.00 KB/s</div>
+                            <div class="metric-label">Bandwidth Usage</div>
+                            <div class="metric-value">56596.5 bytes</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">操作频率</div>
-                            <div class="metric-value">0.00 ops/s</div>
+                            <div class="metric-label">Operation Rate</div>
+                            <div class="metric-value">6.887281183465568 ops/s</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Total Operations</div>
+                            <div class="metric-value">663</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">协作者数</div>
+                            <div class="metric-label">Collaborators</div>
                             <div class="metric-value">2</div>
                         </div>
                     </div>
@@ -263,31 +263,31 @@
                     <h3>格式范围重叠测试</h3>
                     <p><strong>描述:</strong> 两个用户都做bold操作，但选中的文本范围有重叠</p>
                     <p><strong>测试类型:</strong> unknown</p>
-                    <p><strong>时间戳:</strong> 2025/7/28 23:35:21</p>
+                    <p><strong>时间戳:</strong> 2025/7/29 02:53:11</p>
 
                     <div class="metrics-grid">
                         <div class="metric">
-                            <div class="metric-label">平均延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Average Latency</div>
+                            <div class="metric-value">68.83873358330573 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">P95延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">P95 Latency</div>
+                            <div class="metric-value">229.34999999403954 ms</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">带宽使用</div>
-                            <div class="metric-value">0.00 KB/s</div>
+                            <div class="metric-label">Bandwidth Usage</div>
+                            <div class="metric-value">69561.5 bytes</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">操作频率</div>
-                            <div class="metric-value">0.00 ops/s</div>
+                            <div class="metric-label">Operation Rate</div>
+                            <div class="metric-value">4.445637983314503 ops/s</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">E2E延迟</div>
-                            <div class="metric-value">0.00 ms</div>
+                            <div class="metric-label">Total Operations</div>
+                            <div class="metric-value">663</div>
                         </div>
                         <div class="metric">
-                            <div class="metric-label">协作者数</div>
+                            <div class="metric-label">Collaborators</div>
                             <div class="metric-value">2</div>
                         </div>
                     </div>
@@ -295,50 +295,26 @@
             
         </div>
 
-        <h2>性能建议</h2>
+        <h2>Performance Recommendations</h2>
         <div class="recommendations">
             
-                    <div class="recommendation priority-high">
-                        <strong>LATENCY</strong> (优先级: high)
-                        <p>平均延迟较高，建议优化网络连接或减少操作频率</p>
-                        <p>指标: 209.33125000074506</p>
-                    </div>
-                
-                    <div class="recommendation priority-high">
-                        <strong>SYNCHRONIZATION</strong> (优先级: high)
-                        <p>benchmark1 同步质量较差，可能存在冲突解决问题</p>
-                        
-                    </div>
-                
                     <div class="recommendation priority-high">
                         <strong>SYNCHRONIZATION</strong> (优先级: high)
                         <p>benchmark2 同步质量较差，可能存在冲突解决问题</p>
                         
                     </div>
                 
-                    <div class="recommendation priority-high">
-                        <strong>SYNCHRONIZATION</strong> (优先级: high)
-                        <p>benchmark3 同步质量较差，可能存在冲突解决问题</p>
-                        
-                    </div>
-                
-                    <div class="recommendation priority-high">
-                        <strong>SYNCHRONIZATION</strong> (优先级: high)
-                        <p>benchmark4 同步质量较差，可能存在冲突解决问题</p>
-                        
-                    </div>
-                
         </div>
 
-        <h2>最佳/最差性能基准测试</h2>
+        <h2>Best/Worst Performance Benchmarks</h2>
         <div class="benchmark-details">
             <div class="benchmark-card">
-                <h3>🏆 最佳性能: 基础并发输入测试</h3>
-                <p>平均延迟: 0.00 ms</p>
+                <h3>🏆 Best Performance: 富文本格式协作测试</h3>
+                <p>Average Latency: 68.84 ms</p>
             </div>
             <div class="benchmark-card">
-                <h3>⚠️ 最差性能: 基础并发输入测试</h3>
-                <p>平均延迟: 0.00 ms</p>
+                <h3>⚠️ Worst Performance: 长文本协作测试</h3>
+                <p>Average Latency: 96.87 ms</p>
             </div>
         </div>
     </div>
@@ -351,15 +327,15 @@
                 labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [
                     {
-                        label: '平均延迟 (ms)',
-                        data: [0.00,0.00,0.00,0.00],
+                        label: 'Average Latency (ms)',
+                        data: [91.56562500074506,96.87397396864324,68.83873358330573,68.83873358330573],
                         backgroundColor: 'rgba(231, 76, 60, 0.5)',
                         borderColor: 'rgba(231, 76, 60, 1)',
                         borderWidth: 1
                     },
                     {
-                        label: 'P95延迟 (ms)',
-                        data: [0.00,0.00,0.00,0.00],
+                        label: 'P95 Latency (ms)',
+                        data: [227.84999999403954,258.7999999821186,229.34999999403954,229.34999999403954],
                         backgroundColor: 'rgba(155, 89, 182, 0.5)',
                         borderColor: 'rgba(155, 89, 182, 1)',
                         borderWidth: 1
@@ -392,8 +368,8 @@
             data: {
                 labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [{
-                    label: '带宽使用 (KB/s)',
-                    data: [0.00,0.00,0.00,0.00],
+                    label: 'Bandwidth Usage (bytes)',
+                    data: [1896.5,46953.5,56596.5,69561.5],
                     backgroundColor: 'rgba(52, 152, 219, 0.5)',
                     borderColor: 'rgba(52, 152, 219, 1)',
                     borderWidth: 1
@@ -404,7 +380,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: '带宽使用对比'
+                        text: 'Bandwidth Usage Comparison'
                     }
                 },
                 scales: {
@@ -412,7 +388,7 @@
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '带宽 (KB/s)'
+                            text: 'Bandwidth (KB/s)'
                         }
                     }
                 }
@@ -425,8 +401,8 @@
             data: {
                 labels: ["基础并发输入测试","长文本协作测试","富文本格式协作测试","格式范围重叠测试"],
                 datasets: [{
-                    label: '操作频率 (ops/s)',
-                    data: [0.00,0.00,0.00,0.00],
+                    label: 'Operation Rate (ops/s)',
+                    data: [0.6844609818405517,11.531701261760764,6.887281183465568,4.445637983314503],
                     backgroundColor: 'rgba(46, 204, 113, 0.5)',
                     borderColor: 'rgba(46, 204, 113, 1)',
                     borderWidth: 1
@@ -437,7 +413,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: '操作频率对比'
+                        text: 'Operation Rate Comparison'
                     }
                 },
                 scales: {
@@ -445,7 +421,7 @@
                         beginAtZero: true,
                         title: {
                             display: true,
-                            text: '操作频率 (ops/s)'
+                            text: 'Operation Rate (ops/s)'
                         }
                     }
                 }

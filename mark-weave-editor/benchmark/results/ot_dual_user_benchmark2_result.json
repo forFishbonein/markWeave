@@ -2,25 +2,91 @@
   "benchmark": "benchmark2",
   "name": "长文本协作测试",
   "description": "长文本连续输入，测试持续性能和稳定性",
-  "timestamp": "2025-07-28T15:34:27.795Z",
+  "timestamp": "2025-07-28T18:52:18.069Z",
   "userA": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 6.0085,
+      "isConnected": true,
+      "windowId": "ot-1753728702494-u0wjk6h11",
+      "operationsCount": 16,
+      "totalOperationSize": 11282,
+      "opsPerSecond": 2.6628942331696765,
+      "avgOperationSize": 705.125,
+      "keystrokes": 182,
+      "keystrokesPerSecond": 30.29042190230507,
+      "pendingOperations": 119,
+      "avgLatency": 133.13125000149012,
+      "p95Latency": 380.69999998807907,
+      "avgNetworkLatency": 3.5,
+      "latencySamples": 16,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 3,
+      "avgE2ELatency": 230.17142856972558,
+      "p95E2ELatency": 310.5,
+      "e2eSamples": 7,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "limited",
+        "confidence": "low"
+      },
+      "bytesSent": 46633,
+      "bytesReceived": 41443,
+      "bytesPerSecond": 14658.567030040776,
+      "messagesSent": 184,
+      "messagesReceived": 362,
+      "messagesPerSecond": 90.87126570691521,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 6008.5,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAAWThis is le, another ser ii resuu rehtona ,ela longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdTThis is a l anothr usee is alss edittng tte same ddocumen. Thii createe a reaaisticccollabooativeeditinnig scenaro wheee multtple peopll work  n the ssme conent ss imultaneusly..ylsuooenatlumitnettnoc emaa eht nookrow eepoep elpiilum errhw oiiranecs gtidee  vitarrballoc  itsiller a sstaerc sshT .ttnemuco emas ehh gniiide oola si rrsu reehtona ongeeanwhile,,elihwnaer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
     "email": "haowhenhai@163.com"
   },
   "userB": {
     "stats": {
-      "error": "监控器不存在",
-      "debug": {
-        "monitorExists": false
-      }
+      "monitoringDuration": 26.12679999998212,
+      "isConnected": true,
+      "windowId": "ot-1753728702498-fzcwq8els",
+      "operationsCount": 533,
+      "totalOperationSize": 457776,
+      "opsPerSecond": 20.40050829035185,
+      "avgOperationSize": 858.8667917448405,
+      "keystrokes": 184,
+      "keystrokesPerSecond": 7.042576970778126,
+      "pendingOperations": 0,
+      "avgLatency": 60.61669793579637,
+      "p95Latency": 136.89999997615814,
+      "avgNetworkLatency": 2.4333333174387612,
+      "latencySamples": 533,
+      "recentLatencySamples": 0,
+      "networkLatencySamples": 3,
+      "avgE2ELatency": 415.46599999815226,
+      "p95E2ELatency": 4557.699999988079,
+      "e2eSamples": 200,
+      "dataQuality": {
+        "timeWindow": 4000,
+        "minSamples": 12,
+        "calculationMethod": "historical",
+        "confidence": "medium"
+      },
+      "bytesSent": 47274,
+      "bytesReceived": 322474,
+      "bytesPerSecond": 14152.058422778644,
+      "messagesSent": 186,
+      "messagesReceived": 371,
+      "messagesPerSecond": 21.319105286540303,
+      "activeConnections": 1,
+      "conflictResolutions": 0,
+      "uptime": 26126.79999998212,
+      "dataSource": "real-websocket-monitoring",
+      "hasRealNetworkData": true,
+      "hasRealLatencyData": true
     },
-    "content": "BAAAAAAAABle, another ser ius alsoMeanwhiW editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+    "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwhile,BWdT",
     "email": "haowhenhai@gmail.com"
   },
   "testConfig": {
