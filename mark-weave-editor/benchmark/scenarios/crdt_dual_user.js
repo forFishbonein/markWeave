@@ -15,23 +15,25 @@ const EDITOR_SELECTOR = 'div[placeholder*="content"]';
 // 定义4个测试基准
 const BENCHMARKS = {
   benchmark1: {
-    name: "基础并发输入测试",
+    name: "Basic Concurrent Input", // 基础并发输入测试
     userA: "AAAAAAA",
     userB: "BBBBBBB",
-    description: "最基础的并发输入，测试CRDT核心冲突解决能力",
+    description:
+      "The most basic concurrent input; tests core CRDT conflict resolution.", // 最基础的并发输入，测试CRDT核心冲突解决能力
     testType: "concurrent_input",
   },
   benchmark2: {
-    name: "长文本协作测试",
+    name: "Long Text Collaboration", // 长文本协作测试
     userA:
       "This is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
     userB:
       "Meanwhile, another user is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
-    description: "长文本连续输入，测试持续性能和稳定性",
+    description:
+      "Continuous long-text input; tests sustained performance and stability.", // 长文本连续输入，测试持续性能和稳定性
     testType: "long_text_collaboration",
   },
   benchmark3: {
-    name: "富文本格式协作测试",
+    name: "Rich-text Formatting Collaboration", // 富文本格式协作测试
     userA: {
       insertText: "Hello world! This is user A's content.",
       formatTarget: "Hello world!",
@@ -42,11 +44,12 @@ const BENCHMARKS = {
       formatTarget: "Hello world!",
       format: "italic",
     },
-    description: "不同用户插入不同文本，但对同一段文本应用格式",
+    description:
+      "Different users insert different text but apply styles to the same span.", // 不同用户插入不同文本，但对同一段文本应用格式
     testType: "text_format_collaboration",
   },
   benchmark4: {
-    name: "格式范围重叠测试",
+    name: "Format Range Overlap", // 格式范围重叠测试
     userA: {
       insertText: "This is a shared document for collaborative testing.",
       formatTarget: "shared document",
@@ -57,7 +60,7 @@ const BENCHMARKS = {
       formatTarget: "document for collaborative",
       format: "bold",
     },
-    description: "两个用户都做bold操作，但选中的文本范围有重叠",
+    description: "Both users apply bold with overlapping selection ranges.", // 两个用户都做bold操作，但选中的文本范围有重叠
     testType: "format_range_overlap",
   },
 };

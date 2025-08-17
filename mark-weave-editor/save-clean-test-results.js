@@ -13,17 +13,17 @@ function cleanTestOutput(rawOutput) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // 跳过console.log相关的行
+    // Skip console.log related lines
     if (line.trim().startsWith("console.log")) {
       continue;
     }
 
-    // 跳过文件路径信息行（at Object.log等）
+    // Skip file path information lines (at Object.log, etc.)
     if (line.trim().startsWith("at ") && line.includes(".js:")) {
       continue;
     }
 
-    // 跳过空的console.log内容行（只包含空格的行）
+    // Skip empty console.log content lines (lines with only spaces)
     if (
       line.trim() === "" &&
       i > 0 &&
@@ -32,7 +32,7 @@ function cleanTestOutput(rawOutput) {
       continue;
     }
 
-    // 跳过箭头符号等Jest输出格式
+    // Skip arrow symbols and other Jest output formats
     if (line.trim().startsWith("at Array.forEach")) {
       continue;
     }
@@ -44,7 +44,7 @@ function cleanTestOutput(rawOutput) {
 }
 
 function formatTestSummary(output) {
-  // 提取测试结果摘要 - 只提取最后的统计信息
+  // Extract test result summary - only extract final statistics
   const lines = output.split("\n");
   let summary = "";
   let foundTestSuites = false;
@@ -64,7 +64,7 @@ function formatTestSummary(output) {
       summary = line + "\n" + summary;
     }
 
-    // 如果找到了完整的测试摘要，停止搜索
+    // If complete test summary is found, stop searching
     if (foundTestSuites && line.includes("Ran all test suites")) {
       break;
     }
@@ -75,41 +75,40 @@ function formatTestSummary(output) {
 
 function main() {
   try {
-    console.log("🧹 开始生成干净的测试日志...");
+    console.log("🧹 Starting to generate clean test logs...");
 
-    // 执行测试并捕获输出
+    // Execute tests and capture output
     const rawOutput = execSync("npm run test:crdt", {
       encoding: "utf8",
       cwd: process.cwd(),
     });
 
-    // 清理输出
+    // Clean output
     const cleanOutput = cleanTestOutput(rawOutput);
 
-    // 创建带时间戳的文件名
+    // Create timestamped filenames
     const timestamp = getCurrentTime();
     const cleanLogFile = `test-results/clean-test-log-${timestamp}.txt`;
     const latestCleanLogFile = "test-results/latest-clean-test-log.txt";
 
-    // 确保目录存在
+    // Ensure directory exists
     if (!fs.existsSync("test-results")) {
       fs.mkdirSync("test-results");
     }
 
-    // 生成清理后的完整日志
+    // Generate cleaned complete log
     const header = `CRDT Test Results - Clean Version
-Generated at: ${new Date().toLocaleString("en-US")}
-================================
-
-`;
+    Generated at: ${new Date().toLocaleString("en-US")}
+    ================================
+    `;
 
     const fullCleanLog = header + cleanOutput;
 
-    // 保存文件
+    // Save files
     fs.writeFileSync(cleanLogFile, fullCleanLog);
     fs.writeFileSync(latestCleanLogFile, fullCleanLog);
 
-    // 生成简洁摘要
+    // Generate concise summary
     const summary = formatTestSummary(rawOutput);
     const summaryFile = `test-results/clean-test-summary-${timestamp}.txt`;
     const latestSummaryFile = "test-results/latest-clean-summary.txt";
@@ -117,30 +116,30 @@ Generated at: ${new Date().toLocaleString("en-US")}
     const summaryContent = `CRDT Test Summary - ${new Date().toLocaleString(
       "en-US"
     )}
-================================
+    ================================
 
-[Summary Statistics]
-${summary}
+    [Summary Statistics]
+    ${summary}
 
-[Suite Descriptions]:
-- CRDT Performance Benchmark Suite
-- CRDT Randomized Fuzz Suite (6 subtests)
-- CRDT Concurrent Operations Suite (17 subtests)
-- CRDT Multi-Format Suite (7 subtests)
-- CRDT Conflict Resolution Suite (remove-wins)
-- CRDT Deterministic Suite
-`;
+    [Suite Descriptions]:
+    - CRDT Performance Benchmark Suite
+    - CRDT Randomized Fuzz Suite (6 subtests)
+    - CRDT Concurrent Operations Suite (17 subtests)
+    - CRDT Multi-Format Suite (7 subtests)
+    - CRDT Conflict Resolution Suite (remove-wins)
+    - CRDT Deterministic Suite
+    `;
 
     fs.writeFileSync(summaryFile, summaryContent);
     fs.writeFileSync(latestSummaryFile, summaryContent);
 
-    console.log("✅ 干净的测试日志已生成:");
-    console.log(`   📄 完整日志: ${cleanLogFile}`);
-    console.log(`   📋 测试摘要: ${summaryFile}`);
-    console.log(`   🔗 最新日志: ${latestCleanLogFile}`);
-    console.log(`   🔗 最新摘要: ${latestSummaryFile}`);
+    console.log("✅ Clean test logs generated:");
+    console.log(`   📄 Complete log: ${cleanLogFile}`);
+    console.log(`   📋 Test summary: ${summaryFile}`);
+    console.log(`   🔗 Latest log: ${latestCleanLogFile}`);
+    console.log(`   🔗 Latest summary: ${latestSummaryFile}`);
   } catch (error) {
-    console.error("❌ 生成干净测试日志时出错:", error.message);
+    console.error("❌ Error generating clean test logs:", error.message);
     process.exit(1);
   }
 }

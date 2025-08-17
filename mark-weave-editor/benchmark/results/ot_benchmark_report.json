@@ -1,39 +1,44 @@
 {
-  "title": "OT性能分析报告",
-  "timestamp": "2025-07-28T19:00:36.441Z",
+  "title": "OT Performance Report",
+  "timestamp": "2025-08-10T12:57:00.463Z",
   "summary": {
     "totalTests": 4,
     "successfulTests": 4,
     "failedTests": 0,
-    "averageLatency": 81.52926653399993,
-    "averageThroughput": 5.887270352595346,
-    "totalBytesTransferred": 350016,
-    "totalMessages": 1381
+    "averageLatency": 130.54720325381828,
+    "averageThroughput": 1.6216204372559397,
+    "totalBytesTransferred": 233931,
+    "totalMessages": 918
   },
   "benchmarks": {
     "benchmark1": {
       "status": "success",
-      "name": "基础并发输入测试",
-      "description": "最基础的并发输入，测试OT核心冲突解决能力",
-      "timestamp": "2025-07-28T18:51:57.956Z",
+      "name": "Basic Concurrent Input",
+      "description": "The most basic concurrent input; tests core OT conflict resolution.",
+      "timestamp": "2025-08-10T12:55:38.560Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdT",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTAAAAAAAllo woMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT",
         "performance": {
           "latency": {
-            "average": 133.13125000149012,
-            "p95": 380.69999998807907,
+            "average": 202.21250000596046,
+            "p95": 579.3000000715256,
             "samples": 16
           },
+          "e2e": {
+            "average": 360.12857142516543,
+            "p95": 545.1999999284744,
+            "samples": 7
+          },
           "throughput": {
-            "operationsPerSecond": 1.0364641027139927,
-            "keystrokesPerSecond": 0.4534530449373718,
-            "messagesPerSecond": 1.0364641027139927
+            "operationsPerSecond": 1.005802221562642,
+            "keystrokesPerSecond": 0.44003847193365586,
+            "messagesPerSecond": 1.005802221562642
           },
           "network": {
-            "bytesSent": 1888,
-            "bytesReceived": 5995,
+            "bytesSent": 1874,
+            "bytesReceived": 50523,
             "messagesSent": 8,
             "messagesReceived": 8
           },
@@ -43,8 +48,8 @@
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 15.43709999999404,
-            "uptime": 15437.09999999404,
+            "duration": 15.907700000047683,
+            "uptime": 15907.700000047684,
             "isConnected": true
           }
         }
@@ -52,21 +57,26 @@
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABBB23BWdTAAAAAAAAAAAAAABBBBBBB",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTllo woMeanwhiAAAAAAABre, MeanAAAAAAAAAAAAAABBBBBBBwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT",
         "performance": {
           "latency": {
             "average": 50,
             "p95": 75,
             "samples": 2
           },
+          "e2e": {
+            "average": 0,
+            "p95": 0,
+            "samples": 0
+          },
           "throughput": {
-            "operationsPerSecond": 0.3324578609671107,
-            "keystrokesPerSecond": 1.1636025133848875,
-            "messagesPerSecond": 3.8232654011217733
+            "operationsPerSecond": 0.3327122704258942,
+            "keystrokesPerSecond": 1.1644929464906297,
+            "messagesPerSecond": 3.8261911098977834
           },
           "network": {
-            "bytesSent": 1905,
-            "bytesReceived": 2138,
+            "bytesSent": 1886,
+            "bytesReceived": 7704,
             "messagesSent": 8,
             "messagesReceived": 15
           },
@@ -76,56 +86,62 @@
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 6.015799999982119,
-            "uptime": 6015.799999982119,
+            "duration": 6.011200000047683,
+            "uptime": 6011.200000047684,
             "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 128,
-        "contentLengthB": 142,
+        "contentLengthA": 3447,
+        "contentLengthB": 3461,
         "lengthDifference": 14,
-        "syncQuality": 90.14084507042254,
+        "syncQuality": 99.59549263218723,
         "isSynchronized": true,
-        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdT",
-        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABBB23BWdTAAAAAAAAAAAAAABBBBBBB"
-      }
+        "contentA": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTAAAAAAAllo woMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT",
+        "contentB": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTllo woMeanwhiAAAAAAABre, MeanAAAAAAAAAAAAAABBBBBBBwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT"
+      },
+      "e2e": null
     },
     "benchmark2": {
       "status": "success",
-      "name": "长文本协作测试",
-      "description": "长文本连续输入，测试持续性能和稳定性",
-      "timestamp": "2025-07-28T18:52:18.069Z",
+      "name": "Long Text Collaboration",
+      "description": "Continuous long-text input; tests sustained performance and stability.",
+      "timestamp": "2025-08-10T12:55:58.529Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdTThis is a l anothr usee is alss edittng tte same ddocumen. Thii createe a reaaisticccollabooativeeditinnig scenaro wheee multtple peopll work  n the ssme conent ss imultaneusly..ylsuooenatlumitnettnoc emaa eht nookrow eepoep elpiilum errhw oiiranecs gtidee  vitarrballoc  itsiller a sstaerc sshT .ttnemuco emas ehh gniiide oola si rrsu reehtona ongeeanwhile,,elihwnaer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTAAAAAAAllo woMeanwhiAAAThMeanwhileelihwnaeMis is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.AAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT",
         "performance": {
           "latency": {
-            "average": 133.13125000149012,
-            "p95": 380.69999998807907,
+            "average": 202.21250000596046,
+            "p95": 579.3000000715256,
             "samples": 16
           },
+          "e2e": {
+            "average": 360.12857142516543,
+            "p95": 545.1999999284744,
+            "samples": 7
+          },
           "throughput": {
-            "operationsPerSecond": 2.6628942331696765,
-            "keystrokesPerSecond": 30.29042190230507,
-            "messagesPerSecond": 90.87126570691521
+            "operationsPerSecond": 2.660458929165281,
+            "keystrokesPerSecond": 4.489524442966411,
+            "messagesPerSecond": 37.0801463252411
           },
           "network": {
-            "bytesSent": 46633,
-            "bytesReceived": 41443,
-            "messagesSent": 184,
-            "messagesReceived": 362
+            "bytesSent": 7050,
+            "bytesReceived": 67408,
+            "messagesSent": 29,
+            "messagesReceived": 194
           },
           "operations": {
             "total": 16,
-            "pending": 119,
+            "pending": 20,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 6.0085,
-            "uptime": 6008.5,
+            "duration": 6.014,
+            "uptime": 6014,
             "isConnected": true
           }
         }
@@ -133,152 +149,82 @@
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwhile,BWdT",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwhiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
         "performance": {
           "latency": {
-            "average": 60.61669793579637,
-            "p95": 136.89999997615814,
-            "samples": 533
+            "average": 124.67241380132478,
+            "p95": 440.89999997615814,
+            "samples": 29
+          },
+          "e2e": {
+            "average": 64.36111109124289,
+            "p95": 278.2999999523163,
+            "samples": 18
           },
           "throughput": {
-            "operationsPerSecond": 20.40050829035185,
-            "keystrokesPerSecond": 7.042576970778126,
-            "messagesPerSecond": 21.319105286540303
+            "operationsPerSecond": 1.116342093408838,
+            "keystrokesPerSecond": 7.082998109904351,
+            "messagesPerSecond": 21.441467104438715
           },
           "network": {
-            "bytesSent": 47274,
-            "bytesReceived": 322474,
+            "bytesSent": 47760,
+            "bytesReceived": 154230,
             "messagesSent": 186,
             "messagesReceived": 371
           },
           "operations": {
-            "total": 533,
-            "pending": 0,
+            "total": 29,
+            "pending": 127,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 26.12679999998212,
-            "uptime": 26126.79999998212,
+            "duration": 25.977700000047683,
+            "uptime": 25977.700000047684,
             "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 655,
-        "contentLengthB": 306,
-        "lengthDifference": 349,
-        "syncQuality": 46.717557251908396,
-        "isSynchronized": false,
-        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABB23BWdTThis is a l anothr usee is alss edittng tte same ddocumen. Thii createe a reaaisticccollabooativeeditinnig scenaro wheee multtple peopll work  n the ssme conent ss imultaneusly..ylsuooenatlumitnettnoc emaa eht nookrow eepoep elpiilum errhw oiiranecs gtidee  vitarrballoc  itsiller a sstaerc sshT .ttnemuco emas ehh gniiide oola si rrsu reehtona ongeeanwhile,,elihwnaer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
-        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwhile,BWdT"
-      }
+        "contentLengthA": 3640,
+        "contentLengthB": 3621,
+        "lengthDifference": 19,
+        "syncQuality": 99.47802197802199,
+        "isSynchronized": true,
+        "contentA": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHello wTAAAAAAAllo woMeanwhiAAAThMeanwhileelihwnaeMis is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.AAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.tMeanwhiHello woHello worlWTWT",
+        "contentB": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwhiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously."
+      },
+      "e2e": null
     },
     "benchmark3": {
       "status": "success",
-      "name": "富文本格式协作测试",
-      "description": "不同用户插入不同文本，但对同一段文本应用格式",
-      "timestamp": "2025-07-28T18:52:45.715Z",
+      "name": "Rich-text Formatting Collaboration",
+      "description": "Different users insert different text but apply styles to the same span.",
+      "timestamp": "2025-08-10T12:56:21.436Z",
       "userA": {
         "status": "success",
         "email": "haowhenhai@163.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorld! Thi is uss A'srecontent. while,BHello wWdT",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHeHello world! TllMeanwhileo wTAAAAAAAllBo woMeanwhiAtAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotThis is c s'.tnetnoA resuMeanwhiHello woHello worlWTWT",
         "performance": {
           "latency": {
-            "average": 77.06076923081508,
-            "p95": 321.80000001192093,
+            "average": 107.9676923073255,
+            "p95": 548.3999999761581,
             "samples": 130
           },
-          "throughput": {
-            "operationsPerSecond": 3.862598459121022,
-            "keystrokesPerSecond": 6.536705084666345,
-            "messagesPerSecond": 19.69925214151721
-          },
-          "network": {
-            "bytesSent": 56394,
-            "bytesReceived": 120499,
-            "messagesSent": 223,
-            "messagesReceived": 440
-          },
-          "operations": {
-            "total": 130,
-            "pending": 0,
-            "conflicts": 0
-          },
-          "monitoring": {
-            "duration": 33.65609999999404,
-            "uptime": 33656.09999999404,
-            "isConnected": true
-          }
-        }
-      },
-      "userB": {
-        "status": "success",
-        "email": "haowhenhai@gmail.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwTesting OT collaboration from user B.hile,BWdT",
-        "performance": {
-          "latency": {
-            "average": 60.61669793579637,
-            "p95": 136.89999997615814,
-            "samples": 533
+          "e2e": {
+            "average": 515.7289156683956,
+            "p95": 1467.5,
+            "samples": 83
           },
           "throughput": {
-            "operationsPerSecond": 9.911963907810113,
-            "keystrokesPerSecond": 4.109838693482242,
-            "messagesPerSecond": 13.89162671507346
+            "operationsPerSecond": 4.494288796080042,
+            "keystrokesPerSecond": 2.3162873025950983,
+            "messagesPerSecond": 11.754293774363186
           },
           "network": {
-            "bytesSent": 56799,
-            "bytesReceived": 340298,
-            "messagesSent": 224,
-            "messagesReceived": 523
-          },
-          "operations": {
-            "total": 533,
-            "pending": 37,
-            "conflicts": 0
-          },
-          "monitoring": {
-            "duration": 53.77339999997616,
-            "uptime": 53773.39999997616,
-            "isConnected": true
-          }
-        }
-      },
-      "synchronization": {
-        "contentLengthA": 345,
-        "contentLengthB": 343,
-        "lengthDifference": 2,
-        "syncQuality": 99.42028985507247,
-        "isSynchronized": true,
-        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorld! Thi is uss A'srecontent. while,BHello wWdT",
-        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwTesting OT collaboration from user B.hile,BWdT"
-      }
-    },
-    "benchmark4": {
-      "status": "success",
-      "name": "格式范围重叠测试",
-      "description": "两个用户都做bold操作，但选中的文本范围有重叠",
-      "timestamp": "2025-07-28T18:53:11.456Z",
-      "userA": {
-        "status": "success",
-        "email": "haowhenhai@163.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorThis is a shared document for collaborative testing.ld! Thi is uss A'srecontent. while,BHello wWdT",
-        "performance": {
-          "latency": {
-            "average": 77.06076923081508,
-            "p95": 321.80000001192093,
-            "samples": 130
-          },
-          "throughput": {
-            "operationsPerSecond": 2.1884416611955624,
-            "keystrokesPerSecond": 4.612561655135263,
-            "messagesPerSecond": 13.837684965405789
-          },
-          "network": {
-            "bytesSent": 70016,
-            "bytesReceived": 130073,
-            "messagesSent": 276,
-            "messagesReceived": 546
+            "bytesSent": 17090,
+            "bytesReceived": 555312,
+            "messagesSent": 68,
+            "messagesReceived": 272
           },
           "operations": {
             "total": 130,
@@ -286,8 +232,8 @@
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 59.403,
-            "uptime": 59403,
+            "duration": 28.92560000002384,
+            "uptime": 28925.600000023842,
             "isConnected": true
           }
         }
@@ -295,54 +241,152 @@
       "userB": {
         "status": "success",
         "email": "haowhenhai@gmail.com",
-        "content": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwWe are testing the collaborative editing system.Testing OT collaboration from user B.hile,BWdT",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woHello world!   !!ddllrrooww  oolllleeHHMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitidecTesting OT collaboration from user B.es gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwThis is ccc ...tttnnneeetttnnnooo  sss'''AAA   rrreeesssuuu  ssii  ssiihhTThiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
         "performance": {
           "latency": {
-            "average": 60.61669793579637,
-            "p95": 136.89999997615814,
-            "samples": 533
+            "average": 124.67241380132478,
+            "p95": 440.89999997615814,
+            "samples": 29
+          },
+          "e2e": {
+            "average": 64.36111109124289,
+            "p95": 278.2999999523163,
+            "samples": 18
           },
           "throughput": {
-            "operationsPerSecond": 6.702834305433445,
-            "keystrokesPerSecond": 3.382856338014253,
-            "messagesPerSecond": 11.204925640039775
+            "operationsPerSecond": 0.5931865367110875,
+            "keystrokesPerSecond": 4.561399920226638,
+            "messagesPerSecond": 15.279666997351114
           },
           "network": {
-            "bytesSent": 69107,
-            "bytesReceived": 348698,
-            "messagesSent": 272,
-            "messagesReceived": 619
+            "bytesSent": 57554,
+            "bytesReceived": 170860,
+            "messagesSent": 224,
+            "messagesReceived": 523
           },
           "operations": {
-            "total": 533,
-            "pending": 48,
+            "total": 29,
+            "pending": 1,
             "conflicts": 0
           },
           "monitoring": {
-            "duration": 79.51859999999404,
-            "uptime": 79518.59999999404,
+            "duration": 48.8885,
+            "uptime": 48888.5,
             "isConnected": true
           }
         }
       },
       "synchronization": {
-        "contentLengthA": 397,
-        "contentLengthB": 391,
-        "lengthDifference": 6,
-        "syncQuality": 98.48866498740554,
+        "contentLengthA": 3503,
+        "contentLengthB": 3772,
+        "lengthDifference": 269,
+        "syncQuality": 92.86850477200424,
         "isSynchronized": true,
-        "contentA": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAATBBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanorThis is a shared document for collaborative testing.ld! Thi is uss A'srecontent. while,BHello wWdT",
-        "contentB": "2b2A32122332123223123AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaaaaaaaaaaaaaaaaaaaaaaAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAABBB23 anothr usee is alsr editong tie same dhocumen. Thit creates a reasisticlcollabo ativerditine g scenaro wheie multrple peopli work en the some conent staimultaneusly.oMeanwWe are testing the collaborative editing system.Testing OT collaboration from user B.hile,BWdT"
-      }
+        "contentA": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHeHello world! TllMeanwhileo wTAAAAAAAllBo woMeanwhiAtAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotThis is c s'.tnetnoA resuMeanwhiHello woHello worlWTWT",
+        "contentB": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woHello world!   !!ddllrrooww  oolllleeHHMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteoplework  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitidecTesting OT collaboration from user B.es gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwThis is ccc ...tttnnneeetttnnnooo  sss'''AAA   rrreeesssuuu  ssii  ssiihhTThiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously."
+      },
+      "e2e": null
+    },
+    "benchmark4": {
+      "status": "success",
+      "name": "Format Range Overlap",
+      "description": "Both users apply bold with overlapping selection ranges.",
+      "timestamp": "2025-08-10T12:56:47.108Z",
+      "userA": {
+        "status": "success",
+        "email": "haowhenhai@163.com",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHeHello world! TllMeanwhileo wTAAAAAAAllBo woMeanwhiAtAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteopleThis is a shared document for collaborative testing.work  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotThis is c s'.tnetnoA resuMeanwhiHello woHello worlWTWT",
+        "performance": {
+          "latency": {
+            "average": 107.9676923073255,
+            "p95": 548.3999999761581,
+            "samples": 130
+          },
+          "e2e": {
+            "average": 515.7289156683956,
+            "p95": 1467.5,
+            "samples": 83
+          },
+          "throughput": {
+            "operationsPerSecond": 2.381218414512551,
+            "keystrokesPerSecond": 2.2163648319693747,
+            "messagesPerSecond": 9.195166492963851
+          },
+          "network": {
+            "bytesSent": 30810,
+            "bytesReceived": 564766,
+            "messagesSent": 122,
+            "messagesReceived": 380
+          },
+          "operations": {
+            "total": 130,
+            "pending": 1,
+            "conflicts": 0
+          },
+          "monitoring": {
+            "duration": 54.59389999997616,
+            "uptime": 54593.89999997616,
+            "isConnected": true
+          }
+        }
+      },
+      "userB": {
+        "status": "success",
+        "email": "haowhenhai@gmail.com",
+        "content": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woHello world!   !!ddllrrooww  oolllleeHHMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteopleWe are testing the collaborative editing system.work  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitidecTesting OT collaboration from user B.es gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwThis is ccc ...tttnnneeetttnnnooo  sss'''AAA   rrreeesssuuu  ssii  ssiihhTThiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
+        "performance": {
+          "latency": {
+            "average": 124.67241380132478,
+            "p95": 440.89999997615814,
+            "samples": 29
+          },
+          "e2e": {
+            "average": 64.36111109124289,
+            "p95": 278.2999999523163,
+            "samples": 18
+          },
+          "throughput": {
+            "operationsPerSecond": 0.3889542361811839,
+            "keystrokesPerSecond": 3.6347102760379597,
+            "messagesPerSecond": 11.990520246413048
+          },
+          "network": {
+            "bytesSent": 69907,
+            "bytesReceived": 179598,
+            "messagesSent": 273,
+            "messagesReceived": 621
+          },
+          "operations": {
+            "total": 29,
+            "pending": 48,
+            "conflicts": 0
+          },
+          "monitoring": {
+            "duration": 74.55889999997616,
+            "uptime": 74558.89999997616,
+            "isConnected": true
+          }
+        }
+      },
+      "synchronization": {
+        "contentLengthA": 3555,
+        "contentLengthB": 3820,
+        "lengthDifference": 265,
+        "syncQuality": 93.06282722513089,
+        "isSynchronized": true,
+        "contentA": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHeHello world! TllMeanwhileo wTAAAAAAAllBo woMeanwhiAtAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteopleThis is a shared document for collaborative testing.work  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitideces gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotThis is c s'.tnetnoA resuMeanwhiHello woHello worlWTWT",
+        "contentB": "This isle a longer text tht simulatesa real documet edining. tIt contains multiple sentencesand  should test the system's abilityto ha dle cnntiouousnM irld! Ts is usihr A'seconte t.nTAAAAAAATBle, anther oser us alsi editong tie samh document. Teis crhates areali etic cslaborlotivTeAAAAAAAT aBdiMeanwhitTieMeanTwhig scenrioAAAAAAA wBWhTTeanTe MeanwhiAAAAAAAmTBTulriple teoplepworkHello w  Wn theosame c ntentosimul aneoWtsHello wly.uorld! Tis is ser uh'sT coAMeanwhiAAAAAAAteBTTnt.nle, anoer uhtr is eslso eaitingdthe s me doament.uc Thiscreat s a realisteorld! Tis TishMeanwhilAAAAAAAuTBsHellMeanwhilTHeHellMeanwhileo wTAAAAAAAllBo woHello world!   !!ddllrrooww  oolllleeHHMeanwhiAAAAAAABre, MeanwMeanwhihHellAAAAAAABo Hello wwiAAAAAAATleB, aAAAAAAATo BworlTTeMeanwhile,AAAAAAATr B 'sMeanwMeanwhilehile,MeanwAAAAAAAhiB cHeAAAAAAATllBo woAtent.nlTeIt cont, anWhHeAAAAAAAllBo wTer toeHelMeanwhiAAAAAAAloB wTr iMeaAAAAAAAsTBuTHello wHWello w alsosditie  tWhHelloW wegname s ocumed. Ttive edihtTn cresies aHello wtaealisric cot aTborllive taditieg scenario nere hwltipum peoele wolp on tk samehrcont et sineltaneWumsly.uoorld! Ts isihser u s co'Aent.tnle, antheroser u s alsiedit ong thi sameedocum t. Tneis crhtes ae reaaisticcolla loratibe ediing stvenari wheoce mulrple iteopleWe are testing the collaborative editing system.work  pn tTheosame cont nt sieulTtanmouslye.orld! Ts is ir Aesuh conts't.nele, anoeWr uhtr isealso sditine the  gmTe dasumenco Thi.toTrld! s isihTser u s c'Atentno.e, anthor useer is lso eaitindthe  game dscumen Thi.to creass a etaliseric ctlaboloativerditie g scnarione wherorld! s iihTuser s's cA enttnonwhi.le, antheo userr is also editing he stme doamentucThis .reatc s a ealiertic sollabcrativoedit eingsce naTriowhere ultim e plpeope wlork o the name sontect sinmTltauneousl.yorld!W is hT usesi A'srontec t.nting sstym.ele, anherTtoseru s ali o edsingtihe st mTe daumenco Thi.tcre ses tareal atic sillWaocratobe edvitingicens io wraere hltiumle ppple oeThis isHrk oowhe t nme asontect sinltaumouslen.yorld! is hT usesA's  rintenoc.tle, anoer hter sus ali ediosing te shte domaumenc. Hello wTts crihates erea astiilcoll coratbae evitinidsce garionwher mult ele ppipleoework on t e sahe coment tnmulisanWeotsly.uTorld! s ihTseu siA's  tenocr.tn anotherr iesTu also  sitingdee saht  docement. Thim creatsua r sestilae collcioratbae eviingtidcens ioT raerehwmult e plpiWpleoerkow on t e sahe coment tnmultisousen.ylaorld!  isihTuse sA's rontWc .tne, Tanotr uehr ie alss editiosthe gn emas cumTeTod. Ttnis hreatec a rsalieic cotslaboltarve editing iencsio whrare meitlule peple wpo okrothe  nme asnteoc simutnanetllsuo.d! Thiyseru si s s'A tnetno. anothcus re irealso diting e se shtaWins mWulTtip senTecnetl and shoulse testd syehtTem'sts bilia  to hytdle nantiocous inunut frpmu moiple utlers.sd ema a shared mucod rof taboratllocnestt evie.gninotherresusi  so la ditingee ht emas cumentodihT .erc ss a etalisae citrlaborloce vitaitidecTesting OT collaboration from user B.es gnio ranreehwtiplum e pllpoork on w eehe satnoc etnetmmuis anetly.lsuoorld! Thi si s'A rentoc ss.tneuanotheesusi r ralso die  thegnitme as codentmuThis .rec s a etalisaer citabolloctivartide eg scniiranehw o mulerele pitpoeporkw eln tho mas cont ee sitnelumneouaty.lsorld! Thsi si resu cons'A .tnetle, another r isesuld! Th si siA resnoc s'.tnetule, anoth urei realso ssdite ht gnisame ecod enmThis  .tureatc a ilaerseic ctsallativrobedit eo gninaecs whoirmu erpleitleopep w el on kroe shtma content sietlumeousna.ylorld! Thi si resu cs'A sentno.t, anotMeanwThis is ccc ...tttnnneeetttnnnooo  sss'''AAA   rrreeesssuuu  ssii  ssiihhTThiHello woHello worlWTWTuser is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously."
+      },
+      "e2e": null
     }
   },
   "recommendations": [
     {
-      "type": "synchronization",
+      "type": "latency",
       "priority": "high",
-      "message": "benchmark2 同步质量较差，可能存在冲突解决问题",
-      "benchmark": "benchmark2",
-      "syncQuality": 46.717557251908396
+      "message": "Average latency is high. Consider optimizing network or batching operations.",
+      "metric": 130.54720325381828,
+      "threshold": 100
     }
   ],
   "metadata": {
