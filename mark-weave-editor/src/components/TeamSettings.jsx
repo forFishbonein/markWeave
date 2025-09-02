@@ -6,8 +6,8 @@ import './TeamSettings.css';
 const { Sider, Content } = Layout;
 
 const members = [
-  { name: '张三', role: '成员' },
-  { name: '李四', role: '成员' },
+  { name: 'Zhang San', role: 'Member' },
+  { name: 'Li Si', role: 'Member' },
 ];
 
 const TeamSettings = () => {
@@ -15,38 +15,38 @@ const TeamSettings = () => {
     <Layout className="teamset-layout">
       <Sider width={200} className="teamset-sider">
         <Menu mode="inline" defaultSelectedKeys={['general']} style={{ height: '100%', borderRight: 0 }}>
-          <Menu.Item key="general" icon={<SettingOutlined />}>常规</Menu.Item>
-          <Menu.Item key="manage" icon={<TeamOutlined />}>成员管理</Menu.Item>
+          <Menu.Item key="general" icon={<SettingOutlined />}>General</Menu.Item>
+          <Menu.Item key="manage" icon={<TeamOutlined />}>Member Management</Menu.Item>
         </Menu>
-        <div className="teamset-settings">设置</div>
+        <div className="teamset-settings">Settings</div>
       </Sider>
       <Layout>
         <Content className="teamset-content">
-          <h2>团队设置</h2>
+          <h2>Team Settings</h2>
           <Form layout="vertical" style={{ maxWidth: 400 }}>
-            <Form.Item label="团队名称" name="teamName">
-              <Input placeholder="请输入团队名称" />
+            <Form.Item label="Team Name" name="teamName">
+              <Input placeholder="Please enter team name" />
             </Form.Item>
-            <Form.Item label="描述" name="description">
-              <Input.TextArea placeholder="请输入描述" rows={2} />
+            <Form.Item label="Description" name="description">
+              <Input.TextArea placeholder="Please enter description" rows={2} />
             </Form.Item>
-            <Form.Item label="邀请成员">
+            <Form.Item label="Invite Member">
               <Input.Group compact>
-                <Input style={{ width: '70%' }} placeholder="输入邮箱邀请" />
-                <Select defaultValue="成员" style={{ width: '30%' }}>
-                  <Select.Option value="成员">成员</Select.Option>
-                  <Select.Option value="管理员">管理员</Select.Option>
+                <Input style={{ width: '70%' }} placeholder="Enter email to invite" />
+                <Select defaultValue="Member" style={{ width: '30%' }}>
+                  <Select.Option value="Member">Member</Select.Option>
+                  <Select.Option value="Administrator">Administrator</Select.Option>
                 </Select>
               </Input.Group>
-              <Button type="primary" style={{ marginTop: 8 }}>邀请</Button>
+              <Button type="primary" style={{ marginTop: 8 }}>Invite</Button>
             </Form.Item>
           </Form>
-          <h3 style={{ marginTop: 32 }}>成员列表</h3>
+          <h3 style={{ marginTop: 32 }}>Member List</h3>
           <List
             bordered
             dataSource={members}
             renderItem={item => (
-              <List.Item actions={[<Select defaultValue={item.role} style={{ width: 90 }}><Select.Option value="成员">成员</Select.Option><Select.Option value="管理员">管理员</Select.Option></Select>]}>
+              <List.Item actions={[<Select defaultValue={item.role} style={{ width: 90 }}><Select.Option value="Member">Member</Select.Option><Select.Option value="Administrator">Administrator</Select.Option></Select>]}>
                 {item.name}
               </List.Item>
             )}

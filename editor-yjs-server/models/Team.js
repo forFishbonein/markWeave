@@ -26,14 +26,14 @@ const TeamSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "团队名称是必需的"],
+      required: [true, "Team name is required"],
       trim: true,
-      maxlength: [100, "团队名称最多100个字符"],
+      maxlength: [100, "Team name maximum 100 characters"],
     },
     description: {
       type: String,
       trim: true,
-      maxlength: [500, "团队描述最多500个字符"],
+      maxlength: [500, "Team description maximum 500 characters"],
     },
     ownerId: {
       type: Types.ObjectId,

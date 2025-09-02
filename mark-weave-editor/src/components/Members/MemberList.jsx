@@ -101,11 +101,11 @@ const MemberList = () => {
   // Check if current user has permission to manage
   const canManageMembers = () => {
     if (!team || !user) {
-      console.log('canManageMembers: 缺少team或user数据', { team: !!team, user: !!user });
+      console.log('canManageMembers: missing team or user data', { team: !!team, user: !!user });
       return false;
     }
     const currentUserMember = team.members?.find(m => m.userId._id === user.userId);
-    console.log('canManageMembers: 当前用户成员信息', {
+    console.log('canManageMembers: current user member info', {
       currentUserMember,
       userId: user.userId,
       members: team.members?.map(m => ({ id: m.userId._id, role: m.role }))
@@ -146,7 +146,7 @@ const MemberList = () => {
         Member Management
       </h3>
 
-      {/* Invite member form - 临时强制显示用于测试 */}
+      {/* Invite member form - temporarily forced display for testing */}
       {(canManageMembers() || true) && (
         <div style={{
           background: '#fafafa',

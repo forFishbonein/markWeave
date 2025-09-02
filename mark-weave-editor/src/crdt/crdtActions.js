@@ -11,21 +11,21 @@
 import { getYDoc, getYChars, getYFormatOps } from "./index";
 import * as Y from "yjs";
 
-// 🔧 统一获取属性，兼容普通对象与 Y.Map
+// 🔧 Unified property access, compatible with plain objects and Y.Map
 function getProp(obj, key) {
   return typeof obj?.get === "function" ? obj.get(key) : obj[key];
 }
 
-let localCounter = 0; // 用于确保同一毫秒插入多个字符时仍然有序
-let formatOpCounter = 0; // 用于确保格式操作的唯一性
+let localCounter = 0; // To ensure multiple characters inserted in same millisecond remain ordered
+let formatOpCounter = 0; // To ensure uniqueness of format operations
 
-// 🔧 添加opId解析和比较函数
+// 🔧 Add opId parsing and comparison functions
 function parseOpId(opId) {
   const parts = opId.split("@");
   const timestampPart = parts[0];
   const userId = parts[1] || "client";
 
-  // 解析时间戳和计数器
+  // Parse timestamp and counter
   const timestampParts = timestampPart.split("_");
   const timestamp = parseInt(timestampParts[0]);
   const counter = timestampParts.length > 1 ? parseInt(timestampParts[1]) : 0;
@@ -34,23 +34,23 @@ function parseOpId(opId) {
 }
 
 function compareOpIds(opId1, opId2) {
-  // 检查是否是旧格式（没有下划线）
+  // Check if it's old format (no underscore)
   const isOldFormat1 = !opId1.includes("_");
   const isOldFormat2 = !opId2.includes("_");
 
   if (isOldFormat1 && isOldFormat2) {
-    // 都是旧格式，使用简单的时间戳比较
+    // Both old format, use simple timestamp comparison
     const timestamp1 = parseInt(opId1.split("@")[0]);
     const timestamp2 = parseInt(opId2.split("@")[0]);
     return timestamp1 - timestamp2;
   }
 
   if (isOldFormat1 || isOldFormat2) {
-    // 混合格式，旧格式优先（向后兼容）
+    // Mixed format, old format takes priority (backward compatibility)
     return isOldFormat1 ? -1 : 1;
   }
 
-  // 都是新格式，使用完整解析
+  // Both new format, use complete parsing
   const parsed1 = parseOpId(opId1);
   const parsed2 = parseOpId(opId2);
 
@@ -65,11 +65,11 @@ function compareOpIds(opId1, opId2) {
   return parsed1.userId.localeCompare(parsed2.userId);
 }
 
-// 2️⃣ 插入字符
+// 2️⃣ Insert character
 export function insertChar(afterId, ch, awareness = null) {
   const ychars = getYChars();
 
-  // 获取用户标识
+  // Get user identifier
   let userId = "unknown";
   if (awareness) {
     const localState = awareness.getLocalState();
@@ -77,7 +77,7 @@ export function insertChar(afterId, ch, awareness = null) {
   }
 
   const opId = `${Date.now()}_${localCounter}@${userId}`;
-  localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
+  localCounter += 1; // Increment counter to ensure characters in same millisecond remain sortable
 
   const newChar = new Y.Map();
   newChar.set("opId", opId);
@@ -87,29 +87,29 @@ export function insertChar(afterId, ch, awareness = null) {
 
   let index;
   if (afterId) {
-    // 找到afterId字符的位置
+    // Find position of afterId character
     const afterIndex = ychars
       .toArray()
       .findIndex((c) => getProp(c, "opId") === afterId);
     if (afterIndex === -1) {
-      console.warn(`⚠️ afterId ${afterId} 未找到，插入到开头`);
+      console.warn(`⚠️ afterId ${afterId} not found, inserting at beginning`);
       index = 0;
     } else {
-      // 在afterId后插入，直接插入在afterId+1的位置
+      // Insert after afterId, directly insert at afterId+1 position
       index = afterIndex + 1;
     }
   } else {
-    // afterId为null时，插入到开头，但要考虑时间戳排序
+    // When afterId is null, insert at beginning but consider timestamp ordering
     const currentOpId = opId;
     const chars = ychars.toArray();
     let insertIndex = 0;
 
-    // 向后查找，直到找到opId更大的字符
+    // Search backward until finding character with larger opId
     while (insertIndex < chars.length) {
       const nextChar = chars[insertIndex];
       const nextOpId = getProp(nextChar, "opId");
 
-      // 使用智能比较函数
+      // Use intelligent comparison function
       if (compareOpIds(nextOpId, currentOpId) > 0) {
         break;
       }
@@ -125,23 +125,23 @@ export function insertChar(afterId, ch, awareness = null) {
 export function insertText(afterId, text, awareness = null) {
   const ychars = getYChars();
 
-  // 获取用户标识
+  // Get user identifier
   let userId = "unknown";
   if (awareness) {
     const localState = awareness.getLocalState();
     userId = localState?.user?.id || localState?.user?.name || "unknown";
   }
 
-  // 将文本拆分成单个字符
+  // Split text into individual characters
   const charsArr = text.split("");
   let currentAfterId = afterId;
 
   for (let i = 0; i < charsArr.length; i++) {
     const ch = charsArr[i];
 
-    // 生成唯一 opId，使用正常时间戳 + 递增 counter，保证唯一且可排序
+    // Generate unique opId, use normal timestamp + increment counter, ensure unique and sortable
     const opId = `${Date.now()}_${localCounter}@${userId}`;
-    localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
+    localCounter += 1; // Increment counter to ensure characters in same millisecond remain sortable
 
     const newChar = new Y.Map();
     newChar.set("opId", opId);
@@ -149,22 +149,24 @@ export function insertText(afterId, text, awareness = null) {
     newChar.set("deleted", false);
     newChar.set("userId", userId);
 
-    // 计算插入位置
+    // Calculate insertion position
     let index;
     if (currentAfterId) {
-      // 找到afterId字符的位置
+      // Find position of afterId character
       const afterIndex = ychars
         .toArray()
         .findIndex((c) => getProp(c, "opId") === currentAfterId);
       if (afterIndex === -1) {
-        console.warn(`⚠️ afterId ${currentAfterId} 未找到，插入到开头`);
+        console.warn(
+          `⚠️ afterId ${currentAfterId} not found, inserting at beginning`
+        );
         index = 0;
       } else {
-        // 在afterId后插入
+        // Insert after afterId
         index = afterIndex + 1;
       }
     } else {
-      // afterId为null时，使用智能比较进行排序
+      // When afterId is null, use intelligent comparison for sorting
       const currentOpId = opId;
       const chars = ychars.toArray();
       let insertIndex = 0;
@@ -182,11 +184,11 @@ export function insertText(afterId, text, awareness = null) {
       index = insertIndex;
     }
 
-    // 插入当前字符操作
+    // Insert current character operation
     ychars.insert(index, [newChar]);
 
-    // 🔥 关键修复：更新 currentAfterId 为新插入字符的 opId
-    // 这样下一个字符会插入在当前字符之后，保持字符串顺序
+    // 🔥 Critical fix: update currentAfterId to new inserted character's opId
+    // This way next character will be inserted after current character, maintaining string order
     currentAfterId = opId;
   }
 }
@@ -194,30 +196,30 @@ export function insertText(afterId, text, awareness = null) {
 export function deleteChars(from, to) {
   const ychars = getYChars();
 
-  // ProseMirror 采用 1-based，删除区间 [from, to)（end 不含）
+  // ProseMirror uses 1-based, delete range [from, to) (end not included)
   const startVis = from - 1;
   const endVis = to - 1;
   if (startVis < 0 || endVis < startVis) {
-    console.warn("⚠️ deleteChars 参数非法", { from, to });
+    console.warn("⚠️ deleteChars invalid parameters", { from, to });
     return;
   }
 
-  // 获取当前时刻的快照
+  // Get snapshot at current moment
   const snapshot = ychars.toArray();
   let visIdx = 0;
   let count = 0;
   const toDelete = [];
 
-  // 首先找出要删除的字符索引
+  // First find character indices to delete
   for (let i = 0; i < snapshot.length; i++) {
     const char = snapshot[i];
     const isMap = typeof char?.get === "function";
     const isDel = isMap ? char.get("deleted") : char.deleted;
 
-    // 跳过已删除的字符（墓碑），不计入可见索引
+    // Skip deleted characters (tombstones), don't count in visible index
     if (isDel) continue;
 
-    // 检查当前可见字符是否在删除范围内
+    // Check if current visible character is within delete range
     if (visIdx >= startVis && visIdx < endVis) {
       toDelete.push(i);
     }
@@ -225,7 +227,7 @@ export function deleteChars(from, to) {
     visIdx += 1;
   }
 
-  // 然后从后往前删除，避免索引变化
+  // Then delete from back to front to avoid index changes
   for (let i = toDelete.length - 1; i >= 0; i--) {
     const idx = toDelete[i];
     const char = snapshot[idx];
@@ -234,7 +236,7 @@ export function deleteChars(from, to) {
     if (isMap) {
       char.set("deleted", true);
     } else {
-      // 对于普通对象，需要转换为Y.Map
+      // For plain objects, need to convert to Y.Map
       const m = new Y.Map();
       m.set("opId", char.opId);
       m.set("ch", char.ch);
@@ -245,22 +247,22 @@ export function deleteChars(from, to) {
     count += 1;
   }
   // console.log("📝 deleteChars");
-  // console.log(`🗑️ deleteChars 逻辑删除 ${count} 个字符`, { from, to });
+  // console.log(`🗑️ deleteChars logically deleted ${count} characters`, { from, to });
 }
 
-// 4️⃣ 添加格式（加粗）
+// 4️⃣ Add formatting (bold)
 export function addBold(startId, endId, boundaryType = "after") {
   const yformatOps = getYFormatOps();
 
-  // 增强时间戳唯一性，避免多窗口时间戳冲突
+  // Enhance timestamp uniqueness, avoid multi-window timestamp conflicts
   const timestamp = Date.now();
   const opId = `${timestamp}_${formatOpCounter}_${Math.random()
     .toString(36)
     .substr(2, 9)}@client`;
   formatOpCounter += 1;
 
-  // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
-  // 直接使用传入的boundaryType，确保格式范围准确
+  // 🔧 Fix: simplify boundary type handling, avoid range errors from dynamic adjustments
+  // Directly use passed boundaryType to ensure accurate format range
   const adjustedBoundaryType = boundaryType;
 
   const markOp = {
@@ -268,27 +270,27 @@ export function addBold(startId, endId, boundaryType = "after") {
     action: "addMark",
     markType: "bold",
     start: { type: "before", opId: startId },
-    // 使用调整后的边界类型
+    // Use adjusted boundary type
     end: { type: adjustedBoundaryType, opId: endId },
-    timestamp, // 记录操作的时间戳
+    timestamp, // Record operation timestamp
   };
   yformatOps.push([markOp]);
   console.log("🔄 Bold addMark:", { opId, boundaryType: adjustedBoundaryType });
 }
 
-//取消的时候在中间是before，否则会导致多取消一个，在末尾才是after
+// When canceling, use "before" in middle to avoid canceling one extra, use "after" only at end
 export function removeBold(startId, endId, boundaryType = "before") {
   const yformatOps = getYFormatOps();
 
-  // 增强时间戳唯一性，避免多窗口时间戳冲突
+  // Enhance timestamp uniqueness, avoid multi-window timestamp conflicts
   const timestamp = Date.now();
   const opId = `${timestamp}_${formatOpCounter}_${Math.random()
     .toString(36)
     .substr(2, 9)}@client`;
   formatOpCounter += 1;
 
-  // 🔧 修复：简化边界类型处理，避免动态调整导致的范围错误
-  // 直接使用传入的boundaryType，确保格式范围准确
+  // 🔧 Fix: Simplify boundary type handling, avoid range errors from dynamic adjustments
+  // Use passed boundaryType directly to ensure accurate format range
   const adjustedBoundaryType = boundaryType;
 
   const markOp = {
@@ -297,16 +299,16 @@ export function removeBold(startId, endId, boundaryType = "before") {
     markType: "bold",
     start: { type: "before", opId: startId },
     end: { type: adjustedBoundaryType, opId: endId },
-    timestamp, // 记录操作的时间戳
+    timestamp, // Record operation timestamp
   };
-  // 注意：如果你的 CRDT 需要 push([markOp])，那就这样写
+  // Note: If your CRDT needs push([markOp]), write it this way
   yformatOps.push([markOp]);
   console.log("🔄 Bold removeMark:", {
     opId,
     boundaryType: adjustedBoundaryType,
   });
 }
-// CRDT.js 中的辅助函数：添加斜体标记（em）
+// Helper function in CRDT.js: add italic mark (em)
 export function addEm(startId, endId, boundaryType = "after") {
   const yformatOps = getYFormatOps();
 
@@ -318,15 +320,15 @@ export function addEm(startId, endId, boundaryType = "after") {
     markType: "em",
     start: { type: "before", opId: startId },
     end: { type: boundaryType, opId: endId },
-    timestamp, // 记录操作的时间戳
+    timestamp, // Record operation timestamp
   };
-  // 由于你必须使用 push([markOp])，这里保持此写法
+  // Since you must use push([markOp]), keep this syntax
   yformatOps.push([markOp]);
   // console.log("🔄 Italic addMark:", yformatOps.toArray());
   // console.log("📝 addEm");
 }
 
-// CRDT.js 中的辅助函数：取消斜体标记（em）
+// Helper function in CRDT.js: remove italic mark (em)
 export function removeEm(startId, endId, boundaryType = "before") {
   const yformatOps = getYFormatOps();
 
@@ -338,13 +340,13 @@ export function removeEm(startId, endId, boundaryType = "before") {
     markType: "em",
     start: { type: "before", opId: startId },
     end: { type: boundaryType, opId: endId },
-    timestamp, // 记录操作的时间戳
+    timestamp, // Record operation timestamp
   };
   yformatOps.push([markOp]);
   // console.log("🔄 Italic removeMark:", yformatOps.toArray());
   // console.log("📝 removeEm");
 }
-// 添加链接操作：记录 addMark，附带 href 属性
+// Add link operation: record addMark with href attribute
 export function addLink(startId, endId, href, boundaryType = "after") {
   const yformatOps = getYFormatOps();
 
@@ -356,15 +358,15 @@ export function addLink(startId, endId, href, boundaryType = "after") {
     markType: "link",
     start: { type: "before", opId: startId },
     end: { type: boundaryType, opId: endId },
-    attrs: { href }, // 链接的 URL 存在这里
-    timestamp, // 记录操作的时间戳
+    attrs: { href }, // Link URL stored here
+    timestamp, // Record operation timestamp
   };
-  // 因为你需要用 yformatOps.push([markOp])（即数组包装），所以：
+  // Because you need to use yformatOps.push([markOp]) (array wrapping):
   yformatOps.push([markOp]);
   console.log("🔄 Link addMark:", yformatOps.toArray());
 }
 
-// 取消链接操作：记录 removeMark
+// Remove link operation: record removeMark
 export function removeLink(startId, endId, boundaryType = "before") {
   const yformatOps = getYFormatOps();
 
@@ -376,14 +378,14 @@ export function removeLink(startId, endId, boundaryType = "before") {
     markType: "link",
     start: { type: "before", opId: startId },
     end: { type: boundaryType, opId: endId },
-    // 通常不需要 attrs，因为取消链接只需标识操作范围即可
-    timestamp, // 记录操作的时间戳
+    // Usually no attrs needed, as removing link only needs to identify operation range
+    timestamp, // Record operation timestamp
   };
   yformatOps.push([markOp]);
   console.log("🔄 Link removeMark:", yformatOps.toArray());
 }
 
-// 🔧 新增辅助函数：将可见索引转换为字符的opId
+// 🔧 New helper function: convert visible index to character opId
 export function getVisibleCharOpId(visibleIndex) {
   const ychars = getYChars();
   const chars = ychars.toArray();
@@ -394,10 +396,10 @@ export function getVisibleCharOpId(visibleIndex) {
     const isDeleted =
       typeof char?.get === "function" ? char.get("deleted") : char.deleted;
 
-    // 跳过已删除的字符（墓碑）
+    // Skip deleted characters (tombstones)
     if (isDeleted) continue;
 
-    // 找到对应的可见字符
+    // Find corresponding visible character
     if (visibleCount === visibleIndex) {
       return typeof char?.get === "function" ? char.get("opId") : char.opId;
     }
@@ -405,18 +407,20 @@ export function getVisibleCharOpId(visibleIndex) {
     visibleCount++;
   }
 
-  return null; // 索引超出范围
+  return null; // Index out of range
 }
 
-// 🔧 批量获取可见字符的opId范围
+// 🔧 Batch get visible character opId range
 export function getVisibleCharOpIds(fromIndex, toIndex) {
   const ychars = getYChars();
   const chars = ychars.toArray();
   let visibleCount = 0;
   const result = { startId: null, endId: null };
 
-  console.log(`🔍 getVisibleCharOpIds 查找范围: [${fromIndex}, ${toIndex})`);
-  console.log(`🔍 当前CRDT字符数组长度: ${chars.length}`);
+  console.log(
+    `🔍 getVisibleCharOpIds searching range: [${fromIndex}, ${toIndex})`
+  );
+  console.log(`🔍 Current CRDT character array length: ${chars.length}`);
 
   for (let i = 0; i < chars.length; i++) {
     const char = chars[i];
@@ -425,40 +429,42 @@ export function getVisibleCharOpIds(fromIndex, toIndex) {
     const opId = typeof char?.get === "function" ? char.get("opId") : char.opId;
     const ch = typeof char?.get === "function" ? char.get("ch") : char.ch;
 
-    // 跳过已删除的字符（墓碑）
+    // Skip deleted characters (tombstones)
     if (isDeleted) {
-      // console.log(`🔍 跳过已删除字符: ${ch} (opId: ${opId})`);
+      // console.log(`🔍 Skip deleted character: ${ch} (opId: ${opId})`);
       continue;
     }
 
-    // console.log(`🔍 可见字符 ${visibleCount}: ${ch} (opId: ${opId})`);
+    // console.log(`🔍 Visible character ${visibleCount}: ${ch} (opId: ${opId})`);
 
-    // 查找起始位置
+    // Find start position
     if (visibleCount === fromIndex) {
       result.startId = opId;
-      console.log(`✅ 找到起始位置 ${fromIndex}: opId=${opId}`);
+      console.log(`✅ Found start position ${fromIndex}: opId=${opId}`);
     }
 
-    // 查找结束位置 (toIndex是exclusive的，所以实际要找toIndex-1的字符)
+    // Find end position (toIndex is exclusive, so actually need to find toIndex-1 character)
     if (visibleCount === toIndex - 1) {
       result.endId = opId;
-      console.log(`✅ 找到结束位置 ${toIndex - 1}: opId=${opId}`);
+      console.log(`✅ Found end position ${toIndex - 1}: opId=${opId}`);
     }
 
     visibleCount++;
 
-    // 如果已经找到了起始和结束位置，可以提前退出
+    // If start and end positions are found, can exit early
     if (result.startId && result.endId) {
       break;
     }
   }
 
-  console.log(`🔍 最终结果: startId=${result.startId}, endId=${result.endId}`);
+  console.log(
+    `🔍 Final result: startId=${result.startId}, endId=${result.endId}`
+  );
   return result;
 }
 
-// 5️⃣ 监听变更
-// ychars.observe(() => console.log("字符变更:", ychars.toArray()));
-// yformatOps.observe(() => console.log("格式变更:", yformatOps.toArray()));
+// 5️⃣ Listen to changes
+// ychars.observe(() => console.log("Character changes:", ychars.toArray()));
+// yformatOps.observe(() => console.log("Format changes:", yformatOps.toArray()));
 
 export { getYDoc as ydoc, getYChars as ychars, getYFormatOps as yformatOps };

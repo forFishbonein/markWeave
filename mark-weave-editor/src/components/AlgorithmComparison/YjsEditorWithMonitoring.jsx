@@ -2,7 +2,7 @@
  * @FilePath: YjsEditorWithMonitoring.jsx
  * @Author: Aron
  * @Date: 2025-01-27
- * @Description: 集成编辑器和多窗口同步的真实性能监控面板
+ * @Description: Integrated editor and multi-window sync real performance monitoring panel
  */
 
 import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
@@ -43,14 +43,14 @@ const YjsEditorWithMonitoring = forwardRef(({
   const monitorRef = useRef(null);
   const refreshTimer = useRef(null);
 
-  // 暴露重置方法给父组件
+  // Expose reset method to parent component
   useImperativeHandle(ref, () => ({
     resetMetrics: handleReset
   }));
 
-  // 初始化监控器
+  // Initialize monitor
   useEffect(() => {
-    console.log("🔧 [DEBUG] useEffect 运行，检查监控器状态:", {
+    console.log("🔧 [DEBUG] useEffect running, checking monitor state:", {
       hasMonitorRef: !!monitorRef.current,
       hasYdoc: !!ydoc,
       hasProvider: !!provider,
@@ -59,36 +59,36 @@ const YjsEditorWithMonitoring = forwardRef(({
     });
 
     if (!monitorRef.current) {
-      console.log("🔧 [DEBUG] 创建新的 YjsPerformanceMonitor");
+      console.log("🔧 [DEBUG] Creating new YjsPerformanceMonitor");
       monitorRef.current = new YjsPerformanceMonitor();
-      // 挂载到 window 上，供 benchmarkApi.js 访问
+      // Mount to window for benchmarkApi.js access
       window.crdtMonitor = monitorRef.current;
-      console.log("🔧 [DEBUG] window.crdtMonitor 已挂载:", !!window.crdtMonitor);
+      console.log("🔧 [DEBUG] window.crdtMonitor mounted:", !!window.crdtMonitor);
     }
 
-    // 挂载 Yjs 相关对象到 window，供 Playwright 检测
+    // Mount Yjs related objects to window for Playwright detection
     if (ydoc) window.ydoc = ydoc;
     if (provider) window.provider = provider;
     if (awareness) window.awareness = awareness;
 
-    // 暴露强制初始化函数给 Playwright
+    // Expose force initialization function to Playwright
     window.forceInitCrdtMonitor = () => {
       if (!monitorRef.current) {
         console.log("🔧 [FORCE] 强制创建监控器");
         monitorRef.current = new YjsPerformanceMonitor();
       }
-      // 无论监控器是否已存在，都要确保挂载到 window 上
+      // 无论监控器是否already存在，都要确保挂载到 window 上
       window.crdtMonitor = monitorRef.current;
-      console.log("🔧 [FORCE] 监控器已挂载到 window.crdtMonitor:", !!window.crdtMonitor);
+      console.log("🔧 [FORCE] 监控器already挂载到 window.crdtMonitor:", !!window.crdtMonitor);
 
       if (ydoc && provider && awareness && !isMonitoring) {
-        console.log("🔧 [FORCE] 强制开始监控");
+        console.log("🔧 [FORCE] 强制Start monitoring");
         handleStartMonitoring();
       }
       return !!window.crdtMonitor;
     };
 
-    // 自动开始监控 - 移除 isConnected 限制，确保监控器总是可用
+    // 自动Start monitoring - 移除 isConnected 限制，确保监控器总是可用
     if (ydoc && provider && awareness && !isMonitoring) {
       handleStartMonitoring();
     }
@@ -110,16 +110,16 @@ const YjsEditorWithMonitoring = forwardRef(({
     };
   }, [ydoc, provider, awareness]);
 
-  // 监控数据刷新 - 只在有实际变化时更新
+  // 监控count据刷新 - 只在有实际change时update
   useEffect(() => {
     if (isMonitoring && monitorRef.current) {
-      // 初始加载时获取一次数据
+      // 初始加载时获取一次count据
       const initialStats = monitorRef.current.getPerformanceStats();
       if (initialStats) {
         setPerformanceData(initialStats);
         if (onMetricsUpdate) {
           onMetricsUpdate({
-            // 基本操作指标
+            // 基本operation指标
             operationsCount: initialStats.documentUpdates || 0,
             avgLatency: initialStats.avgLatency || 0,
             p95Latency: initialStats.p95Latency || 0,
@@ -156,7 +156,7 @@ const YjsEditorWithMonitoring = forwardRef(({
             isConnected: initialStats.isConnected || false,
             windowId: initialStats.windowId || '',
 
-            // 数据样本统计
+            // count据样本统计
             latencySamples: initialStats.latencySamples || 0,
             recentLatencySamples: initialStats.recentLatencySamples || 0,
 
@@ -164,14 +164,14 @@ const YjsEditorWithMonitoring = forwardRef(({
             activeCollaborators: initialStats.activeCollaborators || 0,
             totalAwarenessChanges: initialStats.totalAwarenessChanges || 0,
 
-            // 数据源标识
+            // count据源标识
             algorithm: 'CRDT',
             dataSource: 'yjs-real-monitoring'
           });
         }
       }
 
-      // 只在用户操作时更新，而不是定时刷新
+      // 只在用户operation时update，而不是定时刷新
       const handleUserActivity = () => {
         const stats = monitorRef.current.getPerformanceStats();
         if (stats) {
@@ -208,7 +208,7 @@ const YjsEditorWithMonitoring = forwardRef(({
             });
           }
 
-          // 更新延迟历史 - 只在有新数据时更新
+          // update延迟历史 - 只在有新count据时update
           if (stats.recentLatencySamples > 0) {
             setLatencyHistory(prev => {
               const newHistory = [...prev, {
@@ -226,7 +226,7 @@ const YjsEditorWithMonitoring = forwardRef(({
         }
       };
 
-      // 监听用户操作事件
+      // listen用户operationevent
       document.addEventListener('keydown', handleUserActivity);
       document.addEventListener('mousedown', handleUserActivity);
 
@@ -376,7 +376,7 @@ const YjsEditorWithMonitoring = forwardRef(({
     }
   ];
 
-  // 如果showMetrics为false，只显示编辑器部分
+  // ifshowMetrics为false，只show编辑器部分
   if (!showMetrics) {
     return (
       <div style={{ padding: '12px' }}>

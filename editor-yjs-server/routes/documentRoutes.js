@@ -11,8 +11,8 @@ router.use(authenticate);
 router.post(
   "/",
   [
-    body("title").notEmpty().withMessage("文档标题不能为空"),
-    body("teamId").isMongoId().withMessage("无效的团队ID"),
+    body("title").notEmpty().withMessage("Document title cannot be empty"),
+    body("teamId").isMongoId().withMessage("Invalid team ID"),
   ],
   validateRequest,
   documentController.createDocument
@@ -20,14 +20,14 @@ router.post(
 
 router.get(
   "/team/:teamId",
-  [param("teamId").isMongoId().withMessage("无效的团队ID")],
+  [param("teamId").isMongoId().withMessage("Invalid team ID")],
   validateRequest,
   documentController.getTeamDocuments
 );
 
 router.get(
   "/:docId",
-  [param("docId").isMongoId().withMessage("无效的文档ID")],
+  [param("docId").isMongoId().withMessage("Invalid document ID")],
   validateRequest,
   documentController.getDocumentDetails
 );
@@ -35,8 +35,8 @@ router.get(
 router.put(
   "/:docId",
   [
-    param("docId").isMongoId().withMessage("无效的文档ID"),
-    body("title").optional().notEmpty().withMessage("标题不能为空"),
+    param("docId").isMongoId().withMessage("Invalid document ID"),
+    body("title").optional().notEmpty().withMessage("Title cannot be empty"),
   ],
   validateRequest,
   documentController.updateDocument
@@ -44,7 +44,7 @@ router.put(
 
 router.delete(
   "/:docId",
-  [param("docId").isMongoId().withMessage("无效的文档ID")],
+  [param("docId").isMongoId().withMessage("Invalid document ID")],
   validateRequest,
   documentController.deleteDocument
 );

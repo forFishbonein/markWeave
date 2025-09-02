@@ -9,9 +9,9 @@ const router = express.Router();
 router.post(
   "/register",
   [
-    body("email").isEmail().withMessage("请输入有效的邮箱地址"),
-    body("username").notEmpty().withMessage("用户名不能为空"),
-    body("password").isLength({ min: 6 }).withMessage("密码至少需要6位"),
+    body("email").isEmail().withMessage("Please enter a valid email address"),
+    body("username").notEmpty().withMessage("Username cannot be empty"),
+    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
   ],
   validateRequest,
   register
@@ -20,8 +20,8 @@ router.post(
 router.post(
   "/login",
   [
-    body("email").isEmail().withMessage("请输入有效的邮箱地址"),
-    body("password").notEmpty().withMessage("密码不能为空"),
+    body("email").isEmail().withMessage("Please enter a valid email address"),
+    body("password").notEmpty().withMessage("Password cannot be empty"),
   ],
   validateRequest,
   login

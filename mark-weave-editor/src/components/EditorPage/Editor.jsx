@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:38:04
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:45:01
+ * @LastEditTime: 2025-09-03 04:02:37
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -20,53 +20,53 @@ import { schema } from "../../plugins/schema";
 import { addBold, removeBold, addEm, removeEm, getVisibleCharOpIds } from "../../crdt/crdtActions";
 import { markActive } from "../../plugins/utils";
 
-// 接收docId作为props
+// Receive docId as props
 export default function Editor({ docId }) {
   const editorRef = useRef(null);
 
-  // 如果没有传入docId，则生成一个新的
+  // If no docId passed, generate a new one
   if (!docId) {
     docId = uuidv4();
-    console.warn("没有提供docId，生成新的docId:", docId);
+    console.warn("No docId provided, generating new docId:", docId);
   }
 
-  console.log("Editor组件使用的docId:", docId);
+  console.log("Editor component using docId:", docId);
 
-  // 调用自定义 Hook 获取 editorView
+  // Call custom Hook to get editorView
   const [editorView, awareness] = useYjsEditor(docId, editorRef);
 
-  // 业务逻辑：处理 Bold / Italic / Link 等可以放在 Toolbar 内部
-  // 也可以在这里通过 editorView 调用 toggleMark 等
+  // Business logic: handling Bold/Italic/Link etc. can be placed inside Toolbar
+  // Can also pass editorView here to call toggleMark etc.
   const handleBold = () => {
     if (editorView) {
       const state = editorView.state;
       const { from, to } = state.selection;
 
-      console.log("🔥 Bold按钮被点击");
+      console.log("🔥 Bold button clicked");
 
       if (from === to) {
-        console.warn("⚠️ 不能在空选区加粗！");
+        console.warn("⚠️ Cannot bold empty selection!");
         return;
       }
 
-      // ✅ 使用正确的可见索引转换方法
-      // ProseMirror使用1-based索引[from, to)，转换为0-based [from-1, to-1)
+      // ✅ Use correct visible index conversion method
+      // ProseMirror uses 1-based index [from, to), convert to 0-based [from-1, to-1)
       const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
-      console.log(`🔵 Bold按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
+      console.log(`🔵 Bold button operation, ProseMirror position: [${from}, ${to}), converted: [${from - 1}, ${to - 1}), startId: ${startId}, endId: ${endId}`);
 
-      // 使用辅助函数判断当前选区是否已经是 bold
+      // Use helper function to check if current selection is already bold
       if (markActive(state, schema.marks.bold)) {
-        console.log("🔵 当前选区已经加粗，调用 removeBold");
-        // removeBold时使用"before"避免多取消一个字符
+        console.log("🔵 Current selection is already bold, calling removeBold");
+        // Use "before" when removeBold to avoid canceling one extra character
         removeBold(startId, endId, "before");
       } else {
-        console.log("🔵 当前选区未加粗，调用 addBold");
-        // addBold时使用"after"确保包含选区内的所有字符
+        console.log("🔵 Current selection is not bold, calling addBold");
+        // Use "after" when addBold to ensure all characters in selection are included
         addBold(startId, endId, "after");
       }
 
-      // 调用ProseMirror操作更新UI
+      // Call ProseMirror operation to update UI
       toggleMark(schema.marks.bold)(editorView.state, editorView.dispatch);
     }
   };
@@ -76,30 +76,30 @@ export default function Editor({ docId }) {
       const state = editorView.state;
       const { from, to } = state.selection;
 
-      console.log("🔥 Italic按钮被点击");
+      console.log("🔥 Italic button clicked");
 
       if (from === to) {
-        console.warn("⚠️ 不能在空选区斜体！");
+        console.warn("⚠️ Cannot italicize empty selection!");
         return;
       }
 
-      // ✅ 使用正确的可见索引转换方法
-      // ProseMirror使用1-based索引[from, to)，转换为0-based [from-1, to-1)
+      // ✅ Use correct visible index conversion method
+      // ProseMirror uses 1-based index [from, to), convert to 0-based [from-1, to-1)
       const { startId, endId } = getVisibleCharOpIds(from - 1, to - 1);
 
-      console.log(`🔵 Italic按钮操作, ProseMirror位置: [${from}, ${to}), 转换后: [${from-1}, ${to-1}), startId: ${startId}, endId: ${endId}`);
+      console.log(`🔵 Italic button operation, ProseMirror position: [${from}, ${to}), converted: [${from - 1}, ${to - 1}), startId: ${startId}, endId: ${endId}`);
 
       if (markActive(state, schema.marks.em)) {
-        console.log("🔵 当前选区已经斜体，调用 removeEm");
-        // removeEm时使用"before"避免多取消一个字符
+        console.log("🔵 Current selection is already italic, calling removeEm");
+        // Use "before" when removeEm to avoid canceling one extra character
         removeEm(startId, endId, "before");
       } else {
-        console.log("🔵 当前选区未斜体，调用 addEm");
-        // addEm时使用"after"确保包含选区内的所有字符
+        console.log("🔵 Current selection is not italic, calling addEm");
+        // Use "after" when addEm to ensure all characters in selection are included
         addEm(startId, endId, "after");
       }
 
-      // 调用ProseMirror操作更新UI
+      // Call ProseMirror operation to update UI
       toggleMark(schema.marks.em)(editorView.state, editorView.dispatch);
     }
   };
@@ -107,7 +107,7 @@ export default function Editor({ docId }) {
   const handleLink = () => {
     if (editorView) {
       const url = prompt("Enter link URL:");
-      // 这里你可以自定义处理链接逻辑
+      // You can customize link handling logic here
       toggleMark(schema.marks.link)(editorView.state, editorView.dispatch);
     }
   };

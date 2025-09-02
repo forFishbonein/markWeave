@@ -35,7 +35,7 @@
     "test:crdt:json": "jest --runInBand --verbose --json --outputFile=test-results.json",
     "test:save": "node tests/scripts/save-test-results.js",
     "test:clean": "node tests/scripts/save-clean-test-results.js",
-    "test:concurrent": "npm run test:crdt -- --testNamePattern=\"并发插入完整测试套件\"",
+    "test:concurrent": "npm run test:crdt -- --testNamePattern=\"Complete concurrent insertion test suite\"",
     "test:concurrent:save": "node tests/scripts/save-concurrent-tests.js",
     "benchmark:crdt_dual_user": "node benchmark/scenarios/crdt_dual_user.js",
     "benchmark:crdt_dual_user:1": "node benchmark/scenarios/crdt_dual_user.js benchmark1",

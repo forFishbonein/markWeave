@@ -7,17 +7,17 @@
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
-// 辅助函数：判断选区是否已经包含指定 mark
+// Helper function: determine if selection already contains specified mark
 export function markActive(state, type) {
   const { from, to, empty } = state.selection;
 
   if (empty) {
-    // ✅ 处理光标位置（单字符）
+    // ✅ Handle cursor position (single character)
     return !!(state.storedMarks || state.selection.$from.marks()).find(
       (mark) => mark.type === type
     );
   } else {
-    // ✅ 处理选区
+    // ✅ Handle selection
     let hasNonMark = false;
     let hasMark = false;
 
@@ -31,7 +31,7 @@ export function markActive(state, type) {
       }
     });
 
-    // 🚀 如果选区中有至少一个非指定 mark，则返回 false（意味着应该 apply）
+    // 🚀 If selection has at least one non-specified mark, return false (means should apply)
     return hasNonMark ? false : hasMark;
   }
 }

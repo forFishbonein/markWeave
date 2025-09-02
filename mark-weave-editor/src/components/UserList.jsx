@@ -15,14 +15,14 @@ function deduplicateUsers(users) {
   const result = [];
 
   users.forEach((user) => {
-    // 使用多个字段进行更可靠的去重
+    // Use multiple fields for more reliable deduplication
     const key = user.userId || user.email || user.name;
 
     if (!seen.has(key)) {
       seen.set(key, true);
       result.push(user);
     } else {
-      // 如果有重复，保留信息更完整的那个
+      // If duplicates exist, keep the one with more complete info
       const existingIndex = result.findIndex(u =>
         (u.userId && u.userId === user.userId) ||
         (u.email && u.email === user.email) ||
@@ -30,7 +30,7 @@ function deduplicateUsers(users) {
       );
 
       if (existingIndex >= 0) {
-        // 保留信息更完整的用户对象
+        // Keep user object with more complete info
         const existing = result[existingIndex];
         if (user.userId && !existing.userId) {
           result[existingIndex] = user;
@@ -43,64 +43,64 @@ function deduplicateUsers(users) {
 }
 const UserList = ({ awareness }) => {
   const [users, setUsers] = useState([]);
-  const { user: currentUser } = useAuth(); // 获取当前登录用户
+  const { user: currentUser } = useAuth(); // Get current logged-in user
 
   useEffect(() => {
     if (!awareness) {
-      console.log("⚠️ Awareness未初始化");
+      console.log("⚠️ Awareness not initialized");
       return;
     }
 
-    console.log("🔄 UserList useEffect 执行，初始化监听器");
+    console.log("🔄 UserList useEffect executed, initializing listeners");
 
-    // 获取在线用户的核心函数
+    // Core function to get online users
     const updateUserList = () => {
       try {
         const states = Array.from(awareness.getStates().values());
-        // console.log("📊 原始awareness状态数量:", states.length);
+        // console.log("📊 Original awareness state count:", states.length);
 
-        // 获取有效的用户信息
+        // Get valid user information
         let userList = states
           .filter((state) => {
             return state && state.user && state.user.name && state.user.name.trim() !== '';
           })
           .map((state) => state.user);
 
-        // console.log("📋 过滤后用户:", userList.map(u => ({ name: u.name, userId: u.userId })));
+        // console.log("📋 Filtered users:", userList.map(u => ({ name: u.name, userId: u.userId })));
 
-        // 去重
+        // Deduplicate
         userList = deduplicateUsers(userList);
 
-        // console.log("✅ 最终用户列表:", userList.map(u => u.name));
+        // console.log("✅ Final user list:", userList.map(u => u.name));
         setUsers(userList);
       } catch (error) {
-        console.error("❌ 更新用户列表出错:", error);
+        console.error("❌ Error updating user list:", error);
       }
     };
 
-    // 监听awareness变化
+    // Listen to awareness changes
     awareness.on("change", updateUserList);
 
-    // 立即更新一次
+    // Update immediately once
     updateUserList();
 
     return () => {
       awareness.off("change", updateUserList);
-      console.log("🧹 UserList清理监听器");
+      console.log("🧹 UserList cleaning listeners");
     };
-  }, [awareness]); // 只依赖awareness
+  }, [awareness]); // Only depend on awareness
 
   return (
     <div className='online-users'>
       <h4>ONLINE USERS:</h4>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px' }}>
         {users.map((user, idx) => {
-          // 判断是否为当前用户
+          // Determine if it's current user
           const isCurrentUser = user.userId === currentUser?.userId ||
             user.name === currentUser?.username ||
             user.email === currentUser?.email;
 
-          // 本账号用蓝色，其他用户用绿色
+          // Current account uses blue, other users use green
           const userColor = isCurrentUser ? '#2563eb' : '#10b981';
 
           return (
@@ -136,7 +136,7 @@ const UserList = ({ awareness }) => {
       </div>
       {users.length === 0 && (
         <p style={{ color: '#999', fontSize: '12px', margin: '8px 0' }}>
-          暂无在线用户
+          No online users
         </p>
       )}
     </div>

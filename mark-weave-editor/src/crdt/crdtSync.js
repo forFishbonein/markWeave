@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:59:57
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-13 02:26:23
+ * @LastEditTime: 2025-09-03 04:37:13
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -12,14 +12,14 @@ import { convertCRDTToProseMirrorDoc } from "./crdtUtils";
 import { getYDoc } from "./index";
 import * as Y from "yjs";
 import { Buffer } from "buffer";
-// 同步 CRDT 数据到 ProseMirror：完全依靠 ydoc 的更新事件，也就是说利用 ydoc.on("update") 来触发更新
+// Sync CRDT data to ProseMirror: completely rely on ydoc update events, using ydoc.on("update") to trigger updates
 export function syncToProseMirror(view, docId) {
   const updateEditor = debounce(() => {
     const ydoc = getYDoc();
     const newDoc = convertCRDTToProseMirrorDoc();
     const update = Y.encodeStateAsUpdate(ydoc); // Uint8Array
     const updateB64 = Buffer.from(update).toString("base64");
-    //这里把变化传入后端，但是只作为持久化存储，方便下一次打开的时候文档还在，但是不作为向其他用户的同步
+    // Pass changes to backend, but only for persistent storage, so documents are still there next time opened, not for sync to other users
     fetch("http://localhost:1234/api/doc", {
       method: "POST",
       headers: {
@@ -33,58 +33,58 @@ export function syncToProseMirror(view, docId) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("服务器响应：", data);
+        console.log("Server response:", data);
       })
       .catch((error) => {
-        console.error("请求错误：", error);
+        console.error("Request error:", error);
       });
     if (!newDoc || !newDoc.type) {
       console.error(
-        "🚨 convertCRDTToProseMirrorDoc() 返回无效的 Node:",
+        "🚨 convertCRDTToProseMirrorDoc() returned invalid Node:",
         newDoc
       );
       return;
     }
-    // 如果文档没变化，也可直接 return 避免多余 dispatch
+    // If document unchanged, can return directly to avoid unnecessary dispatch
     if (view.state.doc.eq(newDoc)) {
-      console.log("文档内容相同，跳过 dispatch");
+      console.log("Document content same, skipping dispatch");
       return;
     }
-    // TODO 这里输出的是最有参考价值的！
+    // TODO: This output is most valuable for reference!
     console.log(
       "📝 the newDoc (from generated paragraph):",
       newDoc.toJSON()
       // JSON.stringify(newDoc.toJSON(), null, 2)
-    ); // 🚀 检查 newDoc 的内容
+    ); // 🚀 Check newDoc content
 
     const tr = view.state.tr;
     // console.log(
-    //   "🔍 替换前的文档内容:",
+    //   "🔍 Document content before replacement:",
     //   view.state.doc.toJSON(),
     //   view.state.doc.content.size,
     //   view.state.tr,
     //   newDoc.content
-    // ); // 🚀 看看 ProseMirror 现在的状态
-    // console.log("🔍 新的文档内容:", newDoc.content.content[0]);
+    // ); // 🚀 See current ProseMirror state
+    // console.log("🔍 New document content:", newDoc.content.content[0]);
 
     tr.replaceWith(0, view.state.doc.content.size, newDoc.content);
 
-    // 设置 meta 表示此交易来自 CRDT 同步
+    // Set meta to indicate this transaction comes from CRDT sync
     tr.setMeta("fromSync", true);
 
-    // console.log("🔍 替换后的 Transaction:", tr);
+    // console.log("🔍 Transaction after replacement:", tr);
     // if (tr.curSelectionFor !== 0) {
     view.dispatch(tr);
-    // console.log("最新的ydoc", ydoc);
+    // console.log("Latest ydoc", ydoc);
     // }
   }, 50);
 
-  // 监听整个 ydoc 的更新，以及 ychars 和 yformatOps 的深层变化
+  // Listen to entire ydoc updates, as well as deep changes in ychars and yformatOps
   const ydoc = getYDoc();
   ydoc.on("update", updateEditor);
-  // ychars.observeDeep(updateEditor); //如果远程增加了字符，会触发这个
-  // yformatOps.observeDeep(updateEditor); //如果远程增加了操作符，会触发这个
+  // ychars.observeDeep(updateEditor); // This will be triggered if remote adds characters
+  // yformatOps.observeDeep(updateEditor); // This will be triggered if remote adds operators
 
-  // 🔄 初始化时立即同步一次，防止错过早期的远程更新
+  // 🔄 Sync immediately on initialization to prevent missing early remote updates
   // updateEditor();
 }

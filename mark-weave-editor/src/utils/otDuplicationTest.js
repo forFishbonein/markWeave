@@ -1,6 +1,6 @@
 /**
- * OT内容重复问题测试工具
- * 用于验证多窗口协作时是否存在内容重复问题
+ * OT content duplication issue test tool
+ * Used to verify if content duplication issues exist during multi-window collaboration
  */
 
 class OTDuplicationTest {
@@ -11,11 +11,11 @@ class OTDuplicationTest {
   }
 
   /**
-   * 启动重复问题测试
+   * Start duplication issue test
    */
   startTest(otClient, editorView) {
     if (this.isRunning) {
-      console.warn("🧪 [测试] 测试已在运行中");
+      console.warn("🧪 [TEST] Test is already running");
       return;
     }
 
@@ -23,26 +23,26 @@ class OTDuplicationTest {
     this.otClient = otClient;
     this.editorView = editorView;
 
-    console.log("🧪 [测试] 开始OT重复问题测试", {
+    console.log("🧪 [TEST] Starting OT duplication issue test", {
       testId: this.testId,
       clientId: otClient?.connectionId,
       editorConnected: !!editorView,
     });
 
-    // 监听操作事件
+    // Listen to operation events
     this.monitorOperations();
 
-    // 执行测试用例
+    // Execute test cases
     this.runTestCases();
   }
 
   /**
-   * 监听操作事件
+   * Listen to operation events
    */
   monitorOperations() {
     if (!this.otClient || !this.editorView) return;
 
-    // 记录发送的操作
+    // Record sent operations
     const originalSubmit = this.otClient.submitOperation.bind(this.otClient);
     this.otClient.submitOperation = (collection, id, op) => {
       this.recordOperation("sent", {
@@ -55,7 +55,7 @@ class OTDuplicationTest {
       return originalSubmit(collection, id, op);
     };
 
-    // 监听接收的操作
+    // Listen to received operations
     this.otClient.on("operation", (data) => {
       this.recordOperation("received", {
         ...data,
@@ -63,7 +63,7 @@ class OTDuplicationTest {
       });
     });
 
-    // 监听编辑器变化
+    // Listen to editor changes
     const originalDispatch = this.editorView.dispatch.bind(this.editorView);
     this.editorView.dispatch = (tr) => {
       if (tr.docChanged && !tr.getMeta("fromOT")) {
@@ -78,7 +78,7 @@ class OTDuplicationTest {
   }
 
   /**
-   * 记录操作
+   * Record operation
    */
   recordOperation(type, data) {
     const record = {
@@ -89,38 +89,38 @@ class OTDuplicationTest {
     };
 
     this.testResults.push(record);
-    console.log(`🧪 [测试] 记录操作:`, record);
+    console.log(`🧪 [test] Record operation:`, record);
   }
 
   /**
-   * 执行测试用例
+   * Execute test cases
    */
   async runTestCases() {
     await this.delay(1000); // 等待连接稳定
 
-    // 测试用例1: 单字符输入
+    // test用例1: singlecharacterinput
     await this.testSingleCharacterInput();
 
-    // 测试用例2: 连续输入
+    // test用例2: 连续input
     await this.testContinuousInput();
 
-    // 测试用例3: 删除操作
+    // test用例3: deleteoperation
     await this.testDeleteOperation();
 
-    // 生成测试报告
+    // generatetestreport
     this.generateReport();
   }
 
   /**
-   * 测试单字符输入
+   * testsinglecharacterinput
    */
   async testSingleCharacterInput() {
-    console.log("🧪 [测试] 执行单字符输入测试");
+    console.log("🧪 [test] 执行singlecharacterinputtest");
 
     const testChar = "1";
     const initialContent = this.editorView.state.doc.textContent;
 
-    // 模拟用户输入
+    // 模拟用户input
     this.simulateUserInput(testChar);
 
     await this.delay(2000); // 等待同步完成
@@ -144,14 +144,14 @@ class OTDuplicationTest {
       timestamp: Date.now(),
     });
 
-    console.log("🧪 [测试] 单字符输入测试结果:", testResult);
+    console.log("🧪 [test] singlecharacterinputtestresults:", testResult);
   }
 
   /**
-   * 测试连续输入
+   * test连续input
    */
   async testContinuousInput() {
-    console.log("🧪 [测试] 执行连续输入测试");
+    console.log("🧪 [test] 执行连续inputtest");
 
     const testString = "abc";
     const initialContent = this.editorView.state.doc.textContent;
@@ -182,22 +182,22 @@ class OTDuplicationTest {
       timestamp: Date.now(),
     });
 
-    console.log("🧪 [测试] 连续输入测试结果:", testResult);
+    console.log("🧪 [test] 连续inputtestresults:", testResult);
   }
 
   /**
-   * 测试删除操作
+   * testdeleteoperation
    */
   async testDeleteOperation() {
-    console.log("🧪 [测试] 执行删除操作测试");
+    console.log("🧪 [test] 执行deleteoperationtest");
 
-    // 先插入一些文本
+    // first插入一些文本
     this.simulateUserInput("test");
     await this.delay(500);
 
     const beforeDelete = this.editorView.state.doc.textContent;
 
-    // 模拟删除操作
+    // 模拟deleteoperation
     this.simulateDelete(1);
     await this.delay(2000);
 
@@ -217,11 +217,11 @@ class OTDuplicationTest {
       timestamp: Date.now(),
     });
 
-    console.log("🧪 [测试] 删除操作测试结果:", testResult);
+    console.log("🧪 [test] deleteoperationtestresults:", testResult);
   }
 
   /**
-   * 模拟用户输入
+   * 模拟用户input
    */
   simulateUserInput(text) {
     const { state } = this.editorView;
@@ -230,7 +230,7 @@ class OTDuplicationTest {
   }
 
   /**
-   * 模拟删除操作
+   * 模拟deleteoperation
    */
   simulateDelete(length = 1) {
     const { state } = this.editorView;
@@ -251,7 +251,7 @@ class OTDuplicationTest {
   }
 
   /**
-   * 生成测试报告
+   * generatetestreport
    */
   generateReport() {
     const report = {
@@ -280,9 +280,9 @@ class OTDuplicationTest {
       }
     });
 
-    console.log("🧪 [测试] 测试报告:", report);
+    console.log("🧪 [test] testreport:", report);
 
-    // 保存到localStorage供调试使用
+    // Save到localStorage供调试使用
     localStorage.setItem(
       `ot_test_report_${this.testId}`,
       JSON.stringify(report)
@@ -300,15 +300,15 @@ class OTDuplicationTest {
   }
 
   /**
-   * 停止测试
+   * 停止test
    */
   stopTest() {
     this.isRunning = false;
-    console.log("🧪 [测试] 测试已停止");
+    console.log("🧪 [test] testalready停止");
   }
 }
 
-// 创建全局测试实例
+// 创建全局test实例
 window.OTDuplicationTest = OTDuplicationTest;
 
 export default OTDuplicationTest;

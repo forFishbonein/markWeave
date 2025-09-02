@@ -1,0 +1,1069 @@
+CRDT Test Results - Clean Version
+Generated at: 9/3/2025, 4:43:52 AM
+================================
+
+
+> mark-weave-editor@0.1.0 test:crdt
+> jest --runInBand --verbose
+
+    ================================================================================
+
+
+    🚀 CRDT Performance Benchmark Test Suite - benchmark.test.js
+
+
+    ================================================================================
+
+
+    --- CRDT Benchmark Result ---
+
+
+    Total operations: 900
+
+
+    Time elapsed (ms): 2832.71
+
+
+    Operations / ms: 0.32
+
+
+    Final text length: 449
+
+
+    First 120 chars of text: gqnrqfsfqbgtvzqjlzbamtjnsidsfwqtwixffhddwxzlbhszaqssrisatclytzgsiwulxinanhudcfzoercieqxdmuawxllntwvkuyoihmavgjwjavhzxvcg
+
+
+    ================================================================================
+
+
+    🎲 CRDT Randomized Fuzz Test Suite - fuzz.test.js
+
+
+    ================================================================================
+
+
+    🎯 Starting 50 rounds of random operation test...
+
+
+    ✅ 50 rounds of random operation test completed
+
+
+    🔀 Starting complex mixed operation test (30 rounds)...
+
+
+    ✅ Complex mixed operation test completed
+
+
+    ⚡ Starting extreme boundary case test (25 rounds)...
+
+
+    ✅ Extreme boundary case test completed
+
+
+    ⏰ Starting timestamp conflict stress test (20 rounds)...
+
+
+    ✅ Timestamp conflict stress test completed
+
+
+    🌐 Starting network partition recovery test (15 rounds)...
+
+
+    ✅ Network partition recovery test completed
+
+
+    📊 Starting large data volume test (10 rounds)...
+
+
+    ✅ Large data volume test completed
+
+
+    ================================================================================
+
+
+    ⚡ CRDT Concurrent Operations Test Suite - concurrent.test.js
+
+
+    ================================================================================
+
+
+    [SCENARIO] Basic concurrent insert - two clients insert at start
+
+
+    [SCENARIO] Two clients insert different chars at start
+
+
+    Base document: hello
+
+
+    A inserted char "A" opId: 1756845831952@client
+
+
+    B inserted char "B" opId: 1756845831952@client
+
+
+    [RESULT] Final: "helloAB"
+
+
+    [SCENARIO] Concurrent insert in middle - insert at specified char
+
+
+    🔧 A client ychars initial length: 0
+
+
+    🔧 A length after insertion: 9
+
+
+    🔧 A snapshot: start_end
+
+
+    🔧 A char details:
+
+
+    🔧 B sync length: 9
+
+
+    🔧 B snapshot: start_end
+
+
+    📋 Test scenario: two clients insert after underscore
+
+
+    Base document: start_end
+
+
+    🔍 Debug char search:
+
+
+    Char array length: 9
+
+
+    Underscore "_" opId: 1756845831956_5@client
+
+
+    State after insertion:
+
+
+    A: start_Xend
+
+
+    B: start_Yend
+
+
+    [RESULT] Final: "start_YXend"
+
+
+    ✅ Characters inserted correctly after underscore
+
+
+    [SCENARIO] Multiple character concurrent insert - using insertText
+
+
+    Base document: base
+
+
+    A after insertion: AAAbase
+
+
+    B after insertion: BBBbase
+
+
+    [RESULT] Final: "AAABBBbase"
+
+
+    [SCENARIO] Three client concurrent insert - complex concurrent scenario
+
+
+    Base document: start
+
+
+    State after insertion:
+
+
+    A: start1
+
+
+    B: start2
+
+
+    C: start3
+
+
+    🎯 Final result:
+
+
+    A: start213
+
+
+    B: start213
+
+
+    C: start213
+
+
+    ✅ Characters inserted at document end (modified behavior)
+
+
+    [SCENARIO] Simulate two users fast continuous input
+
+
+    Base document: doc
+
+
+    After fast typing:
+
+
+    A: doc_end
+
+
+    B: doc!
+
+
+    [RESULT] Final: "doc_end!"
+
+
+    [ANALYSIS] Result: "doc_end!"
+
+
+    ✅ Characters inserted in reasonable order (A before B)
+
+
+    [SCENARIO] Mixed concurrent operations - A insert, B delete
+
+
+    Base document: hello world
+
+
+    After operation:
+
+
+    A: hello worldX
+
+
+    B: helloorld
+
+
+    [RESULT] Final: "helloorldX"
+
+
+    === Visible characters after mixed operations ===
+
+
+    [0] "h" -> opId: 1756845831973_0@client (timestamp: 1756845831973_0)
+
+
+    [1] "e" -> opId: 1756845831973_1@client (timestamp: 1756845831973_1)
+
+
+    [2] "l" -> opId: 1756845831973_2@client (timestamp: 1756845831973_2)
+
+
+    [3] "l" -> opId: 1756845831973_3@client (timestamp: 1756845831973_3)
+
+
+    [4] "o" -> opId: 1756845831973_4@client (timestamp: 1756845831973_4)
+
+
+    [5] "o" -> opId: 1756845831974_7@client (timestamp: 1756845831974_7)
+
+
+    [6] "r" -> opId: 1756845831974_8@client (timestamp: 1756845831974_8)
+
+
+    [7] "l" -> opId: 1756845831974_9@client (timestamp: 1756845831974_9)
+
+
+    [8] "d" -> opId: 1756845831974_10@client (timestamp: 1756845831974_10)
+
+
+    [9] "X" -> opId: 1756845831974@client (timestamp: 1756845831974)
+
+
+    Actual result analysis: "helloorldX"
+
+
+    ✅ Deletion operation took effect, deleted 'w ' character
+
+
+    ✅ Deletion operation took effect, deleted 'o' related characters
+
+
+    [SCENARIO] Concurrent insert on empty document
+
+
+    After insertion:
+
+
+    A: A
+
+
+    B: B
+
+
+    [RESULT] Empty document concurrent insertion result: "BA"
+
+
+    Result length: 2
+
+
+    [SCENARIO] Deep analysis of timestamps and sorting rules
+
+
+    Timestamp analysis:
+
+
+      Start time: 1756845831983
+
+
+      Middle time: 1756845831983 (difference: 0ms)
+
+
+      End time: 1756845831983 (difference: 0ms)
+
+
+    Actual opId:
+
+
+      A opId: 1756845831983@client
+
+
+      B opId: 1756845831983@client
+
+
+    [ORDER] Expected: Sort by timestamp, Actual: T2T1
+
+
+    Char "T2" timestamp: 1756845831983
+
+
+    Char "T1" timestamp: 1756845831983
+
+
+    [RESULT] Final order: "T2T1"
+
+
+    [SCENARIO] Three client ultra-fast concurrent insert
+
+
+    🔍 baseChars length: 4
+
+
+    🔍 baseChars: [
+      { ch: 'b', opId: '1756845831986_0@client' },
+      { ch: 'a', opId: '1756845831986_1@client' },
+      { ch: 's', opId: '1756845831986_2@client' },
+      { ch: 'e', opId: '1756845831986_3@client' }
+    ]
+
+
+    🔍 lastCharId: 1756845831986_3@client
+
+
+    State after ultra-fast insertion:
+
+
+    A: baseA4A3A2A1A0
+
+
+    B: baseB4B3B2B1B0
+
+
+    C: baseC4C3C2C1C0
+
+
+    🎯 Ultra-fast concurrent final result:
+
+
+    A: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
+
+
+    B: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
+
+
+    C: baseB4B3B2B1B0A4A3A2A1A0C4C3C2C1C0
+
+
+    [SCENARIO] Simulate network partition and delayed sync
+
+
+    After A-B sync during partition:
+
+
+    A-B state: start12
+
+
+    C isolated state: startisolated
+
+
+    Before network recovery:
+
+
+    A-B: _partitioned_networkstart12
+
+
+    C: startisolated
+
+
+    🎯 Final state after network recovery:
+
+
+    A: _partitioned_networkstartisolated12
+
+
+    B: _partitioned_networkstartisolated12
+
+
+    C: _partitioned_networkstartisolated12
+
+
+    [SCENARIO] Large-scale concurrent pressure test - 10 clients
+
+
+    Base document: shared_document
+
+
+    Performed 30 concurrent operations
+
+
+    🎯 Large-scale concurrent final result:
+
+
+    Final document: _9_2_9_0_6_2_6_0_5_2_5__3_2_3__8_2_8_0_4_2_4_0_0_2_0_0_2_2_2__7_2_7_0_1_2_1_0sharedcuent
+
+
+    Document length: 88
+
+
+    [SCENARIO] Out-of-order message sync test
+
+
+    Simulate out-of-order sync...
+
+
+    🎯 Out-of-order sync final result:
+
+
+    A: B2B1C1A2A1
+
+
+    B: B2B1C1A2A1
+
+
+    C: B2B1C1A2A1
+
+
+    [SCENARIO] Conflict resolution for same timestamp
+
+
+    Created operations with same timestamp
+
+
+    🎯 Conflict resolution result for same timestamp: AB
+
+
+    [SCENARIO] Simulate network packet loss and message loss
+
+
+    Generated 4 updates
+
+
+    Delivery after packet loss:
+
+
+    A received: 2 updates
+
+
+    B received: 2 updates
+
+
+    C received: 2 updates
+
+
+    State after packet loss:
+
+
+    A: base1423
+
+
+    B: base123
+
+
+    C: base143
+
+
+    🎯 Final state after network recovery:
+
+
+    A: base1423
+
+
+    B: base1423
+
+
+    C: base1423
+
+
+    [SCENARIO] Simulate different network delays
+
+
+    Simulate transmission in order of delay:
+
+
+    Step 1: C -> [A, B] (delay 50ms)
+
+
+       State: A="startAC", B="startBC", C="startC"
+
+
+    Step 2: A -> [B, C] (delay 100ms)
+
+
+       State: A="startAC", B="startBAC", C="startAC"
+
+
+    Step 3: B -> [A, C] (delay 300ms)
+
+
+       State: A="startBAC", B="startBAC", C="startBAC"
+
+
+    🎯 Final result of delay simulation:
+
+
+    A: startBAC
+
+
+    B: startBAC
+
+
+    C: startBAC
+
+
+    [SCENARIO] Simulate network duplicate transmission
+
+
+    Original state: original
+
+
+    B after adding X: originalX
+
+
+    A first update received: originalX
+
+
+    Simulate duplicate transmission of the same update...
+
+
+    After 2 applications: originalX
+
+
+    After 3 applications: originalX
+
+
+    After 4 applications: originalX
+
+
+    After 5 applications: originalX
+
+
+    After 6 applications: originalX
+
+
+    🎯 Duplicate transmission handling result:
+
+
+    A: originalX
+
+
+    B: originalX
+
+
+    [SCENARIO] Simulate network bandwidth limit and batch transmission
+
+
+    Generated 20 individual updates
+
+
+    A current state: 01234567890123456789
+
+
+    Split into 4 batches for transmission
+
+
+    Transmitting batch 1/4 (5 updates)
+
+
+    State after batch 1: 01234
+
+
+    Transmitting batch 2/4 (5 updates)
+
+
+    State after batch 2: 0123456789
+
+
+    Transmitting batch 3/4 (5 updates)
+
+
+    State after batch 3: 012345678901234
+
+
+    Transmitting batch 4/4 (5 updates)
+
+
+    State after batch 4: 01234567890123456789
+
+
+    🎯 Final result of batch transmission:
+
+
+    A: 01234567890123456789
+
+
+    B: 01234567890123456789
+
+
+    ================================================================================
+
+
+    🎨 CRDT Multi-Format Test Suite - multiMark.test.js
+
+
+    ================================================================================
+
+
+    📋 Test scenario: Nested formatting - bold containing italic
+
+
+    Initial text: Hello World
+
+
+    Character ranges:
+
+
+      Hello range: 1756845832117_0@client to 1756845832117_4@client
+
+
+      World range: 1756845832117_6@client to 1756845832117_10@client
+
+
+    🔸 A operation: Bold entire 'Hello World'
+
+
+    🔸 B operation: Add italic to 'World' part
+
+
+    🔄 Synchronizing format operations...
+
+
+    Final format operations count: 2
+
+
+    Format operation details:
+
+
+      1. addMark bold (1756845832120@client)
+
+
+      2. addMark em (1756845832120@client)
+
+
+    📄 🎯 Nested formatting final result:
+
+
+      Plain text: "Hello World"
+
+
+      Format operations count: 2
+
+
+      Formatted text: [H:bold][e:bold][l:bold][l:bold][o:bold][ :bold][W:bold,em][o:bold,em][r:bold,em][l:bold,em][d:bold,em]
+
+
+      Format operation details:
+
+
+        1. addMark bold (1756845832120@client)
+
+
+        2. addMark em (1756845832120@client)
+
+
+
+
+    Expected effect: 'Hello World' all bold, 'World' part also italic
+
+
+    📋 Test scenario: Cross formatting - A bolds ABC, B italicizes DEF, C has both bold and italic
+
+
+    Initial text: ABCDEF
+
+
+    Character ID mapping:
+
+
+      A(0): 1756845832125_0@client
+
+
+      B(1): 1756845832125_1@client
+
+
+      C(2): 1756845832125_2@client
+
+
+      D(3): 1756845832125_3@client
+
+
+      E(4): 1756845832125_4@client
+
+
+      F(5): 1756845832125_5@client
+
+
+    🔸 A operation: Bold 'ABC' (positions 0-2)
+
+
+    🔸 B operation: Add italic to 'DEF' (positions 3-5)
+
+
+    🔄 Concurrent sync of A and B formatting operations...
+
+
+    🔸 C operation: Apply both bold and italic to 'CD' (positions 2-3)
+
+
+    🔄 Three-way sync of all formatting operations...
+
+
+    Final format operations total: 4
+
+
+    Bold operations: 2 count
+
+
+    Italic operations: 2 count
+
+
+    Expected format distribution:
+
+
+      A: bold, B: bold, C: bold+italic, D: italic+bold, E: italic, F: italic
+
+
+    📄 🎯 Cross formatting final result:
+
+
+      Plain text: "ABCDEF"
+
+
+      Format operations count: 4
+
+
+      Formatted text: [A:bold][B:bold][C:bold,em][D:em,bold][E:em][F:em]
+
+
+      Format operation details:
+
+
+        1. addMark bold (1756845832127@client)
+
+
+        2. addMark em (1756845832128@client)
+
+
+        3. addMark bold (1756845832129@client)
+
+
+        4. addMark em (1756845832129@client)
+
+
+
+
+    📋 Test scenario: remove-wins priority - multi-client format conflicts
+
+
+    🎯 remove-wins final result: test
+
+
+    Format operation statistics:
+
+
+    Add operations: 3
+
+
+    Remove operations: 1
+
+
+    📋 Test scenario: Chain format operations
+
+
+    Initial paragraph: This is a complex paragraph for testing.
+
+
+    Target word positions:
+
+
+      'This' (0-3): 1756845832139_0@client to 1756845832139_3@client
+
+
+      'complex' (10-16): 1756845832139_10@client to 1756845832139_16@client
+
+
+      'testing' (31-37): 1756845832139_31@client to 1756845832140_37@client
+
+
+    🔸 A's format operations:
+
+
+      1. Bold 'This'
+
+
+      2. Add italic to 'complex'
+
+
+      3. Add link to 'testing'
+
+
+    🔸 B's format operations:
+
+
+      1. Bold 'complex' (overlapped with A's italic)
+
+
+      2. Add italic to 'This' (overlapped with A's bold)
+
+
+    🔄 First round sync of format operations...
+
+
+    After first round: This is a complex paragraph for testing.
+
+
+    Number of format operations after first round: 5
+
+
+    🔸 Second round operations - undo some formats:
+
+
+      A: Undo bold for 'This'
+
+
+      B: Undo italic for 'complex'
+
+
+    🔄 Final sync of all operations...
+
+
+    Total number of format operations: 7
+
+
+    Types of formats involved: [ 'bold', 'em', 'link' ]
+
+
+    Add operations: 5 , Remove operations: 2
+
+
+    Expected final effect:
+
+
+      'This': Only italic (bold removed)
+
+
+      'complex': Only bold (italic removed)
+
+
+      'testing': Has link
+
+
+    📄 🎯 Chain format final result:
+
+
+      Plain text: "This is a complex paragraph for testing."
+
+
+      Format operations count: 7
+
+
+      Formatted text: [T:em][h:em][i:em][s:em] is a [c:bold][o:bold][m:bold][p:bold][l:bold][e:bold][x:bold] paragraph for[ :link][t:link][e:link][s:link][t:link][i:link][n:link]g.
+
+
+      Format operation details:
+
+
+        1. addMark bold (1756845832142@client)
+
+
+        2. addMark em (1756845832142@client)
+
+
+        3. addMark link (1756845832142@client)
+
+
+        4. addMark bold (1756845832143@client)
+
+
+        5. addMark em (1756845832143@client)
+
+
+        6. removeMark bold (1756845832145@client)
+
+
+        7. removeMark em (1756845832145@client)
+
+
+
+
+    📋 Test scenario: Boundary formatting - single character formatting
+
+
+    📄 🎯 Boundary formatting result:
+
+
+      Plain text: "XY"
+
+
+      Format operations count: 3
+
+
+      Formatted text: [X:bold,em][Y:link]
+
+
+      Format operation details:
+
+
+        1. addMark bold (1756845832153@client)
+
+
+        2. addMark em (1756845832153@client)
+
+
+        3. addMark link (1756845832153@client)
+
+
+
+
+    📋 Test scenario: Concurrent formatting and text editing mixed
+
+
+    Status of each client after mixed operations:
+
+
+    A (inserted): eding_tit
+
+
+    B (formatted): edit
+
+
+    C (deleted+formatted): edt
+
+
+    🎯 Mixed scenario final result:
+
+
+    A: eding_tt
+
+
+    B: eding_tt
+
+
+    C: eding_tt
+
+
+    ================================================================================
+
+
+    🔄 CRDT Conflict Resolution Test Suite - removeWins.test.js
+
+
+    ================================================================================
+
+
+    📋 Test Scenario: remove-wins conflict resolution mechanism
+
+
+    Initial text: hi
+
+
+    Character IDs: { hId: '1756845832217_0@client', iId: '1756845832218_1@client' }
+
+
+    C2 after sync: hi
+
+
+    C1 bold operation completed, C2 synced
+
+
+    C2 remove bold operation completed, C1 synced
+
+
+    C1 format operation count: 2
+
+
+    C2 format operation count: 2
+
+
+    Format operation types: [ 'addMark-bold', 'removeMark-bold' ]
+
+
+    🔥 convertCRDTToProseMirrorDoc called
+
+
+    the newest yformatOps:  []
+
+
+    the newest ychars []
+
+
+    ✅ Generated paragraph: []
+
+
+    📄 ProseMirror document structure:
+
+
+    {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph"
+        }
+      ]
+    }
+
+
+    ⚠️ Document is empty, which matches remove-wins logic
+
+
+    ================================================================================
+
+
+    🎯 CRDT Deterministic Test Suite - deterministic.test.js
+
+
+    ================================================================================
+
+
+    📋 Test scenario: two clients concurrently insert text
+
+
+    Status after insertion:
+
+
+    A: abc
+
+
+    B: XYZ
+
+
+    🎯 Final result after synchronization:
+
+
+    A: abcXYZ
+
+
+    B: abcXYZ
+
+
+    ✅ State consistency verification: Passed
+
+

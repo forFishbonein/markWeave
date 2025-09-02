@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 
 export const authenticate = (req, res, next) => {
-  // 如果路由标记为跳过认证，则直接通过
+  // If route is marked to skip authentication, pass directly
   if (req.skipAuth) {
     return next();
   }
 
   const authHeader = req.header("Authorization");
   if (!authHeader) {
-    return res.status(401).json({ msg: "无token，授权被拒绝" });
+    return res.status(401).json({ msg: "No token, authorization denied" });
   }
 
   try {
@@ -17,6 +17,6 @@ export const authenticate = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ msg: "Token无效" });
+    res.status(401).json({ msg: "Invalid token" });
   }
 };

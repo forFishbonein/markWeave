@@ -4,7 +4,7 @@ import { TeamOutlined, UserOutlined, SettingOutlined, QuestionCircleOutlined } f
 import '../DocumentList/documentList.css';
 
 const Sidebar = ({ activeTab = "documents", setActiveTab }) => {
-  // 只有 setActiveTab 存在时才绑定点击事件
+  // Only bind click event when setActiveTab exists
   const menuProps = setActiveTab
     ? { onClick: ({ key }) => setActiveTab(key) }
     : {};
@@ -20,12 +20,12 @@ const Sidebar = ({ activeTab = "documents", setActiveTab }) => {
         style={{ height: '100%', borderRight: 0 }}
         {...menuProps}
       >
-        <Menu.Item key="documents" icon={<TeamOutlined />}>文档</Menu.Item>
-        <Menu.Item key="members" icon={<UserOutlined />}>成员</Menu.Item>
-        <Menu.Item key="settings" icon={<SettingOutlined />}>设置</Menu.Item>
-        <Menu.Item key="help" icon={<QuestionCircleOutlined />}>帮助</Menu.Item>
+        <Menu.Item key="documents" icon={<TeamOutlined />}>Documents</Menu.Item>
+        <Menu.Item key="members" icon={<UserOutlined />}>Member</Menu.Item>
+        <Menu.Item key="settings" icon={<SettingOutlined />}>Settings</Menu.Item>
+        <Menu.Item key="help" icon={<QuestionCircleOutlined />}>Help</Menu.Item>
       </Menu>
-      <div className="doclist-settings">设置</div>
+      <div className="doclist-settings">Settings</div>
     </div>
   );
 };

@@ -12,7 +12,7 @@ const JsonEditor = ({ docId }) => {
   const [saving, setSaving] = useState(false);
   const { user } = useAuth();
 
-  // 加载文档内容
+  // Load document content
   const loadDocument = useCallback(async () => {
     if (!docId) return;
 
@@ -22,12 +22,12 @@ const JsonEditor = ({ docId }) => {
 
       if (response.success) {
         setDocument(response.data);
-        // 将JSON内容转换为纯文本显示
+        // Convert JSON content to plain text display
         setContent(extractTextFromContent(response.data.content));
       }
     } catch (error) {
-      console.error('加载文档失败:', error);
-      message.error('加载文档失败');
+      console.error('Failed to load document:', error);
+      message.error('Failed to load document');
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ const JsonEditor = ({ docId }) => {
     loadDocument();
   }, [loadDocument]);
 
-  // 从JSON内容中提取纯文本
+  // Extract plain text from JSON content
   const extractTextFromContent = (jsonContent) => {
     if (!jsonContent || !jsonContent.content) return '';
 
@@ -56,7 +56,7 @@ const JsonEditor = ({ docId }) => {
     return text;
   };
 
-  // 将纯文本转换为JSON格式
+  // Convert plain text to JSON format
   const textToJsonContent = (text) => {
     const paragraphs = text.split('\n').filter(p => p.trim() || p === '');
 
@@ -75,7 +75,7 @@ const JsonEditor = ({ docId }) => {
     };
   };
 
-  // 保存文档
+  // Save document
   const saveDocument = async () => {
     if (!document || !user) return;
 
@@ -90,16 +90,16 @@ const JsonEditor = ({ docId }) => {
         document.teamId
       );
 
-      message.success('文档保存成功');
+      message.success('Document saved successfully');
     } catch (error) {
-      console.error('保存文档失败:', error);
-      message.error('保存文档失败');
+      console.error('Failed to save document:', error);
+      message.error('Failed to save document');
     } finally {
       setSaving(false);
     }
   };
 
-  // 格式化操作（简单示例）
+  // Formatting operations (simple example)
   const handleFormat = (type) => {
     const textarea = document.getElementById('json-editor-textarea');
     if (!textarea) return;
@@ -109,7 +109,7 @@ const JsonEditor = ({ docId }) => {
     const selectedText = content.substring(start, end);
 
     if (!selectedText) {
-      message.info('请先选择要格式化的文字');
+      message.info('Please select text to format first');
       return;
     }
 
@@ -135,29 +135,29 @@ const JsonEditor = ({ docId }) => {
   if (loading) {
     return (
       <div className="json-editor-loading">
-        <div>加载中...</div>
+        <div>Loading...</div>
       </div>
     );
   }
 
   return (
     <div className="json-editor">
-      {/* 工具栏 */}
+      {/* Toolbar */}
       <div className="json-editor-toolbar">
         <Button
           icon={<BoldOutlined />}
           onClick={() => handleFormat('bold')}
-          title="粗体 (**文字**)"
+          title="Bold (**text**)"
         />
         <Button
           icon={<ItalicOutlined />}
           onClick={() => handleFormat('italic')}
-          title="斜体 (*文字*)"
+          title="Italic (*text*)"
         />
         <Button
           icon={<UnderlineOutlined />}
           onClick={() => handleFormat('underline')}
-          title="下划线 (_文字_)"
+          title="Underline (_text_)"
         />
         <div className="json-editor-toolbar-divider" />
         <Button
@@ -165,26 +165,26 @@ const JsonEditor = ({ docId }) => {
           onClick={saveDocument}
           loading={saving}
         >
-          保存
+          Save
         </Button>
       </div>
 
-      {/* 编辑区域 */}
+      {/* Edit area */}
       <div className="json-editor-content">
         <textarea
           id="json-editor-textarea"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="开始输入文档内容..."
+          placeholder="Start typing document content..."
           className="json-editor-textarea"
         />
       </div>
 
-      {/* 文档信息 */}
+      {/* Document info */}
       <div className="json-editor-info">
-        <span>字符数: {content.length}</span>
+        <span>Character count: {content.length}</span>
         {document && (
-          <span>最后更新: {new Date(document.lastUpdated).toLocaleString()}</span>
+          <span>Last updated: {new Date(document.lastUpdated).toLocaleString()}</span>
         )}
       </div>
     </div>

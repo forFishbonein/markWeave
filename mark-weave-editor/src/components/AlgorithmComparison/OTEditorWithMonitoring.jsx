@@ -2,7 +2,7 @@
  * @FilePath: OTEditorWithMonitoring.jsx
  * @Author: Aron
  * @Date: 2025-01-27
- * @Description: OT算法性能监控组件，集成ShareDB编辑器和真实性能监控面板
+ * @Description: OT algorithm performance monitoring component, integrating ShareDB editor and real performance monitoring panel
  */
 
 import React, { useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
@@ -37,7 +37,7 @@ const OTEditorWithMonitoring = forwardRef(({
   onMetricsUpdate = null
 }, ref) => {
 
-  console.log("🔍 [OT编辑器组件] 初始化参数:", { docId, collection });
+  console.log("🔍 [OT Editor Component] Initialization parameters:", { docId, collection });
   const [isMonitoring, setIsMonitoring] = useState(false);
   const [performanceData, setPerformanceData] = useState(null);
   const [latencyHistory, setLatencyHistory] = useState([]);
@@ -46,7 +46,7 @@ const OTEditorWithMonitoring = forwardRef(({
   const performanceMonitorRef = useRef(null);
   const refreshTimer = useRef(null);
 
-  // 使用OT编辑器Hook - 获取协作状态
+  // Use OT editor Hook - get collaboration state
   let editorView, otClient, isConnected, editorUtils;
 
   try {
@@ -56,65 +56,65 @@ const OTEditorWithMonitoring = forwardRef(({
       editorRef
     );
 
-    // 添加调试信息
-    console.log("🔍 [OT编辑器] Hook状态:", {
+    // Add debug info
+    console.log("🔍 [OT Editor] Hook state:", {
       hasEditorRef: !!editorRef.current,
       docId,
       hasOtClient: !!otClient,
       isConnected
     });
   } catch (error) {
-    console.error("❌ [OT编辑器] Hook初始化失败:", error);
-    // 设置默认值
+    console.error("❌ [OT Editor] Hook initialization failed:", error);
+    // Default settings values
     editorView = null;
     otClient = null;
     isConnected = false;
     editorUtils = {};
   }
 
-  // 获取多窗口协作状态
+  // Get multi-window collaboration state
   const collaborationState = editorUtils?.getCollaborationState ? editorUtils.getCollaborationState() : {
     userStates: [],
     activeUsers: 0,
     isMultiWindow: false
   };
 
-  // 暴露重置方法给父组件
+  // Expose reset method to parent component
   useImperativeHandle(ref, () => ({
     resetMetrics: handleReset,
     getMetrics: () => performanceMonitorRef.current?.getAggregatedMetrics() || {}
   }));
 
   useEffect(() => {
-    console.log("🔍 [OT监控] useEffect 触发", {
+    console.log("🔍 [OT Monitoring] useEffect triggered", {
       hasOtClient: !!otClient,
       isConnected,
       hasMonitor: !!performanceMonitorRef.current
     });
 
-    // 显式暴露OT客户端到window对象
+    // Explicitly expose OT client to window object
     if (otClient) {
       window.otClient = otClient;
       window.otReady = true;
-      console.log("✅ [OT监控] OT客户端已挂载到window对象");
+      console.log("✅ [OT Monitoring] OT client mounted to window object");
     }
 
-    // 只要有OT客户端就初始化性能监控器（不依赖连接状态）
+    // Initialize performance monitor as long as OT client exists (not dependent on connection state)
     if (otClient && !performanceMonitorRef.current) {
       performanceMonitorRef.current = new OTPerformanceMonitor();
-      // 挂载到 window 上，供 benchmarkApi.js 访问
+      // Mount to window for benchmarkApi.js access
       window.otMonitor = performanceMonitorRef.current;
       console.log("✅ [OT监控] 初始化性能监控器");
     }
 
-    // 强制初始化监控器（即使otClient为null）
+    // 强制Initialize monitor（i.e.使otClient为null）
     if (!performanceMonitorRef.current) {
-      console.log("⚠️ [OT监控] otClient为null，强制初始化监控器");
+      console.log("⚠️ [OT监控] otClient为null，强制Initialize monitor");
       performanceMonitorRef.current = new OTPerformanceMonitor();
       window.otMonitor = performanceMonitorRef.current;
-      console.log("✅ [OT监控] 强制初始化性能监控器完成");
+      console.log("✅ [OT监控] 强制初始化性能监控器completion");
     }
-    // 连接成功时自动开始监控
+    // 连接successful时自动Start monitoring
     if (otClient && isConnected && !isMonitoring) {
       handleStartMonitoring();
     }
@@ -129,26 +129,26 @@ const OTEditorWithMonitoring = forwardRef(({
     };
   }, [otClient, isConnected]);
 
-  // 监控数据刷新
+  // 监控count据刷新
   useEffect(() => {
     if (isMonitoring && performanceMonitorRef.current) {
       refreshTimer.current = setInterval(() => {
         const stats = performanceMonitorRef.current.getAggregatedMetrics();
         if (stats) {
-          // 合并协作状态数据
+          // 合并协作状态count据
           const enhancedStats = {
             ...stats,
-            // 不再覆盖 windowCount 和 multiWindow，直接用 stats 的真实值
+            // 不then覆盖 windowCount 和 multiWindow，直接用 stats 的真实值
             userStates: collaborationState.userStates,
             activeUsers: collaborationState.activeUsers,
           };
 
           setPerformanceData(enhancedStats);
 
-          // 通知父组件指标更新 - 🔥 统一指标格式
+          // 通知父组件指标update - 🔥 统一指标格式
           if (onMetricsUpdate) {
             onMetricsUpdate({
-              // 基本操作指标
+              // 基本operation指标
               operationsCount: enhancedStats.operationsCount || 0,
               avgLatency: enhancedStats.avgLatency || 0,
               p95Latency: enhancedStats.p95Latency || 0,
@@ -180,7 +180,7 @@ const OTEditorWithMonitoring = forwardRef(({
               isConnected: enhancedStats.isConnected || false,
               windowId: enhancedStats.windowId || '',
 
-              // 数据样本统计
+              // count据样本统计
               latencySamples: enhancedStats.latencySamples || 0,
               recentLatencySamples: enhancedStats.recentLatencySamples || 0,
 
@@ -195,18 +195,18 @@ const OTEditorWithMonitoring = forwardRef(({
               multiWindow: enhancedStats.multiWindow || false,
               windowCount: enhancedStats.windowCount || 1,
 
-              // 数据源标识
+              // count据源标识
               algorithm: 'OT',
               dataSource: enhancedStats.dataSource || 'sharedb-real-monitoring',
               hasRealNetworkData: enhancedStats.hasRealNetworkData || false,
               hasRealLatencyData: enhancedStats.hasRealLatencyData || false,
 
-              // 运行时间
+              // run时间
               uptime: enhancedStats.uptime || 0
             });
           }
 
-          // 更新延迟历史
+          // update延迟历史
           if (enhancedStats.avgLatency > 0) {
             setLatencyHistory(prev => {
               const newHistory = [...prev, {
@@ -218,7 +218,7 @@ const OTEditorWithMonitoring = forwardRef(({
                 samples: enhancedStats.recentLatencySamples,
                 pending: enhancedStats.pendingOperations
               }];
-              return newHistory.slice(-30); // 保持最近30个数据点
+              return newHistory.slice(-30); // 保持最近30个count据点
             });
           }
         }

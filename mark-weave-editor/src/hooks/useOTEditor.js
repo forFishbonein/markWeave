@@ -2,7 +2,7 @@
  * @FilePath: useOTEditor.js
  * @Author: Aron
  * @Date: 2025-01-27
- * @Description: OT版本的ProseMirror编辑器Hook，集成ShareDB - 多窗口同步版本
+ * @Description: OT version ProseMirror editor Hook, integrated with ShareDB - multi-window sync version
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -15,12 +15,12 @@ import OTClient from "../services/otClient";
 import { useAuth } from "../contexts/AuthContext";
 
 /**
- * OT版本的ProseMirror编辑器Hook - 多窗口同步版本
- * 参考useYjsEditor的实现方式，添加多窗口协作能力
- * @param {string} docId 文档ID
- * @param {string} collection 集合名
- * @param {React.RefObject} editorRef 编辑器DOM引用
- * @returns {[EditorView, OTClient, boolean, object]} [编辑器视图, OT客户端, 连接状态, 工具函数]
+ * OT version ProseMirror editor Hook - multi-window sync version
+ * Reference useYjsEditor implementation, add multi-window collaboration capability
+ * @param {string} docId Document ID
+ * @param {string} collection Collection name
+ * @param {React.RefObject} editorRef Editor DOM reference
+ * @returns {[EditorView, OTClient, boolean, object]} [Editor view, OT client, connection status, utility functions]
  */
 export function useOTEditor(docId, collection = "documents", editorRef) {
   const [editorView, setEditorView] = useState(null);
@@ -34,11 +34,16 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
   const { user: authUser } = useAuth();
 
   useEffect(() => {
-    console.log("🔧 [OT] 当前文档ID:", docId, "集合:", collection);
+    console.log(
+      "🔧 [OT] Current document ID:",
+      docId,
+      "Collection:",
+      collection
+    );
 
     if (!docId || isInitializedRef.current) return;
 
-    console.log("🚀 [OT] 初始化OT编辑器", { docId, collection });
+    console.log("🚀 [OT] Initialize OT editor", { docId, collection });
     initializeOTEditor();
     isInitializedRef.current = true;
 
@@ -48,15 +53,15 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
   }, [docId, collection, authUser]);
 
   const cleanupEditor = () => {
-    console.log("🧹 [OT] 清理编辑器资源");
+    console.log("🧹 [OT] Cleaning up editor resources");
 
-    // 清理定期同步
+    // Clean up periodic sync
     if (window.otSyncInterval) {
       clearInterval(window.otSyncInterval);
       window.otSyncInterval = null;
     }
 
-    // 清理用户状态
+    // Clean up user state
     clearUserState();
 
     if (viewRef.current) {
@@ -78,31 +83,31 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
 
   const initializeOTEditor = async () => {
     try {
-      // 创建OT客户端
+      // Create OT client
       const client = new OTClient();
       otClientRef.current = client;
       setOtClient(client);
 
-      // 设置用户信息
+      // Set user info
       const setUserInfo = () => {
         if (authUser) {
           const userInfo = {
             name: authUser.username || authUser.email || "Unknown User",
             email: authUser.email,
             userId: authUser.userId,
-            color: "#1890ff", // OT使用蓝色主题
+            color: "#1890ff", // OT uses blue theme
             timestamp: Date.now(),
             online: true,
             clientId: client.connectionId || `ot_${Date.now()}`,
           };
 
-          // 存储到localStorage进行多窗口同步
+          // Store to localStorage for multi-window sync
           const userKey = `ot_user_${userInfo.clientId}`;
           localStorage.setItem(userKey, JSON.stringify(userInfo));
 
-          console.log("✅ [OT] 设置用户信息:", userInfo);
+          console.log("✅ [OT] Set user info:", userInfo);
 
-          // 更新本地状态
+          // Update local state
           setUserStates((prev) => {
             const newStates = new Map(prev);
             newStates.set(userInfo.clientId, userInfo);
@@ -110,7 +115,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           });
         } else {
           const fallbackUser = {
-            name: "OT访客" + Math.floor(Math.random() * 100),
+            name: "OTGuest" + Math.floor(Math.random() * 100),
             color: "#1890ff",
             timestamp: Date.now(),
             online: true,
@@ -120,7 +125,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           const userKey = `ot_user_${fallbackUser.clientId}`;
           localStorage.setItem(userKey, JSON.stringify(fallbackUser));
 
-          console.log("⚠️ [OT] 设置访客信息:", fallbackUser);
+          console.log("⚠️ [OT] Set guest info:", fallbackUser);
 
           setUserStates((prev) => {
             const newStates = new Map(prev);
@@ -130,101 +135,103 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         }
       };
 
-      // 连接到OT服务器
-      console.log("🔌 [OT] 开始连接到OT服务器...");
+      // Connect to OT server
+      console.log("🔌 [OT] Starting connection to OT server...");
       await client.connect("ws://localhost:1235");
-      console.log("✅ [OT] 连接请求已发送");
+      console.log("✅ [OT] Connection request sent");
 
-      // 注册连接事件监听器
+      // Register connection event listeners
       client.on("connected", (data) => {
-        console.log("✅ [OT] 客户端连接成功", data);
+        console.log("✅ [OT] Client connection successful", data);
         setIsConnected(true);
 
-        // 连接成功后设置用户信息
+        // Set user info after successful connection
         setUserInfo();
 
-        // 订阅文档
+        // Subscribe to document
         setTimeout(() => {
           client.subscribeDocument(collection, docId);
         }, 100);
       });
 
       client.on("disconnect", (data) => {
-        console.log("🔌 [OT] 客户端连接断开", data);
+        console.log("🔌 [OT] Client connection disconnected", data);
         setIsConnected(false);
         clearUserState();
       });
 
       client.on("docUpdate", (data) => {
-        console.log("📄 [OT] 收到文档更新", data);
+        console.log("📄 [OT] Received document update", data);
         updateEditorFromOT(data);
       });
 
       client.on("operation", (data) => {
-        console.log("⚡ [OT] 收到操作", data);
+        console.log("⚡ [OT] Received operation", data);
         updateEditorFromOT(data);
       });
 
       client.on("error", (error) => {
-        console.error("❌ [OT] 客户端错误:", error);
+        console.error("❌ [OT] Client error:", error);
         setIsConnected(false);
 
-        // 连接失败后尝试重连
+        // Try to reconnect after connection failed
         setTimeout(() => {
           if (!isConnected && otClientRef.current) {
-            console.log("🔄 [OT] 尝试重新连接...");
+            console.log("🔄 [OT] Attempting to reconnect...");
             otClientRef.current.reconnect();
           }
         }, 3000);
       });
 
-      // 监听localStorage变化进行多窗口同步
+      // Listen to localStorage changes for multi-window sync
       window.addEventListener("storage", handleStorageChange);
 
-      // 🔥 移除模拟延迟 - 使用真实连接时序
-      console.log("🔌 [OT] 连接到OT服务器: ws://localhost:1235");
+      // 🔥 Remove simulated delay - use real connection timing
+      console.log("🔌 [OT] Connecting to OT server: ws://localhost:1235");
 
-      // 添加重试逻辑
+      // Add retry logic
       let retryCount = 0;
       const maxRetries = 3;
 
       while (retryCount < maxRetries) {
         try {
           await client.connect("ws://localhost:1235");
-          break; // 连接成功，退出重试循环
+          break; // Connection successful, exit retry loop
         } catch (error) {
           retryCount++;
           console.error(
-            `❌ [OT] 连接失败 (${retryCount}/${maxRetries}):`,
+            `❌ [OT] Connection failed (${retryCount}/${maxRetries}):`,
             error
           );
 
           if (retryCount < maxRetries) {
-            const retryDelay = 1000 * retryCount; // 递增延迟
-            console.log(`🔄 [OT] ${retryDelay}ms后重试连接...`);
+            const retryDelay = 1000 * retryCount; // Incremental delay
+            console.log(`🔄 [OT] Retrying connection in ${retryDelay}ms...`);
             await new Promise((resolve) => setTimeout(resolve, retryDelay));
           } else {
-            console.error("❌ [OT] 连接失败，已达到最大重试次数");
+            console.error(
+              "❌ [OT] Connection failed, reached maximum retry attempts"
+            );
             setIsConnected(false);
           }
         }
       }
 
-      // 创建ProseMirror编辑器
+      // Create ProseMirror editor
       createProseMirrorEditor(client);
     } catch (error) {
-      console.error("❌ [OT] 编辑器初始化失败:", error);
+      console.error("❌ [OT] Editor initialization failed:", error);
       setIsConnected(false);
     }
   };
 
   const handleStorageChange = (event) => {
     if (event.key && event.key.startsWith("ot_user_")) {
-      // 其他窗口的用户状态变化
+      // User state changes from other windows
       try {
         if (event.newValue) {
           const userInfo = JSON.parse(event.newValue);
-          console.log("👥 [OT] 检测到其他窗口用户:", userInfo);
+          console.log("👥 [OT] Detected user from other window:", userInfo);
 
           setUserStates((prev) => {
             const newStates = new Map(prev);
@@ -232,9 +239,9 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             return newStates;
           });
         } else if (event.oldValue) {
-          // 用户离开
+          // User left
           const oldUserInfo = JSON.parse(event.oldValue);
-          console.log("👋 [OT] 用户离开:", oldUserInfo);
+          console.log("👋 [OT] User left:", oldUserInfo);
 
           setUserStates((prev) => {
             const newStates = new Map(prev);
@@ -243,23 +250,23 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           });
         }
       } catch (error) {
-        console.warn("[OT] 处理用户状态变化失败:", error);
+        console.warn("[OT] Failed to handle user state change:", error);
       }
     }
   };
 
   const cleanupExpiredUsers = () => {
     const now = Date.now();
-    const expireTime = 10000; // 10秒过期
+    const expireTime = 10000; // 10 seconds expiration
 
-    // 清理localStorage中的过期用户
+    // Clean expired users from localStorage
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith("ot_user_")) {
         try {
           const userInfo = JSON.parse(localStorage.getItem(key));
           if (now - userInfo.lastSeen > expireTime) {
             localStorage.removeItem(key);
-            console.log("🗑️ [OT] 清理过期用户:", userInfo.name);
+            console.log("🗑️ [OT] Cleaning expired user:", userInfo.name);
           }
         } catch (error) {
           localStorage.removeItem(key);
@@ -267,7 +274,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       }
     });
 
-    // 更新本地状态
+    // Update local state
     setUserStates((prev) => {
       const newStates = new Map();
       prev.forEach((user, clientId) => {
@@ -285,7 +292,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       if (clientId) {
         const userKey = `ot_user_${clientId}`;
         localStorage.removeItem(userKey);
-        console.log("🧹 [OT] 清理用户状态");
+        console.log("🧹 [OT] Cleaning user state");
       }
     }
   };
@@ -293,16 +300,16 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
   const createProseMirrorEditor = (client) => {
     if (!editorRef.current || viewRef.current) return;
 
-    console.log("📝 [OT] 创建ProseMirror编辑器");
+    console.log("📝 [OT] Creating ProseMirror editor");
 
     try {
-      // 创建空的初始文档
+      // Create empty initial document
       const initialDoc = schema.nodes.doc.create(
         null,
         schema.nodes.paragraph.create()
       );
 
-      // 创建编辑器状态
+      // Create editor state
       const state = EditorState.create({
         schema,
         doc: initialDoc,
@@ -314,30 +321,30 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         ],
       });
 
-      // 创建编辑器视图
+      // Create editor view
       const view = new EditorView(editorRef.current, {
         state,
         dispatchTransaction(tr) {
           if (!viewRef.current) return;
 
           try {
-            // 检查是否是从OT同步的事务
+            // Check if transaction is from OT sync
             if (tr.getMeta("fromOT")) {
               const newState = viewRef.current.state.apply(tr);
               viewRef.current.updateState(newState);
               return;
             }
 
-            // 应用用户输入
+            // Apply user input
             const newState = viewRef.current.state.apply(tr);
             viewRef.current.updateState(newState);
 
-            // 处理用户操作，转换为OT操作
+            // Process user operations, convert to OT operations
             if (tr.docChanged && client && client.isConnected) {
               processUserOperations(tr, client);
             }
           } catch (error) {
-            console.error("[OT] 处理编辑器事务失败:", error);
+            console.error("[OT] Failed to process editor transaction:", error);
           }
         },
       });
@@ -345,20 +352,20 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       viewRef.current = view;
       setEditorView(view);
 
-      console.log("✅ [OT] ProseMirror编辑器创建成功");
+      console.log("✅ [OT] ProseMirror editor created successfully");
     } catch (error) {
-      console.error("❌ [OT] 创建ProseMirror编辑器失败:", error);
+      console.error("❌ [OT] Failed to create ProseMirror editor:", error);
     }
   };
 
   const processUserOperations = (tr, client) => {
     try {
-      // 🔥 新增：获取当前文档状态信息
+      // 🔥 New: Get current document state info
       const currentDoc = viewRef.current.state.doc;
       const currentLength = currentDoc.textContent.length;
       const currentContent = currentDoc.textContent;
 
-      console.log("🔥 [OT] 处理用户操作", {
+      console.log("🔥 [OT] Processing user operations", {
         docChanged: tr.docChanged,
         steps: tr.steps.length,
         isConnected: client.isConnected,
@@ -373,46 +380,46 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         return;
       }
 
-      // 处理每个步骤
+      // Handle each step
       tr.steps.forEach((step, index) => {
-        console.log(`🔥 [OT] 处理步骤 ${index}:`, {
+        console.log(`🔥 [OT] Processing step ${index}:`, {
           stepType: step.constructor.name,
           from: step.from,
           to: step.to,
         });
 
         if (step.slice && step.slice.content.size > 0) {
-          // 插入操作 - 支持富文本格式
-          console.log(`🔤 [OT] 处理插入操作在位置 ${step.from}`);
+          // Insert operation - support rich text format
+          console.log(`🔤 [OT] Processing insert operation at position ${step.from}`);
 
-          // 🔥 修复：验证插入位置的有效性
+          // 🔥 Fix: Validate insertion position validity
           const insertPos = step.from;
           const docSize = currentDoc.content.size;
 
           if (insertPos > docSize) {
             console.error(
-              `❌ [OT] 插入位置超出文档范围: ${insertPos} > ${docSize}，跳过操作`
+              `❌ [OT] Insert position exceeds document range: ${insertPos} > ${docSize}, skipping operation`
             );
-            return; // 跳过无效操作
+            return; // Skip invalid operation
           }
 
-          // 🔥 修复：动态调整 retain 位置，基于当前文档的真实长度
+          // 🔥 Fix: Dynamically adjust retain position based on current document's real length
           const actualRetain = Math.min(insertPos, docSize);
 
-          // 构建标准的Delta操作格式（直接发送操作数组，不包装在ops对象中）
+          // Build standard Delta operation format (send operation array directly, not wrapped in ops object)
           const deltaOps = [];
           if (actualRetain > 0) {
             deltaOps.push({ retain: actualRetain });
           }
 
-          // 处理富文本格式 - 提取文本和格式信息
+          // Handle rich text formatting - extract text and format info
           step.slice.content.forEach((node) => {
             if (node.isText) {
               const text = node.text;
               const marks = node.marks || [];
 
               if (marks.length > 0) {
-                // 有格式的文本
+                // Formatted text
                 const attributes = {};
 
                 marks.forEach((mark) => {
@@ -423,25 +430,25 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
                     case "em":
                       attributes.italic = true;
                       break;
-                    // 可以添加更多格式
+                    // Can add more formats
                   }
                 });
 
-                // rich-text格式：{insert: text, attributes: {...}}
+                // rich-text format: {insert: text, attributes: {...}}
                 deltaOps.push({ insert: text, attributes });
-                console.log(`📝 [OT] 插入格式化文本: "${text}"`, attributes);
+                console.log(`📝 [OT] Inserting formatted text: "${text}"`, attributes);
               } else {
-                // 纯文本
+                // Plain text
                 deltaOps.push({ insert: text });
-                console.log(`📝 [OT] 插入纯文本: "${text}"`);
+                console.log(`📝 [OT] Inserting plain text: "${text}"`);
               }
             }
           });
 
-          // ShareDB rich-text期望直接的Delta数组，不是{ops: [...]}格式
+          // ShareDB rich-text expects direct Delta array, not {ops: [...]} format
           const op = deltaOps;
 
-          console.log("🔍 [DEBUG] 准备提交的操作:", {
+          console.log("🔍 [DEBUG] Prepared operation for submission:", {
             isArray: Array.isArray(op),
             opType: typeof op,
             op: op,
@@ -450,39 +457,39 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
 
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 富文本插入操作提交成功");
+            console.log("✅ [OT] Rich text insert operation submitted successfully");
           } catch (error) {
-            console.error("❌ [OT] 富文本插入操作提交失败:", error);
+            console.error("❌ [OT] Rich text insert operation submission failed:", error);
           }
         } else if (step.from !== step.to && step.slice?.content.size === 0) {
-          // 删除操作
+          // Delete operation
           const deleteLength = step.to - step.from;
           console.log(
-            `🗑️ [OT] 删除 ${deleteLength} 个字符，从位置 ${step.from}`
+            `🗑️ [OT] Deleting ${deleteLength} characters from position ${step.from}`
           );
 
-          // 构建标准的Delta删除操作格式
+          // Build standard Delta delete operation format
           const deltaOps = [];
           if (step.from > 0) {
             deltaOps.push({ retain: step.from });
           }
           deltaOps.push({ delete: deleteLength });
 
-          // ShareDB rich-text期望直接的Delta数组
+          // ShareDB rich-text expects direct Delta array
           const op = deltaOps;
 
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 删除操作提交成功");
+            console.log("✅ [OT] Delete operation submitted successfully");
           } catch (error) {
-            console.error("❌ [OT] 删除操作提交失败:", error);
+            console.error("❌ [OT] Delete operation submission failed:", error);
           }
         } else if (step.constructor.name === "AddMarkStep") {
-          // 添加格式（如加粗、斜体等）
+          // Add formatting (like bold, italic, etc.)
           const { from, to, mark } = step;
 
-          // 🔧 修复：在多窗口环境下更精确的位置计算
-          // 确保位置基于最新的文档状态
+          // 🔧 Fix: More precise position calculation in multi-window environment
+          // Ensure position is based on latest document state
           const currentDoc = viewRef.current.state.doc;
           const actualFrom = Math.max(
             0,
@@ -509,37 +516,37 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           }
 
           if (Object.keys(attrs).length === 0) {
-            // 不支持的格式，跳过
+            // Unsupported format, skip
             return;
           }
 
-          // 🔥 修复：使用标准的Delta格式，不添加额外属性
+          // 🔥 Fix: Use standard Delta format, don't add extra properties
           const retainLength = actualTo - actualFrom;
           if (retainLength > 0) {
             deltaOps.push({
               retain: retainLength,
-              attributes: attrs, // 只保留标准的attributes
+              attributes: attrs, // Only keep standard attributes
             });
           }
 
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 格式添加操作提交成功 (多窗口优化)", {
+            console.log("✅ [OT] Format add operation submitted successfully (multi-window optimized)", {
               from: actualFrom,
               to: actualTo,
               markType: mark.type.name,
               op,
             });
           } catch (error) {
-            console.error("❌ [OT] 格式添加操作提交失败:", error);
+            console.error("❌ [OT] Format add operation submission failed:", error);
           }
         } else if (step.constructor.name === "RemoveMarkStep") {
-          // 移除格式
+          // Remove formatting
           const { from, to, mark } = step;
 
-          // 🔧 修复：在多窗口环境下更精确的位置计算
-          // 确保位置基于最新的文档状态
+          // 🔧 Fix: More precise position calculation in multi-window environment
+          // Ensure position is based on latest document state
           const currentDoc = viewRef.current.state.doc;
           const actualFrom = Math.max(
             0,
@@ -569,45 +576,45 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             return;
           }
 
-          // 🔥 修复：使用标准的Delta格式，不添加额外属性
+          // 🔥 Fix: Use standard Delta format, don't add extra properties
           const retainLength = actualTo - actualFrom;
           if (retainLength > 0) {
             deltaOps.push({
               retain: retainLength,
-              attributes: attrs, // 只保留标准的attributes
+              attributes: attrs, // Only keep standard attributes
             });
           }
 
           const op = deltaOps;
           try {
             client.submitOperation(collection, docId, op);
-            console.log("✅ [OT] 格式移除操作提交成功 (多窗口优化)", {
+            console.log("✅ [OT] Format remove operation submitted successfully (multi-window optimized)", {
               from: actualFrom,
               to: actualTo,
               markType: mark.type.name,
               op,
             });
           } catch (error) {
-            console.error("❌ [OT] 格式移除操作提交失败:", error);
+            console.error("❌ [OT] Format remove operation submission failed:", error);
           }
         }
       });
     } catch (error) {
-      console.error("❌ [OT] processUserOperations 失败:", error);
+      console.error("❌ [OT] processUserOperations failed:", error);
     }
   };
 
-  // 重建ShareDB文档内容的辅助函数
+  // Helper function to rebuild ShareDB document content
   const reconstructDocumentFromShareDB = (shareDBData) => {
     try {
-      console.log("🔧 [OT] 开始重建ShareDB文档:", shareDBData);
+      console.log("🔧 [OT] Starting to rebuild ShareDB document:", shareDBData);
 
       if (!shareDBData) {
-        console.log("📄 [OT] ShareDB数据为空");
+        console.log("📄 [OT] ShareDB data is empty");
         return [];
       }
 
-      // ShareDB rich-text 文档的 data 字段包含 ops 数组
+      // ShareDB rich-text document's data field contains ops array
       let operations = [];
 
       if (Array.isArray(shareDBData)) {
@@ -615,16 +622,16 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
       } else if (shareDBData.ops && Array.isArray(shareDBData.ops)) {
         operations = shareDBData.ops;
       } else if (shareDBData && typeof shareDBData === "object") {
-        // 如果直接就是操作对象，包装成数组
+        // If it's directly an operation object, wrap in array
         operations = [shareDBData];
       }
 
-      console.log(`🔧 [OT] 找到 ${operations.length} 个操作`);
+      console.log(`🔧 [OT] Found ${operations.length} operations`);
 
       const textNodes = [];
 
       operations.forEach((op, index) => {
-        console.log(`🔧 [OT] 处理操作 ${index}:`, op);
+        console.log(`🔧 [OT] Handle operation ${index}:`, op);
 
         if (op && typeof op === "object") {
           if (
@@ -632,7 +639,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             typeof op.insert === "string" &&
             op.insert.length > 0
           ) {
-            // 插入文本操作
+            // Insert text operation
             const text = op.insert;
             const attributes = op.attributes || {};
 
@@ -641,25 +648,25 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             if (attributes.italic) marks.push(schema.marks.em.create());
 
             textNodes.push(schema.text(text, marks));
-            console.log(`📝 [OT] 添加文本节点: "${text}"`, attributes);
+            console.log(`📝 [OT] Adding text node: "${text}"`, attributes);
           } else if (op.retain) {
-            // 保留操作 - 在文档重建时通常忽略
-            console.log(`📍 [OT] 跳过保留操作: ${op.retain}`);
+            // Retain operation - usually ignored during document rebuild
+            console.log(`📍 [OT] Skipping retain operation: ${op.retain}`);
           } else if (op.delete) {
-            // 删除操作 - 在文档重建时忽略
-            console.log(`🗑️ [OT] 跳过删除操作: ${op.delete}`);
+            // Delete operation - Ignore during document rebuild
+            console.log(`🗑️ [OT] Skipping delete operation: ${op.delete}`);
           }
         } else if (typeof op === "string" && op.length > 0) {
-          // 纯文本
+          // Plain text
           textNodes.push(schema.text(op));
-          console.log(`📝 [OT] 添加纯文本: "${op}"`);
+          console.log(`📝 [OT] Adding plain text: "${op}"`);
         }
       });
 
-      console.log(`✅ [OT] 重建完成，生成了 ${textNodes.length} 个文本节点`);
+      console.log(`✅ [OT] Rebuild completed, generated ${textNodes.length} text nodes`);
       return textNodes;
     } catch (error) {
-      console.error("❌ [OT] 重建ShareDB文档失败:", error);
+      console.error("❌ [OT] Failed to rebuild ShareDB document:", error);
       return [];
     }
   };
@@ -668,13 +675,13 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
     if (!viewRef.current || !data) return;
 
     try {
-      console.log("🔄 [OT] 从OT更新编辑器", data);
+      console.log("🔄 [OT] Updating editor from OT", data);
 
-      // 🔥 修复：检查是否是自己发送的操作
+      // 🔥 Fix: Check if operation was sent by self
       if (data._clientId) {
         const clientId = otClientRef.current?.connectionId;
         if (data._clientId === clientId) {
-          console.log("🔄 [OT] 跳过自己发送的操作 (编辑器层)", {
+          console.log("🔄 [OT] Skipping self-sent operation (editor layer)", {
             messageClientId: data._clientId,
             myClientId: clientId,
             messageId: data._messageId,
@@ -683,41 +690,41 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
         }
       }
 
-      // 处理操作类型的数据
+      // Handle operation type data
       if (data.op) {
-        console.log("⚡ [OT] 处理操作更新:", data.op);
+        console.log("⚡ [OT] Handle operation update:", data.op);
 
-        // 应用rich-text格式的OT操作到编辑器
+        // Apply rich-text formatted OT operations to editor
         const tr = viewRef.current.state.tr.setMeta("fromOT", true);
         let pos = 0;
 
-        // ShareDB rich-text返回的是标准Delta数组格式：
-        // - {retain: number}: 保留字符数
-        // - {insert: text, attributes?: {}}: 插入文本
-        // - {delete: number}: 删除字符数
-        // data.op直接就是Delta数组
+        // ShareDB rich-text returns standard Delta array format:
+        // - {retain: number}: retain character count
+        // - {insert: text, attributes?: {}}: insert text
+        // - {delete: number}: delete character count
+        // data.op is directly a Delta array
         const ops = Array.isArray(data.op) ? data.op : [data.op];
         ops.forEach((op, index) => {
-          console.log(`🔧 [OT] 处理操作 ${index}:`, op);
+          console.log(`🔧 [OT] Handle operation ${index}:`, op);
 
           if (op.retain) {
-            // 保留操作 - 移动位置
+            // Retain operation - move position
             pos += op.retain;
-            console.log(`📍 [OT] 保留 ${op.retain} 个字符，位置移动到 ${pos}`);
-            // 处理格式属性变化
+            console.log(`📍 [OT] Retaining ${op.retain} characters, position moved to ${pos}`);
+            // Handle format attribute changes
             if (op.attributes) {
               const start = pos - op.retain;
               const end = pos;
               const { bold, italic } = op.attributes;
 
-              // 🔧 修复：多窗口环境下的格式同步优化
-              // 确保位置边界正确性
+              // 🔧 Fix: format sync optimization in multi-window environment
+              // Ensure position boundary correctness
               const docSize = viewRef.current.state.doc.content.size;
               const actualStart = Math.max(0, Math.min(start, docSize));
               const actualEnd = Math.max(actualStart, Math.min(end, docSize));
 
               console.log(
-                `🎨 [OT] 应用格式属性变化: [${actualStart}, ${actualEnd}]`,
+                `🎨 [OT] Applying format attribute changes: [${actualStart}, ${actualEnd}]`,
                 op.attributes
               );
 
@@ -729,12 +736,12 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
                     schema.marks.bold.create()
                   );
                   console.log(
-                    `✅ [OT] 添加粗体格式: [${actualStart}, ${actualEnd}]`
+                    `✅ [OT] Adding bold format: [${actualStart}, ${actualEnd}]`
                   );
                 } else {
                   tr.removeMark(actualStart, actualEnd, schema.marks.bold);
                   console.log(
-                    `❌ [OT] 移除粗体格式: [${actualStart}, ${actualEnd}]`
+                    `❌ [OT] Removing bold format: [${actualStart}, ${actualEnd}]`
                   );
                 }
               }
@@ -742,23 +749,23 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
                 if (italic) {
                   tr.addMark(actualStart, actualEnd, schema.marks.em.create());
                   console.log(
-                    `✅ [OT] 添加斜体格式: [${actualStart}, ${actualEnd}]`
+                    `✅ [OT] Adding italic format: [${actualStart}, ${actualEnd}]`
                   );
                 } else {
                   tr.removeMark(actualStart, actualEnd, schema.marks.em);
                   console.log(
-                    `❌ [OT] 移除斜体格式: [${actualStart}, ${actualEnd}]`
+                    `❌ [OT] Removing italic format: [${actualStart}, ${actualEnd}]`
                   );
                 }
               }
             }
           } else if (op && typeof op === "object" && op.insert) {
-            // 插入带格式的文本
+            // Insert formatted text
             const text = op.insert;
             const attributes = op.attributes || {};
 
             console.log(
-              `➕ [OT] 在位置 ${pos} 插入格式化文本: "${text}"`,
+              `➕ [OT] At position ${pos} inserting formatted text: "${text}"`,
               attributes
             );
 
@@ -767,7 +774,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               pos >= 0 &&
               pos <= viewRef.current.state.doc.content.size
             ) {
-              // 创建带格式的文本节点
+              // Create formatted text node
               const marks = [];
 
               if (attributes.bold) {
@@ -777,7 +784,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
                 marks.push(schema.marks.em.create());
               }
 
-              // 插入带格式的文本
+              // Insert formatted text
               if (marks.length > 0) {
                 const textNode = schema.text(text, marks);
                 tr.insert(pos, textNode);
@@ -788,9 +795,9 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               pos += text.length;
             }
           } else if (op.delete) {
-            // 删除操作
+            // Delete operation
             const deleteLength = op.delete;
-            console.log(`➖ [OT] 从位置 ${pos} 删除 ${deleteLength} 个字符`);
+            console.log(`➖ [OT] From position ${pos} deleting ${deleteLength} characters`);
 
             if (
               deleteLength > 0 &&
@@ -802,31 +809,31 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           }
         });
 
-        // 只有当事务确实改变了文档时才分发
+        // Only dispatch when transaction actually changed document
         if (tr.docChanged) {
-          console.log("✅ [OT] 应用操作更新到编辑器");
+          console.log("✅ [OT] Applied operation update to editor");
           viewRef.current.dispatch(tr);
         } else {
-          console.log("ℹ️ [OT] 操作未改变文档内容");
+          console.log("ℹ️ [OT] Operation did not change document content");
         }
       }
 
-      // 处理文档状态类型的数据
+      // Handle document state type data
       else if (data.data !== undefined) {
-        console.log("📄 [OT] 处理文档状态更新:", data.data);
+        console.log("📄 [OT] Processing document state update:", data.data);
         console.log(
-          "📄 [OT] 数据类型:",
+          "📄 [OT] Data type:",
           typeof data.data,
-          "是否为数组:",
+          "is array:",
           Array.isArray(data.data)
         );
 
-        // 🔥 新增：检测文档状态不一致
+        // 🔥 New: Detect document state inconsistency
         const currentContent = viewRef.current.state.doc.textContent;
         const expectedContent = extractTextFromShareDBData(data.data);
 
         if (currentContent !== expectedContent) {
-          console.warn("⚠️ [OT] 检测到文档状态不一致", {
+          console.warn("⚠️ [OT] Detected document state inconsistency", {
             current: currentContent.length,
             expected: expectedContent.length,
             currentPreview: currentContent.substring(0, 50),
@@ -835,27 +842,27 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
               Math.abs(currentContent.length - expectedContent.length) > 5,
           });
 
-          // 如果差异较大，强制重建文档
+          // If difference is large, force rebuild document
           if (Math.abs(currentContent.length - expectedContent.length) > 5) {
-            console.log("🔄 [OT] 差异较大，强制重建文档");
+            console.log("🔄 [OT] Large difference, force rebuilding document");
             forceDocumentRebuild(data.data);
             return;
           }
         }
 
-        // 尝试重建文档内容
+        // Try to rebuild document content
         const reconstructedContent = reconstructDocumentFromShareDB(data.data);
 
         if (reconstructedContent && reconstructedContent.length > 0) {
-          console.log("🔄 [OT] 重建的文档内容:", reconstructedContent);
+          console.log("🔄 [OT] Rebuilt document content:", reconstructedContent);
 
-          // 创建包含重建内容的新文档
+          // Create new document containing rebuilt content
           const newDoc = schema.nodes.doc.create(
             null,
             schema.nodes.paragraph.create(null, reconstructedContent)
           );
 
-          // 应用到编辑器
+          // Apply to editor
           const tr = viewRef.current.state.tr
             .setMeta("fromOT", true)
             .replaceWith(
@@ -865,25 +872,25 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
             );
 
           viewRef.current.dispatch(tr);
-          console.log("✅ [OT] 文档内容重建完成");
+          console.log("✅ [OT] Document content rebuild completed");
 
-          // 计算重建的文本内容用于日志
+          // Calculate rebuilt text content for logging
           const reconstructedText = reconstructedContent
             .map((node) => node.textContent || node.text || "")
             .join("");
-          console.log(`📄 [OT] 重建的文本内容: "${reconstructedText}"`);
+          console.log(`📄 [OT] Rebuilt text content: "${reconstructedText}"`);
         } else {
-          console.log("ℹ️ [OT] 无法重建文档内容或内容为空");
+          console.log("ℹ️ [OT] Unable to rebuild document content or content is empty");
         }
       } else {
-        console.log("⚠️ [OT] 未知的数据格式:", data);
+        console.log("⚠️ [OT] Unknown data format:", data);
       }
     } catch (error) {
-      console.error("[OT] 从OT更新编辑器失败:", error);
+      console.error("[OT] Failed to update editor from OT:", error);
     }
   };
 
-  // 🔥 新增：从ShareDB数据中提取纯文本内容
+  // 🔥 New: Extract plain text content from ShareDB data
   const extractTextFromShareDBData = (shareDBData) => {
     try {
       let operations = [];
@@ -912,15 +919,15 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
 
       return text;
     } catch (error) {
-      console.error("❌ [OT] 提取文本内容失败:", error);
+      console.error("❌ [OT] Failed to extract text content:", error);
       return "";
     }
   };
 
-  // 🔥 新增：强制重建文档
+  // 🔥 New: Force rebuild document
   const forceDocumentRebuild = (shareDBData) => {
     try {
-      console.log("🔄 [OT] 开始强制重建文档状态");
+      console.log("🔄 [OT] Starting to force rebuild document state");
 
       const reconstructedContent = reconstructDocumentFromShareDB(shareDBData);
 
@@ -940,22 +947,22 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
           );
 
         viewRef.current.dispatch(tr);
-        console.log("✅ [OT] 文档状态强制同步完成");
+        console.log("✅ [OT] Document state force sync completed");
 
-        // 计算重建后的文本内容
+        // Calculate text content after rebuild
         const reconstructedText = reconstructedContent
           .map((node) => node.textContent || node.text || "")
           .join("");
-        console.log(`📄 [OT] 重建后的文本内容: "${reconstructedText}"`);
+        console.log(`📄 [OT] Text content after rebuild: "${reconstructedText}"`);
       } else {
-        console.log("ℹ️ [OT] 无法重建文档内容或内容为空");
+        console.log("ℹ️ [OT] Unable to rebuild document content or content is empty");
       }
     } catch (error) {
-      console.error("❌ [OT] 强制重建文档失败:", error);
+      console.error("❌ [OT] Failed to force rebuild document:", error);
     }
   };
 
-  // 获取协作状态
+  // Get collaboration state
   const getCollaborationState = () => {
     return {
       userStates: Array.from(userStates.values()),
@@ -963,15 +970,15 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
     };
   };
 
-  // 提供重连功能
+  // Provide reconnection functionality
   const reconnect = () => {
     if (otClientRef.current) {
-      console.log("🔄 [OT] 手动重连OT服务器");
+      console.log("🔄 [OT] Manually reconnecting to OT server");
       otClientRef.current.reconnect();
     }
   };
 
-  // 清理函数
+  // Cleanup function
   const cleanup = () => {
     window.removeEventListener("storage", handleStorageChange);
     if (window.otSyncInterval) {
@@ -981,7 +988,7 @@ export function useOTEditor(docId, collection = "documents", editorRef) {
     clearUserState();
   };
 
-  // 页面卸载时清理
+  // Cleanup when page unloads
   useEffect(() => {
     const handleBeforeUnload = () => {
       clearUserState();

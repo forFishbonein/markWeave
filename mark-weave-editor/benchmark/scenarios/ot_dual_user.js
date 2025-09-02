@@ -2,12 +2,12 @@ const { chromium } = require("playwright");
 const fs = require("fs");
 const path = require("path");
 
-// 配置
+// Configuration
 const BASE_URL = "http://localhost:3000";
 const LOGIN_URL = `${BASE_URL}/login`;
 const OT_URL = `${BASE_URL}/performance-lab-ot`;
 
-// 用户配置
+// User configuration
 const USERS = [
   { email: "haowhenhai@163.com", password: "123456" },
   { email: "haowhenhai@gmail.com", password: "123456" },
@@ -15,28 +15,28 @@ const USERS = [
 
 const EDITOR_SELECTOR = 'div[placeholder*="content"]';
 
-// 基准测试配置
+// Benchmark test configuration
 const BENCHMARKS = {
   benchmark1: {
-    name: "Basic Concurrent Input", // 基础并发输入测试
+    name: "Basic Concurrent Input", // Basic concurrent input test
     userA: "AAAAAAA",
     userB: "BBBBBBB",
     description:
-      "The most basic concurrent input; tests core OT conflict resolution.", // 最基础的并发输入，测试OT核心冲突解决能力
+      "The most basic concurrent input; tests core OT conflict resolution.", // Most basic concurrent input, tests core OT conflict resolution capability
     testType: "concurrent_input",
   },
   benchmark2: {
-    name: "Long Text Collaboration", // 长文本协作测试
+    name: "Long Text Collaboration", // Long text collaboration test
     userA:
       "This is a longer text that simulates real document editing. It contains multiple sentences and should test the system's ability to handle continuous input from multiple users.",
     userB:
       "Meanwhile, another user is also editing the same document. This creates a realistic collaborative editing scenario where multiple people work on the same content simultaneously.",
     description:
-      "Continuous long-text input; tests sustained performance and stability.", // 长文本连续输入，测试持续性能和稳定性
+      "Continuous long-text input; tests sustained performance and stability.", // Continuous long-text input, tests sustained performance and stability
     testType: "long_text_collaboration",
   },
   benchmark3: {
-    name: "Rich-text Formatting Collaboration", // 富文本格式协作测试
+    name: "Rich-text Formatting Collaboration", // Rich-text formatting collaboration test
     userA: {
       insertText: "Hello world! This is user A's content.",
       formatTarget: "Hello world!",
@@ -48,11 +48,11 @@ const BENCHMARKS = {
       format: "italic",
     },
     description:
-      "Different users insert different text but apply styles to the same span.", // 不同用户插入不同文本，但对同一段文本应用格式
+      "Different users insert different text but apply styles to the same span.", // Different users insert different text but apply styles to the same span
     testType: "text_format_collaboration",
   },
   benchmark4: {
-    name: "Format Range Overlap", // 格式范围重叠测试
+    name: "Format Range Overlap", // Format range overlap test
     userA: {
       insertText: "This is a shared document for collaborative testing.",
       formatTarget: "shared document",
@@ -63,29 +63,29 @@ const BENCHMARKS = {
       formatTarget: "document for collaborative",
       format: "bold",
     },
-    description: "Both users apply bold with overlapping selection ranges.", // 两个用户都做 bold 操作，但选中的文本范围有重叠
+    description: "Both users apply bold with overlapping selection ranges.", // Both users apply bold operations with overlapping selection ranges
     testType: "format_range_overlap",
   },
 };
 
-// 支持运行所有基准或指定基准
+// Support running all benchmarks or specified benchmark
 const RUN_ALL_BENCHMARKS = process.argv[2] === "all";
 const CURRENT_BENCHMARK = process.argv[2] || "benchmark1";
 
 /**
- * 登录并进入OT编辑器
+ * Login and enter OT editor
  */
 async function loginAndGotoOT(page, { email, password }, userLabel) {
   console.log(`[${userLabel}] goto login`);
 
-  // 重试机制
+  // Retry mechanism
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      console.log(`[${userLabel}] 第 ${attempt} 次登录尝试...`);
+      console.log(`[${userLabel}] Attempt ${attempt} login attempt...`);
 
       await page.goto(LOGIN_URL, { waitUntil: "networkidle" });
 
-      // 用 id 选择器等待和输入
+      // Use id selector to wait and input
       await page.waitForSelector("input#email", {
         timeout: 30000,
         state: "attached",
@@ -98,36 +98,36 @@ async function loginAndGotoOT(page, { email, password }, userLabel) {
 
       await page.click('button[type="submit"]');
 
-      // 等待 URL 变化到 /home
+      // Wait for URL change to /home
       await page.waitForURL("**/home", { timeout: 10000 });
       console.log(`[${userLabel}] login success, goto OT`);
       await page.goto(OT_URL, { waitUntil: "networkidle" });
       await page.waitForSelector(EDITOR_SELECTOR, { timeout: 15000 });
       console.log(`[${userLabel}] editor loaded`);
 
-      // 检查页面标题和URL，确认我们在正确的页面上
+      // Check page title and URL to confirm we're on the correct page
       const pageTitle = await page.title();
       const currentUrl = await page.url();
-      console.log(`[${userLabel}] 页面标题: ${pageTitle}`);
-      console.log(`[${userLabel}] 当前URL: ${currentUrl}`);
+      console.log(`[${userLabel}] Page title: ${pageTitle}`);
+      console.log(`[${userLabel}] Current URL: ${currentUrl}`);
 
-      // 等待OT客户端和监控器初始化（不要求连接状态）
-      console.log(`⏳ 等待用户 ${email} 的OT客户端初始化...`);
+      // Wait for OT client and monitor initialization (connection status not required)
+      console.log(`⏳ Waiting for user ${email} 's OT client initialization...`);
 
-      // 先检查页面上的元素
+      // First check elements on page
       const editorExists = await page.evaluate(() => {
         const editor = document.querySelector(".ProseMirror");
         const hasClient = !!window.otClient;
         const hasMonitor = !!window.otMonitor;
         const isReady = !!window.otReady;
 
-        // 检查React组件是否正确渲染
+        // Check if React components are correctly rendered
         const otComponent =
           document.querySelector('[data-testid="ot-editor"]') ||
           document.querySelector(".ant-card") ||
           document.querySelector('[class*="OT"]');
 
-        console.log("🔍 页面检查:", {
+        console.log("🔍 Page check:", {
           editorExists: !!editor,
           hasClient,
           hasMonitor,
@@ -146,67 +146,67 @@ async function loginAndGotoOT(page, { email, password }, userLabel) {
         };
       });
 
-      console.log("📊 页面状态:", editorExists);
+      console.log("📊 Page status:", editorExists);
 
-      // 等待OT客户端ready状态
-      console.log("⏳ 等待OT客户端ready状态...");
+      // Wait for OT client ready status
+      console.log("⏳ Waiting for OT client ready status...");
       await page.waitForFunction(
         () => {
           const hasClient = !!window.otClient;
           const hasMonitor = !!window.otMonitor;
           const isReady = !!window.otReady;
-          console.log("🔍 检查OT客户端状态:", {
+          console.log("🔍 Checking OT client status:", {
             hasClient,
             hasMonitor,
             isReady,
           });
-          return hasClient && isReady; // 要求客户端存在且ready
+          return hasClient && isReady; // Require client exists and ready
         },
         { timeout: 15000 }
       );
 
-      console.log(`✅ 用户 ${email} 已进入OT编辑器`);
-      return; // 成功，退出重试循环
+      console.log(`✅ User ${email} has entered OT editor`);
+      return; // Success, exit retry loop
     } catch (error) {
       console.log(
-        `❌ [${userLabel}] 第 ${attempt} 次登录尝试失败: ${error.message}`
+        `❌ [${userLabel}] Attempt ${attempt} login attempt failed: ${error.message}`
       );
 
       if (attempt === 3) {
-        // 最后一次尝试失败，抛出错误
+        // Last attempt failed, throw error
         throw error;
       }
 
-      // 等待后重试
-      console.log(`🔄 [${userLabel}] 等待 2 秒后重试...`);
+      // Wait then retry
+      console.log(`🔄 [${userLabel}] Waiting 2 seconds before retry...`);
       await new Promise((res) => setTimeout(res, 2000));
     }
   }
 }
 
 /**
- * 清空编辑器内容
+ * Clear editor content
  */
 async function clearEditor(page) {
-  console.log("🧹 清空编辑器内容");
+  console.log("🧹 Clearing editor content");
 
   await page.evaluate(() => {
     const editor = document.querySelector(".ProseMirror");
     if (editor) {
       editor.innerHTML = "<p><br></p>";
-      // 触发变化事件
+      // Trigger change event
       const event = new Event("input", { bubbles: true });
       editor.dispatchEvent(event);
     }
   });
 
-  console.log("✅ 编辑器内容已清空");
+  console.log("✅ Editor content cleared");
 
-  // 等待组件重新挂载
-  console.log("🔧 等待组件重新挂载...");
+  // Wait for component remount
+  console.log("🔧 Waiting for component remount...");
   await page.waitForTimeout(1000);
 
-  // 恢复检查
+  // Recovery check
   const recoveryCheck = await page.evaluate(() => {
     return {
       hasOtClient: !!window.otClient,
@@ -215,19 +215,19 @@ async function clearEditor(page) {
     };
   });
 
-  console.log("📊 恢复检查:", recoveryCheck);
+  console.log("📊 Recovery check:", recoveryCheck);
 }
 
 /**
- * 执行文本输入测试
+ * Execute text input test
  */
 async function runTextInputTest(pageA, pageB, benchmark) {
-  console.log("📝 执行文本输入测试");
+  console.log("📝 Executing text input test");
 
-  // 确保监控器正在运行
-  console.log("🔧 确保监控器正在运行...");
+  // Ensure monitor is running
+  console.log("🔧 Ensuring monitor is running...");
 
-  // 用户A输入
+  // User A input
   await pageA.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
       window.otMonitor.startMonitoring(window.otClient);
@@ -235,11 +235,11 @@ async function runTextInputTest(pageA, pageB, benchmark) {
   });
 
   await pageA.type(".ProseMirror", benchmark.userA, {
-    delay: 20, // 统一延迟
+    delay: 20, // Unified delay
   });
-  console.log(`✅ 用户A输入完成: "${benchmark.userA}"`);
+  console.log(`✅ User A input completed: "${benchmark.userA}"`);
 
-  // 用户B输入
+  // User B input
   await pageB.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
       window.otMonitor.startMonitoring(window.otClient);
@@ -247,23 +247,23 @@ async function runTextInputTest(pageA, pageB, benchmark) {
   });
 
   await pageB.type(".ProseMirror", benchmark.userB, {
-    delay: 20, // 统一延迟
+    delay: 20, // Unified delay
   });
-  console.log(`✅ 用户B输入完成: "${benchmark.userB}"`);
+  console.log(`✅ User B input completed: "${benchmark.userB}"`);
 
-  // 等待同步
+  // Wait for sync
   await pageA.waitForTimeout(2000);
   await pageB.waitForTimeout(2000);
 }
 
 /**
- * 执行长文本协作测试
+ * Execute long text collaboration test
  */
 async function runLongTextTest(pageA, pageB, benchmark) {
-  console.log("📝 执行长文本协作测试");
+  console.log("📝 Executing long text collaboration test");
 
-  // 确保监控器正在运行
-  console.log("🔧 确保监控器正在运行...");
+  // Ensure monitor is running
+  console.log("🔧 Ensuring monitor is running...");
   await pageA.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
       window.otMonitor.startMonitoring(window.otClient);
@@ -279,7 +279,7 @@ async function runLongTextTest(pageA, pageB, benchmark) {
   const textA = benchmark.userA;
   const textB = benchmark.userB;
 
-  // 每20个字符一段，模拟真实输入
+  // 20 characters per segment, simulate real input
   for (let i = 0; i < textA.length; i += 20) {
     const segmentA = textA.slice(i, i + 20);
     const segmentB = textB.slice(i, i + 20);
@@ -290,19 +290,19 @@ async function runLongTextTest(pageA, pageB, benchmark) {
     ]);
   }
 
-  // 等待同步
+  // Wait for sync
   await pageA.waitForTimeout(2000);
   await pageB.waitForTimeout(2000);
 }
 
 /**
- * 执行格式测试
+ * Execute format test
  */
 async function runFormatTest(pageA, pageB, benchmark) {
-  console.log("📝 执行格式测试");
+  console.log("📝 Executing format test");
 
-  // 确保监控器正在运行
-  console.log("🔧 确保监控器正在运行...");
+  // Ensure monitor is running
+  console.log("🔧 Ensuring monitor is running...");
   await pageA.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
       window.otMonitor.startMonitoring(window.otClient);
@@ -315,72 +315,72 @@ async function runFormatTest(pageA, pageB, benchmark) {
     }
   });
 
-  // 确保编辑器聚焦
+  // Ensure editor is focused
   await pageA.click(EDITOR_SELECTOR);
   await pageB.click(EDITOR_SELECTOR);
   await new Promise((res) => setTimeout(res, 200));
 
-  // 用户A插入文本
+  // User A insert text
   await pageA.keyboard.type(benchmark.userA.insertText, { delay: 20 });
   await new Promise((res) => setTimeout(res, 500));
 
-  // 用户B插入文本
+  // User B insert text
   await pageB.keyboard.type(benchmark.userB.insertText, { delay: 20 });
   await new Promise((res) => setTimeout(res, 500));
 
-  // 等待文本同步
+  // Wait for text sync
   await new Promise((res) => setTimeout(res, 2000));
 
-  // 检查文本是否已插入
+  // Check if text has been inserted
   const textCheck = await pageA.evaluate(() => {
     const editor = document.querySelector(".ProseMirror");
     return editor ? editor.textContent : "";
   });
-  console.log(`📝 当前编辑器内容: "${textCheck}"`);
+  console.log(`📝 Current editor content: "${textCheck}"`);
 
-  // 用户A对目标文本应用格式
+  // User A apply format to target text
   await applyFormatToText(
     pageA,
     benchmark.userA.formatTarget,
     benchmark.userA.format
   );
 
-  // 用户B对目标文本应用格式
+  // User B apply format to target text
   await applyFormatToText(
     pageB,
     benchmark.userB.formatTarget,
     benchmark.userB.format
   );
 
-  // 等待同步
+  // Wait for sync
   await pageA.waitForTimeout(2000);
   await pageB.waitForTimeout(2000);
 }
 
 /**
- * 应用格式到文本
+ * Apply format to text
  */
 async function applyFormatToText(page, targetText, formatType) {
-  console.log(`🔧 尝试应用格式 ${formatType} 到文本: "${targetText}"`);
+  console.log(`🔧 Trying to apply format ${formatType} to text: "${targetText}"`);
 
-  // 重试机制
+  // Retry mechanism
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      console.log(`🔄 第 ${attempt} 次尝试应用格式...`);
+      console.log(`🔄 Attempt ${attempt} trying to apply format...`);
 
-      // 等待一下确保编辑器状态稳定
+      // Wait a bit to ensure editor state is stable
       await new Promise((res) => setTimeout(res, 500));
 
-      // 使用改进的JavaScript直接选择文本
+      // Use improved JavaScript to directly select text
       const selectionResult = await page.evaluate((text) => {
         const editor = document.querySelector(".ProseMirror");
         if (!editor) return { success: false, error: "Editor not found" };
 
-        // 获取纯文本内容
+        // Get plain text content
         const textContent = editor.textContent || "";
-        console.log("当前编辑器文本内容:", textContent);
+        console.log("Current editor text content:", textContent);
 
-        // 查找文本并选择
+        // Find and select text
         const startIndex = textContent.indexOf(text);
         if (startIndex === -1) {
           return {
@@ -392,11 +392,11 @@ async function applyFormatToText(page, targetText, formatType) {
 
         const endIndex = startIndex + text.length;
 
-        // 创建选择范围
+        // Create selection range
         const range = document.createRange();
         const selection = window.getSelection();
 
-        // 改进的文本节点查找逻辑 - 处理跨越多个节点的文本
+        // Improved text node finding logic - handle text spanning multiple nodes
         let currentIndex = 0;
         let startNode = null;
         let startOffset = 0;
@@ -409,13 +409,13 @@ async function applyFormatToText(page, targetText, formatType) {
             const nodeStart = currentIndex;
             const nodeEnd = currentIndex + nodeLength;
 
-            // 检查这个节点是否包含目标文本的起始位置
+            // Check if this node contains target text start position
             if (nodeStart <= startIndex && startIndex < nodeEnd) {
               startNode = node;
               startOffset = startIndex - nodeStart;
             }
 
-            // 检查这个节点是否包含目标文本的结束位置
+            // Check if this node contains target text end position
             if (nodeStart < endIndex && endIndex <= nodeEnd) {
               endNode = node;
               endOffset = endIndex - nodeStart;
@@ -423,17 +423,17 @@ async function applyFormatToText(page, targetText, formatType) {
 
             currentIndex += nodeLength;
           } else {
-            // 递归遍历所有子节点
+            // Recursively traverse all child nodes
             for (const child of node.childNodes) {
               findTextNodes(child);
             }
           }
         }
 
-        // 查找所有相关的文本节点
+        // Find all relevant text nodes
         findTextNodes(editor);
 
-        // 验证是否找到了起始和结束节点
+        // Verify if start and end nodes are found
         if (!startNode) {
           return { success: false, error: "Start node not found" };
         }
@@ -441,7 +441,7 @@ async function applyFormatToText(page, targetText, formatType) {
           return { success: false, error: "End node not found" };
         }
 
-        // 设置选择范围
+        // Set selection range
         try {
           range.setStart(startNode, startOffset);
           range.setEnd(endNode, endOffset);
@@ -459,7 +459,7 @@ async function applyFormatToText(page, targetText, formatType) {
           };
         }
 
-        // 清除现有选择并设置新选择
+        // Clear existing selection and set new selection
         selection.removeAllRanges();
         selection.addRange(range);
 
@@ -467,43 +467,43 @@ async function applyFormatToText(page, targetText, formatType) {
       }, targetText);
 
       if (!selectionResult.success) {
-        console.log(`⚠️ 第 ${attempt} 次尝试失败: ${selectionResult.error}`);
+        console.log(`⚠️ Attempt ${attempt} attempt failed: ${selectionResult.error}`);
         if (selectionResult.availableText) {
-          console.log(`📝 可用文本: "${selectionResult.availableText}"`);
+          console.log(`📝 Available text: "${selectionResult.availableText}"`);
         }
         if (selectionResult.details) {
-          console.log(`🔍 错误详情:`, selectionResult.details);
+          console.log(`🔍 Error details:`, selectionResult.details);
         }
 
-        // 如果是最后一次尝试，返回失败
+        // If it's the last attempt, return failure
         if (attempt === 3) {
           return false;
         }
 
-        // 等待后重试
+        // Wait then retry
         await new Promise((res) => setTimeout(res, 1000));
         continue;
       }
 
-      console.log(`✅ 成功选择文本: "${selectionResult.selectedText}"`);
+      console.log(`✅ Successfully selected text: "${selectionResult.selectedText}"`);
 
-      // 应用格式
+      // Apply format
       switch (formatType) {
         case "bold":
           await page.keyboard.press("Meta+b"); // Command+b on Mac
-          console.log("🔧 应用粗体格式");
+          console.log("🔧 Applying bold format");
           break;
         case "italic":
           await page.keyboard.press("Meta+i"); // Command+i on Mac
-          console.log("🔧 应用斜体格式");
+          console.log("🔧 Applying italic format");
           break;
       }
 
-      // 等待格式应用完成
+      // Wait for format application to complete
       await new Promise((res) => setTimeout(res, 500));
       return true;
     } catch (error) {
-      console.error(`❌ 第 ${attempt} 次尝试应用格式失败: ${error.message}`);
+      console.error(`❌ Attempt ${attempt} failed to apply format: ${error.message}`);
       if (attempt === 3) {
         return false;
       }
@@ -515,43 +515,43 @@ async function applyFormatToText(page, targetText, formatType) {
 }
 
 /**
- * 执行基准测试
+ * Execute benchmark test
  */
 async function runBenchmark(pageA, pageB, benchmarkKey = CURRENT_BENCHMARK) {
   const benchmark = BENCHMARKS[benchmarkKey];
-  console.log(`🚀 开始执行: ${benchmark.name}`);
-  console.log(`📝 测试描述: ${benchmark.description}`);
+  console.log(`🚀 Starting execution: ${benchmark.name}`);
+  console.log(`📝 Test description: ${benchmark.description}`);
 
-  // 确保监控器在测试开始前启动
-  console.log("🔧 确保监控器启动...");
+  // Ensure monitor starts before test begins
+  console.log("🔧 Ensuring monitor startup...");
   await pageA.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
-      console.log("🔧 [用户A] 启动监控器");
+      console.log("🔧 [User A] Starting monitor");
       window.otMonitor.startMonitoring(window.otClient);
     }
   });
 
   await pageB.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
-      console.log("🔧 [用户B] 启动监控器");
+      console.log("🔧 [User B] Starting monitor");
       window.otMonitor.startMonitoring(window.otClient);
     }
   });
 
-  // 等待监控器初始化
+  // Wait for monitor initialization
   await new Promise((res) => setTimeout(res, 1000));
 
-  // 检查页面是否仍然可用
+  // Check if page is still available
   try {
-    // 点击编辑器
+    // Click editor
     await pageA.click(EDITOR_SELECTOR);
     await pageB.click(EDITOR_SELECTOR);
     await new Promise((res) => setTimeout(res, 500));
 
-    // // 清空编辑器内容
-    // console.log("🧹 清空编辑器内容...");
+    // // Clear editor content
+    // console.log("🧹 Clearing editor content...");
 
-    // // 用户A清空内容
+    // // User A clear content
     // await pageA.evaluate(() => {
     //   const editor = document.querySelector(".ProseMirror");
     //   if (editor) {
@@ -561,7 +561,7 @@ async function runBenchmark(pageA, pageB, benchmarkKey = CURRENT_BENCHMARK) {
     //   }
     // });
 
-    // // 用户B清空内容
+    // // User B clear content
     // await pageB.evaluate(() => {
     //   const editor = document.querySelector(".ProseMirror");
     //   if (editor) {
@@ -571,74 +571,74 @@ async function runBenchmark(pageA, pageB, benchmarkKey = CURRENT_BENCHMARK) {
     //   }
     // });
 
-    // 等待内容同步
+    // Wait for content sync
     // await new Promise((res) => setTimeout(res, 1000));
-    // console.log("✅ 编辑器内容已清空");
+    // console.log("✅ Editor content cleared");
   } catch (error) {
-    console.error("❌ 页面已关闭，无法执行基准测试:", error.message);
+    console.error("❌ Page closed, cannot execute benchmark test:", error.message);
     throw error;
   }
 
-  // 执行测试
+  // Execute test
   switch (benchmarkKey) {
     case "benchmark1":
-      // 基础并发输入测试
+      // Basic concurrent input test
       await runTextInputTest(pageA, pageB, benchmark);
       break;
     case "benchmark2":
-      // 长文本协作测试
+      // Long text collaboration test
       await runLongTextTest(pageA, pageB, benchmark);
       break;
     case "benchmark3":
     case "benchmark4":
-      // 富文本格式协作测试
+      // Rich-text formatting collaboration test
       await runFormatTest(pageA, pageB, benchmark);
       break;
   }
 
   await new Promise((res) => setTimeout(res, 1000));
-  console.log(`✅ ${benchmark.name} 完成`);
+  console.log(`✅ ${benchmark.name} completed`);
 }
 
 /**
- * 获取性能数据
+ * Get performance data
  */
 async function getPerformanceData(pageA, pageB) {
-  console.log("🔍 开始获取性能数据...");
+  console.log("🔍 Starting to get performance data...");
 
-  // 确保监控器正在运行
+  // Ensure monitor is running
   await pageA.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
-      console.log("🔧 [用户A] 启动监控器");
+      console.log("🔧 [User A] Starting monitor");
       window.otMonitor.startMonitoring(window.otClient);
     }
   });
 
   await pageB.evaluate(() => {
     if (window.otMonitor && !window.otMonitor.isMonitoring) {
-      console.log("🔧 [用户B] 启动监控器");
+      console.log("🔧 [User B] Starting monitor");
       window.otMonitor.startMonitoring(window.otClient);
     }
   });
 
-  // 等待监控器收集数据
-  console.log("⏳ 等待监控器收集数据...");
+  // Wait for monitor to collect data
+  console.log("⏳ Waiting for monitor to collect data...");
   await pageA.waitForTimeout(3000);
   await pageB.waitForTimeout(3000);
 
-  // 获取用户A的性能数据
+  // Get user A performance data
   const userAStats = await pageA.evaluate(() => {
-    console.log("📊 [用户A] 获取性能数据");
+    console.log("📊 [User A] Getting performance data");
     const monitor = window.otMonitor;
     if (!monitor) {
-      console.log("❌ [用户A] 监控器不存在");
-      return { error: "监控器不存在", debug: { monitorExists: false } };
+      console.log("❌ [User A] Monitor does not exist");
+      return { error: "Monitor does not exist", debug: { monitorExists: false } };
     }
 
     const metrics = monitor.getAggregatedMetrics();
-    console.log("📊 [用户A] 性能数据:", metrics);
+    console.log("📊 [User A] Performance data:", metrics);
 
-    // 返回调试信息
+    // Return debug info
     return {
       metrics,
       debug: {
@@ -651,19 +651,19 @@ async function getPerformanceData(pageA, pageB) {
     };
   });
 
-  // 获取用户B的性能数据
+  // Get user B performance data
   const userBStats = await pageB.evaluate(() => {
-    console.log("📊 [用户B] 获取性能数据");
+    console.log("📊 [User B] Getting performance data");
     const monitor = window.otMonitor;
     if (!monitor) {
-      console.log("❌ [用户B] 监控器不存在");
-      return { error: "监控器不存在", debug: { monitorExists: false } };
+      console.log("❌ [User B] Monitor does not exist");
+      return { error: "Monitor does not exist", debug: { monitorExists: false } };
     }
 
     const metrics = monitor.getAggregatedMetrics();
-    console.log("📊 [用户B] 性能数据:", metrics);
+    console.log("📊 [User B] Performance data:", metrics);
 
-    // 返回调试信息
+    // Return debug info
     return {
       metrics,
       debug: {
@@ -676,7 +676,7 @@ async function getPerformanceData(pageA, pageB) {
     };
   });
 
-  // 获取编辑器内容
+  // Get editor content
   const userAContent = await pageA.evaluate(() => {
     const editor = document.querySelector(".ProseMirror");
     return editor ? editor.textContent : "";
@@ -687,16 +687,16 @@ async function getPerformanceData(pageA, pageB) {
     return editor ? editor.textContent : "";
   });
 
-  console.log("📊 性能数据获取完成:");
-  console.log("用户A统计:", userAStats);
-  console.log("用户B统计:", userBStats);
+  console.log("📊 Performance data collection completed:");
+  console.log("User A statistics:", userAStats);
+  console.log("User B statistics:", userBStats);
 
-  // 显示调试信息
+  // Show debug info
   if (userAStats && userAStats.debug) {
-    console.log("🔍 [用户A] 调试信息:", userAStats.debug);
+    console.log("🔍 [User A] Debug info:", userAStats.debug);
   }
   if (userBStats && userBStats.debug) {
-    console.log("🔍 [用户B] 调试信息:", userBStats.debug);
+    console.log("🔍 [User B] Debug info:", userBStats.debug);
   }
 
   return {
@@ -714,45 +714,45 @@ async function getPerformanceData(pageA, pageB) {
 }
 
 /**
- * 运行单个基准测试
+ * Run single benchmark test
  */
 async function runSingleBenchmark(browser, benchmarkKey, pages = null) {
-  console.log(`\n🚀 开始运行基准测试: ${benchmarkKey}`);
-  console.log(`📝 测试名称: ${BENCHMARKS[benchmarkKey].name}`);
+  console.log(`\n🚀 Starting benchmark test: ${benchmarkKey}`);
+  console.log(`📝 Test name: ${BENCHMARKS[benchmarkKey].name}`);
 
   let pageA, pageB, contextA, contextB;
 
   if (pages) {
-    // 复用现有的页面
+    // Reuse existing pages
     pageA = pages.pageA;
     pageB = pages.pageB;
-    console.log("🔄 复用现有页面会话");
+    console.log("🔄 Reusing existing page session");
   } else {
-    // 创建新的页面和上下文
+    // Create new pages and context
     contextA = await browser.newContext();
     contextB = await browser.newContext();
     pageA = await contextA.newPage();
     pageB = await contextB.newPage();
 
-    // 双用户并发登录和进入OT页面
+    // Dual user concurrent login and enter OT page
     await Promise.all([
       loginAndGotoOT(pageA, USERS[0], "A"),
       loginAndGotoOT(pageB, USERS[1], "B"),
     ]);
 
-    // 等待编辑器完全加载
+    // Wait for editor to fully load
     await new Promise((res) => setTimeout(res, 2000));
   }
 
-  // 执行基准测试
+  // Execute benchmark test
   await runBenchmark(pageA, pageB, benchmarkKey);
 
-  console.log("基准测试完成，开始采集性能数据...");
+  console.log("Benchmark test completed, starting performance data collection...");
 
-  // 采集性能数据
+  // Collect performance data
   const performanceData = await getPerformanceData(pageA, pageB);
 
-  // 保存结果
+  // Save results
   const result = {
     benchmark: benchmarkKey,
     name: BENCHMARKS[benchmarkKey].name,
@@ -767,18 +767,18 @@ async function runSingleBenchmark(browser, benchmarkKey, pages = null) {
   const resultPath = path.join(__dirname, "../results", resultFileName);
   fs.writeFileSync(resultPath, JSON.stringify(result, null, 2));
 
-  console.log(`✅ 基准测试 ${benchmarkKey} 完成，结果已保存到: ${resultPath}`);
-  console.log(`📝 用户A内容: "${performanceData.userA.content}"`);
-  console.log(`📝 用户B内容: "${performanceData.userB.content}"`);
+  console.log(`✅ Benchmark test ${benchmarkKey} completed, results saved to: ${resultPath}`);
+  console.log(`📝 User A content: "${performanceData.userA.content}"`);
+  console.log(`📝 User B content: "${performanceData.userB.content}"`);
 
-  // 只有在创建了新上下文时才关闭，但不在多基准测试模式下关闭
+  // Only close when new context was created, but not in multi-benchmark test mode
   if (RUN_ALL_BENCHMARKS) {
-    // 运行所有基准测试时，不关闭浏览器，只等待一下
-    console.log("等待 2 秒后继续下一个基准测试...");
+    // When running all benchmarks, don't close browser, just wait
+    console.log("Waiting 2 seconds before continuing to next benchmark...");
     await new Promise((res) => setTimeout(res, 2000));
   } else {
-    // 单个基准测试时，等待15秒后关闭
-    console.log("等待 15 秒后关闭浏览器...");
+    // For single benchmark test, wait 15 seconds before closing
+    console.log("Waiting 15 seconds before closing browser...");
     await new Promise((res) => setTimeout(res, 15000));
     await contextA?.close();
     await contextB?.close();
@@ -788,17 +788,17 @@ async function runSingleBenchmark(browser, benchmarkKey, pages = null) {
 }
 
 /**
- * 主函数
+ * Main function
  */
 async function main() {
   const browser = await chromium.launch({ headless: false });
 
   if (RUN_ALL_BENCHMARKS) {
-    console.log("🔄 开始运行所有基准测试...");
+    console.log("🔄 Starting to run all benchmark tests...");
     const allResults = {};
 
-    // 运行所有基准测试
-    let sharedPages = null; // 用于在基准测试间共享页面会话
+    // Run all benchmark tests
+    let sharedPages = null; // For sharing page sessions between benchmark tests
 
     for (const benchmarkKey of Object.keys(BENCHMARKS)) {
       try {
@@ -809,18 +809,18 @@ async function main() {
         );
         allResults[benchmarkKey] = result;
 
-        // 保存页面会话供下一个基准测试使用
+        // Save page session for next benchmark test
         sharedPages = pages;
 
-        // 在基准测试之间稍作等待
+        // Wait briefly between benchmark tests
         await new Promise((res) => setTimeout(res, 1000));
       } catch (error) {
-        console.error(`❌ 基准测试 ${benchmarkKey} 失败:`, error);
+        console.error(`❌ Benchmark test ${benchmarkKey} failed:`, error);
         allResults[benchmarkKey] = { error: error.message };
       }
     }
 
-    // 保存所有结果到一个汇总文件
+    // Save all results to summary file
     const summaryResult = {
       timestamp: new Date().toISOString(),
       totalBenchmarks: Object.keys(BENCHMARKS).length,
@@ -831,18 +831,18 @@ async function main() {
     const summaryPath = path.join(__dirname, "../results", summaryFileName);
     fs.writeFileSync(summaryPath, JSON.stringify(summaryResult, null, 2));
 
-    console.log(`\n🎉 所有基准测试完成！汇总结果已保存到: ${summaryPath}`);
-    console.log("等待 10 秒后关闭浏览器...");
+    console.log(`\n🎉 All benchmark tests completed! Summary results saved to: ${summaryPath}`);
+    console.log("Waiting 10 seconds before closing browser...");
     await new Promise((res) => setTimeout(res, 10000));
   } else {
-    // 运行单个基准测试
+    // Run single benchmark test
     const { result } = await runSingleBenchmark(browser, CURRENT_BENCHMARK);
-    console.log("等待 15 秒后关闭浏览器...");
+    console.log("Waiting 15 seconds before closing browser...");
     await new Promise((res) => setTimeout(res, 15000));
   }
 
   await browser.close();
 }
 
-// 运行主函数
+// Run main function
 main().catch(console.error);

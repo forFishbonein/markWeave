@@ -7,14 +7,16 @@ export const createDocument = async (req, res, next) => {
     const { title, teamId } = req.body;
     const team = await Team.findById(teamId);
     if (!team || !team.members.some((m) => m.userId.equals(req.user.userId))) {
-      return res.status(403).json({ msg: "无权在此团队中创建文档" });
+      return res
+        .status(403)
+        .json({ msg: "No permission to create documents in this team" });
     }
 
     const docId = uuidv4();
 
     const doc = new Doc({
       docId,
-      title: title || "未命名文档",
+      title: title || "Untitled Document",
       teamId,
       ownerId: req.user.userId,
       content: {
@@ -41,7 +43,7 @@ export const getTeamDocuments = async (req, res, next) => {
     const { teamId } = req.params;
     const team = await Team.findById(teamId);
     if (!team || !team.members.some((m) => m.userId.equals(req.user.userId))) {
-      return res.status(404).json({ msg: "未找到团队" });
+      return res.status(404).json({ msg: "Team not found" });
     }
     const docs = await Doc.find({ teamId }).populate("ownerId", "username");
     res.json(docs);
@@ -57,12 +59,14 @@ export const getDocumentDetails = async (req, res, next) => {
       .populate("teamId", "name");
 
     if (!doc) {
-      return res.status(404).json({ msg: "未找到文档" });
+      return res.status(404).json({ msg: "Document not found" });
     }
 
     const team = await Team.findById(doc.teamId);
     if (!team.members.some((m) => m.userId.equals(req.user.userId))) {
-      return res.status(403).json({ msg: "无权访问此文档" });
+      return res
+        .status(403)
+        .json({ msg: "No permission to access this document" });
     }
 
     res.json(doc);
@@ -77,7 +81,7 @@ export const updateDocument = async (req, res, next) => {
     const doc = await Doc.findOne({ docId: req.params.docId });
 
     if (!doc) {
-      return res.status(404).json({ msg: "未找到文档" });
+      return res.status(404).json({ msg: "Document not found" });
     }
 
     const isOwner = doc.ownerId.equals(req.user.userId);
@@ -86,7 +90,9 @@ export const updateDocument = async (req, res, next) => {
     );
 
     if (!isOwner && !isEditor) {
-      return res.status(403).json({ msg: "无权修改此文档" });
+      return res
+        .status(403)
+        .json({ msg: "No permission to modify this document" });
     }
 
     if (title) {
@@ -106,15 +112,15 @@ export const deleteDocument = async (req, res, next) => {
     const doc = await Doc.findOne({ docId: req.params.docId });
 
     if (!doc) {
-      return res.status(404).json({ msg: "未找到文档" });
+      return res.status(404).json({ msg: "Document not found" });
     }
 
     if (!doc.ownerId.equals(req.user.userId)) {
-      return res.status(403).json({ msg: "只有所有者可以删除文档" });
+      return res.status(403).json({ msg: "Only owner can delete document" });
     }
 
     await doc.deleteOne();
-    res.json({ msg: "文档已删除" });
+    res.json({ msg: "Document deleted" });
   } catch (err) {
     next(err);
   }

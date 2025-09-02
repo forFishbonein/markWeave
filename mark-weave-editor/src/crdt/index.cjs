@@ -1,4 +1,13 @@
 /*
+ * @FilePath: index.cjs
+ * @Author: Aron
+ * @Date: 2025-09-03 04:14:39
+ * @LastEditors:
+ * @LastEditTime: 2025-09-03 04:14:40
+ * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
+ * @Descripttion:
+ */
+/*
  * CommonJS wrapper for CRDT index module
  * Used by tests to properly isolate Y.Doc instances
  */
@@ -31,13 +40,19 @@ function resetYDoc() {
   ydoc = new Y.Doc();
   ychars = ydoc.getArray("chars");
   yformatOps = ydoc.getArray("formatOps");
-  
+
   return { ydoc, ychars, yformatOps };
 }
 
 module.exports = {
-  get ydoc() { return ydoc; },
-  get ychars() { return ychars; },
-  get yformatOps() { return yformatOps; },
-  resetYDoc
+  get ydoc() {
+    return ydoc;
+  },
+  get ychars() {
+    return ychars;
+  },
+  get yformatOps() {
+    return yformatOps;
+  },
+  resetYDoc,
 };

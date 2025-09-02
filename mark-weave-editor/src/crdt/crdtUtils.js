@@ -8,22 +8,22 @@
  * @Descripttion:
  */
 // src/crdt/crdtUtils.js
-import { schema } from "../plugins/schema"; // 也可从 Editor 文件中拆分出来
+import { schema } from "../plugins/schema"; // Can also be split from Editor file
 import { getYChars, getYFormatOps } from "./index";
 
-// 统一获取属性，兼容普通对象与 Y.Map
+// Unified property access, compatible with plain objects and Y.Map
 const getProp = (obj, key) =>
   typeof obj?.get === "function" ? obj.get(key) : obj[key];
 
 /**
- * 将 CRDT 中的 ychars、yformatOps 转换为 ProseMirror 的 doc node
+ * Convert ychars and yformatOps from CRDT to ProseMirror doc node
  */
-// 自定义函数：从 CRDT 数据生成 ProseMirror 文档
+// Custom function: generate ProseMirror document from CRDT data
 export function convertCRDTToProseMirrorDoc(docId) {
   const ychars = getYChars();
   const yformatOps = getYFormatOps();
-  
-  console.log("🔥 convertCRDTToProseMirrorDoc 被调用");
+
+  console.log("🔥 convertCRDTToProseMirrorDoc called");
   console.log(
     "the newest yformatOps: ",
     yformatOps.toArray()
@@ -34,8 +34,8 @@ export function convertCRDTToProseMirrorDoc(docId) {
     ychars.toArray()
     // ychars.toArray().length
   );
-  // TODO  因为这里convertCRDTToProseMirrorDoc会执行两次，而最开始ychars和yformatOps都为 0，会导致意外执行，所以利用事件循环放到set Timeout 里面执行就可以很轻松解决了！
-  //达到了只在文档没有内容，刚刚初始化的时候进行数据获取，而不是每次都和 ws 里面的数据合并导致每次数据翻倍了！！！——> 这样就是先等 ws 数据放进来，然后我们看有没有数据，没有数据再去获取
+  // TODO: Because convertCRDTToProseMirrorDoc executes twice, and initially ychars and yformatOps are both 0, causing unexpected execution, using event loop in setTimeout can easily solve this!
+  // Achieved data fetching only when document has no content and just initialized, instead of merging with ws data every time causing data doubling! ——> This way we wait for ws data to come in first, then check if we have data, if no data then fetch
   setTimeout(() => {
     //  alert(111);
     if (
@@ -54,9 +54,9 @@ export function convertCRDTToProseMirrorDoc(docId) {
       if (getProp(char, "deleted")) return null;
 
       const chVal = getProp(char, "ch");
-      if (!chVal) return null; // 跳过空字符
+      if (!chVal) return null; // Skip empty characters
 
-      // 按 markType 分组
+      // Group by markType
       const markOpsByType = {};
       allFormatOps.forEach((op) => {
         if (isCharWithinMark(char, op)) {
@@ -71,7 +71,7 @@ export function convertCRDTToProseMirrorDoc(docId) {
       for (const markType in markOpsByType) {
         const ops = markOpsByType[markType];
 
-        // 选出最后一个 `addMark` 和 `removeMark` 操作
+        // Select the last `addMark` and `removeMark` operations
         const lastAddOp = ops
           .filter((op) => op.action === "addMark")
           .sort((a, b) => b.timestamp - a.timestamp)[0];
@@ -79,7 +79,7 @@ export function convertCRDTToProseMirrorDoc(docId) {
           .filter((op) => op.action === "removeMark")
           .sort((a, b) => b.timestamp - a.timestamp)[0];
 
-        // **remove-wins 逻辑**
+        // **remove-wins logic**
         if (
           !lastRemoveOp ||
           (lastAddOp && lastAddOp.timestamp > lastRemoveOp.timestamp)
@@ -89,10 +89,10 @@ export function convertCRDTToProseMirrorDoc(docId) {
               const attrs = lastAddOp.attrs || {};
               effectiveMarks.push(schema.marks[markType].create(attrs));
             } else {
-              effectiveMarks.push(schema.marks[markType].create()); //大多数走的是这里
+              effectiveMarks.push(schema.marks[markType].create()); // Most cases go here
             }
           } else {
-            console.warn(`⚠️ 未知的 markType: ${markType}`);
+            console.warn(`⚠️ Unknown markType: ${markType}`);
           }
         }
       }
@@ -108,12 +108,12 @@ export function convertCRDTToProseMirrorDoc(docId) {
   ]);
 }
 
-// ✅ 判断当前字符是否在 `addBold` 作用的范围内
+// ✅ Determine if current character is within `addBold` scope
 // function isCharWithinMark(char, op) {
-//   // 假设 op.start.type 应该是 "before"（即标记从该字符前开始生效）
-//   // op.end.type 为 "after" 表示标记到该字符结束，但新字符在此位置不应继承标记
+//   // Assume op.start.type should be "before" (mark starts taking effect before this character)
+//   // op.end.type being "after" means mark ends at this character, but new characters at this position should not inherit the mark
 //   if (op.end && op.end.type === "after") {
-//     // 改为 <=，让最后一个字符包含在范围内
+//     // Change to <=, let last character be included in range
 //     return op.start.opId <= char.opId && char.opId <= op.end.opId;
 //   }
 //   return op.start.opId <= char.opId && char.opId <= op.end.opId;
@@ -121,82 +121,88 @@ export function convertCRDTToProseMirrorDoc(docId) {
 export function isCharWithinMark(char, op) {
   const ychars = getYChars();
   const charArray = ychars.toArray();
-  
-  // 找到字符在CRDT数组中的实际位置索引
-  const charIndex = charArray.findIndex(c => getProp(c, 'opId') === getProp(char, 'opId'));
-  const startIndex = charArray.findIndex(c => getProp(c, 'opId') === op.start.opId);
-  const endIndex = charArray.findIndex(c => getProp(c, 'opId') === op.end.opId);
-  
-  // 如果找不到任何索引，返回false
+
+  // Find actual position index of character in CRDT array
+  const charIndex = charArray.findIndex(
+    (c) => getProp(c, "opId") === getProp(char, "opId")
+  );
+  const startIndex = charArray.findIndex(
+    (c) => getProp(c, "opId") === op.start.opId
+  );
+  const endIndex = charArray.findIndex(
+    (c) => getProp(c, "opId") === op.end.opId
+  );
+
+  // If any index is not found, return false
   if (charIndex === -1 || startIndex === -1 || endIndex === -1) {
     return false;
   }
-  
-  // 如果没有显式的 type，默认 start 用 "before"，end 用 "after"
+
+  // If no explicit type, default start uses "before", end uses "after"
   const startType = op.start?.type || "before";
   const endType = op.end?.type || "after";
 
-  // 判断是否满足"起始"边界
+  // Determine if "start" boundary is satisfied
   let inStart = false;
   if (startType === "before") {
-    // "before"表示从此字符之前开始 → 包含该字符
+    // "before" means start before this character → include this character
     inStart = charIndex >= startIndex;
   } else {
-    // "after"表示从此字符之后开始 → 不包含该字符
+    // "after" means start after this character → exclude this character
     inStart = charIndex > startIndex;
   }
 
-  // 判断是否满足"结束"边界
+  // Determine if "end" boundary is satisfied
   let inEnd = false;
   if (endType === "before") {
-    // "before"表示在此字符之前结束 → 不包含该字符
+    // "before" means end before this character → exclude this character
     inEnd = charIndex < endIndex;
   } else {
-    // "after"表示在此字符之后结束 → 包含该字符
+    // "after" means end after this character → include this character
     inEnd = charIndex <= endIndex;
   }
 
   return inStart && inEnd;
 }
-// 如果有其他导出，比如 loadInitialData、undoManager，也可以放在这里
+// If there are other exports like loadInitialData, undoManager, they can also be placed here
 export async function loadInitialData(docId) {
   const ychars = getYChars();
   const yformatOps = getYFormatOps();
-  
-  //先等 ws 数据放进来，在这里才可以获得最新的数据，然后我们看有没有数据，没有数据再去获取
+
+  // Wait for ws data to come in first, only here can we get the latest data, then check if we have data, if no data then fetch
   if (ychars.toArray().length === 0 && yformatOps.toArray().length === 0) {
     try {
-      // 这里请求一个接口，接口地址根据实际情况设置
+      // Request an interface here, interface address set according to actual situation
       const response = await fetch(
         `http://localhost:1234/api/initial?docId=${docId}`
       );
       if (!response.ok) {
-        throw new Error("网络响应错误");
+        throw new Error("Network response error");
       }
       let data = await response.json();
       console.log(
-        "获取到初始数据:",
+        "Retrieved initial data:",
         data,
-        ychars.toArray().length, // 如果有数据，这里不是 0
+        ychars.toArray().length, // If there's data, this is not 0
         yformatOps.toArray().length
       );
       data = data.content;
-      // 清空当前数组（如果已有内容）——> 不能清空
+      // Clear current arrays (if content exists) ——> Cannot clear
       // ychars.delete(0, ychars.length);
       // yformatOps.delete(0, yformatOps.length);
-      // 将获取到的 chars 数据写入 ychars
+      // Write retrieved chars data to ychars
       if (
         data?.chars &&
         Array.isArray(data.chars) &&
         ychars.toArray().length === 0
       ) {
         data.chars.forEach((item) => {
-          // 注意：这里我们使用 push 将每个对象放入 Y.Array 中
+          // Note: Here we use push to put each object into Y.Array
           ychars.push([item]);
         });
       }
 
-      // 将获取到的 formatOps 数据写入 yformatOps
+      // Write retrieved formatOps data to yformatOps
       if (
         data?.formatOps &&
         Array.isArray(data.formatOps) &&
@@ -207,11 +213,15 @@ export async function loadInitialData(docId) {
         });
       }
       // sessionStorage.setItem("needIntial", false);
-      console.log("初始数据加载完成:", ychars.toArray(), yformatOps.toArray());
+      console.log(
+        "Initial data loading completed:",
+        ychars.toArray(),
+        yformatOps.toArray()
+      );
     } catch (err) {
-      console.error("加载初始数据失败:", err);
+      console.error("Failed to load initial data:", err);
     }
   } else {
-    console.error("存在数据，不需要去数据库加载！");
+    console.error("Data exists, no need to load from database!");
   }
 }

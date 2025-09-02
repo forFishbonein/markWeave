@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 19:18:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-27 06:40:38
+ * @LastEditTime: 2025-09-03 04:40:05
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -32,15 +32,15 @@ dotenv.config();
 
 const app = express();
 app.use(express.static("public"));
-// 添加 JSON body 解析中间件
+// Add JSON body parsing middleware
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
-// API 路由
+// API routes
 app.use("/api", apiRoutes);
 
-// 文档内容相关API
+// Document content related API
 app.get("/api/doc/:docId", async (req, res) => {
   const { docId } = req.params;
 
@@ -50,7 +50,7 @@ app.get("/api/doc/:docId", async (req, res) => {
     if (!doc) {
       return res.status(404).json({
         success: false,
-        message: "文档不存在",
+        message: "Documentsdoes not exist",
       });
     }
 
@@ -59,10 +59,10 @@ app.get("/api/doc/:docId", async (req, res) => {
       data: doc,
     });
   } catch (err) {
-    console.error("获取文档失败:", err);
+    console.error("Get documents failed:", err);
     res.status(500).json({
       success: false,
-      message: "获取文档失败",
+      message: "Failed to get document",
       error: err.message,
     });
   }
@@ -75,7 +75,7 @@ app.put("/api/doc/:docId", async (req, res) => {
   if (!content) {
     return res.status(400).json({
       success: false,
-      message: "缺少文档内容",
+      message: "Missing document content",
     });
   }
 
@@ -84,13 +84,13 @@ app.put("/api/doc/:docId", async (req, res) => {
 
     res.json({
       success: true,
-      message: "文档保存成功",
+      message: "DocumentsSave successful",
     });
   } catch (err) {
-    console.error("保存文档失败:", err);
+    console.error("Saved documentfailed:", err);
     res.status(500).json({
       success: false,
-      message: "保存文档失败",
+      message: "Saved documentfailed",
       error: err.message,
     });
   }
@@ -103,7 +103,7 @@ app.put("/api/doc/:docId/title", async (req, res) => {
   if (!title || !title.trim()) {
     return res.status(400).json({
       success: false,
-      message: "标题不能为空",
+      message: "Title cannot be empty",
     });
   }
 
@@ -112,36 +112,36 @@ app.put("/api/doc/:docId/title", async (req, res) => {
 
     res.json({
       success: true,
-      message: "标题更新成功",
+      message: "Title updated successfully",
     });
   } catch (err) {
-    console.error("更新标题失败:", err);
+    console.error("Failed to update title:", err);
     res.status(500).json({
       success: false,
-      message: "更新标题失败",
+      message: "Failed to update title",
       error: err.message,
     });
   }
 });
 
-// CRDT同步相关的API端点
+// CRDT sync related API endpoints
 app.post("/api/doc", async (req, res) => {
-  const { id, content } = req.body; // content是base64编码的Yjs更新
+  const { id, content } = req.body; // content is base64 encoded Yjs update
 
   if (!id || !content) {
-    return res.status(400).json({ error: "缺少 docId 或 update content" });
+    return res.status(400).json({ error: "Missing docId or update content" });
   }
 
   try {
     const ydoc = await getYDoc(id);
     const uint8 = Uint8Array.from(Buffer.from(content, "base64"));
     Y.applyUpdate(ydoc, uint8);
-    // ⚡ 立刻持久化，避免服务器在 debounce 周期内被重启导致数据丢失
+    // ⚡ Persist immediately to avoid data loss if server restarts during debounce period
     // await saveDocState(id, ydoc);
-    // saveDocState 会在 debounce 中自动调用
-    res.json({ message: "更新已应用" });
+    // saveDocState will be automatically called in debounce
+    res.json({ message: "Update applied" });
   } catch (err) {
-    console.error("应用 update 时出错:", err);
+    console.error("Error applying update:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -150,7 +150,7 @@ app.get("/api/initial", async (req, res) => {
   const { docId } = req.query;
 
   if (!docId) {
-    return res.status(400).json({ error: "缺少 docId 参数" });
+    return res.status(400).json({ error: "Missing docId parameter" });
   }
 
   try {
@@ -160,12 +160,12 @@ app.get("/api/initial", async (req, res) => {
     );
     res.json({ docId, update: stateBase64 });
   } catch (err) {
-    console.error("加载初始文档失败:", err);
+    console.error("Failed to load initial document:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// OT性能指标API
+// OT performance metrics API
 app.get("/api/ot/metrics", (req, res) => {
   if (otServer) {
     const metrics = otServer.getPerformanceMetrics();
@@ -176,7 +176,7 @@ app.get("/api/ot/metrics", (req, res) => {
   } else {
     res.status(503).json({
       success: false,
-      message: "OT服务器未启动",
+      message: "OT server not started",
     });
   }
 });
@@ -186,17 +186,17 @@ app.post("/api/ot/metrics/reset", (req, res) => {
     otServer.resetMetrics();
     res.json({
       success: true,
-      message: "OT性能指标已重置",
+      message: "OT performance metrics reset",
     });
   } else {
     res.status(503).json({
       success: false,
-      message: "OT服务器未启动",
+      message: "OT server not started",
     });
   }
 });
 
-// 错误处理中间件
+// Error handling middleware
 app.use(errorHandler);
 
 const server = http.createServer(app);
@@ -224,7 +224,7 @@ mongoose
     console.error("❌ MongoDB connection error:", err);
   });
 
-// Yjs文档管理
+// Yjs document management
 const docs = new Map();
 
 async function getYDoc(roomName) {
@@ -236,21 +236,21 @@ async function getYDoc(roomName) {
 
   const ydoc = new Y.Doc();
 
-  // 从数据库加载文档状态
+  // Load document state from database
   await loadDocState(roomName, ydoc);
 
-  // 设置持久化（防抖处理）- 缩短延迟时间，避免数据丢失
+  // Set up persistence (debounce handling) - shorten delay to avoid data loss
   const persist = debounce(
     async () => {
       try {
         await saveDocState(roomName, ydoc);
-        console.log(`💾 文档 ${roomName} 自动保存成功`);
+        console.log(`💾 Document ${roomName} auto-save successful`);
       } catch (err) {
-        console.error(`❌ 文档 ${roomName} 自动保存失败:`, err);
+        console.error(`❌ Document ${roomName} auto-save failed:`, err);
       }
     },
-    500, // 500ms内的更新合并（更快响应）
-    { maxWait: 2000 } // 最长2秒必须保存一次（更频繁保存）
+    500, // Merge updates within 500ms (faster response)
+    { maxWait: 2000 } // Must save at least once every 2 seconds (more frequent saves)
   );
 
   ydoc.on("update", persist);
@@ -259,23 +259,23 @@ async function getYDoc(roomName) {
   return ydoc;
 }
 
-// 定期强制保存所有文档（防止长时间无更新导致的数据丢失）
+// Periodically force save all documents (prevent data loss from long periods without updates)
 setInterval(async () => {
   if (docs.size > 0) {
-    console.log(`⏰ 开始定期保存 ${docs.size} 个文档...`);
+    console.log(`⏰ Starting periodic save for ${docs.size} documents...`);
     for (const [docId, ydoc] of docs.entries()) {
       try {
         await saveDocState(docId, ydoc);
-        console.log(`⏰ 定期保存文档 ${docId} 成功`);
+        console.log(`⏰ Periodic save for document ${docId} successful`);
       } catch (err) {
-        console.error(`❌ 定期保存文档 ${docId} 失败:`, err);
+        console.error(`❌ Periodic save for document ${docId} failed:`, err);
       }
     }
-    console.log(`✅ 定期保存完成`);
+    console.log(`✅ Periodic save completed`);
   }
-}, 30000); // 每30秒执行一次
+}, 30000); // Execute every 30 seconds
 
-// WebSocket处理
+// WebSocket handling
 wss.on("connection", async (ws, req) => {
   try {
     const url = new URL(req.url, `ws://${req.headers.host}`);
@@ -285,12 +285,12 @@ wss.on("connection", async (ws, req) => {
 
     const ydoc = await getYDoc(roomName);
 
-    // 🔥 禁用 y-websocket 的内置持久化，避免创建 o_documents 集合
-    // 我们使用自己的 persistence.js 进行持久化到 docs 集合
+    // 🔥 Disable y-websocket built-in persistence to avoid creating o_documents collection
+    // We use our own persistence.js for persistence to docs collection
     setupWSConnection(ws, req, {
       gc: true,
       doc: ydoc,
-      // 禁用内置持久化机制
+      // Disable built-in persistence mechanism
       persistence: {
         provider: null,
         bindState: () => {},
@@ -299,7 +299,7 @@ wss.on("connection", async (ws, req) => {
     });
 
     console.log(
-      "✅ WebSocket 连接已建立，使用自定义持久化 (禁用 o_documents 集合创建)"
+      "✅ WebSocket connection established, using custom persistence (disabled o_documents collection creation)"
     );
   } catch (error) {
     console.error("❌ WebSocket connection error:", error);
@@ -307,17 +307,17 @@ wss.on("connection", async (ws, req) => {
   }
 });
 
-// 初始化OT服务器
+// Initialize OT server
 let otServer = null;
 
 async function initializeOTServer() {
   try {
     otServer = new OTServer();
     await otServer.initialize();
-    otServer.startWebSocketServer(1235); // OT服务器运行在1235端口
-    console.log("✅ OT服务器启动成功");
+    otServer.startWebSocketServer(1235); // OT server runs on port 1235
+    console.log("✅ OT server startup successful");
   } catch (error) {
-    console.error("❌ OT服务器启动失败:", error);
+    console.error("❌ OT server startup failed:", error);
   }
 }
 
@@ -327,17 +327,17 @@ server.listen(PORT, async () => {
   console.log(`📡 WebSocket server available at ws://localhost:${PORT}`);
   console.log(`🌐 API server available at http://localhost:${PORT}/api`);
 
-  // 启动OT服务器
+  // Start OT server
   await initializeOTServer();
 });
 
 // --------------------------
-// 进程退出前主动把所有文档状态写入数据库
+// Actively write all document states to database before process exit
 // --------------------------
 async function flushAllDocs() {
   try {
     const docCount = docs.size;
-    console.log(`💾 正在持久化所有内存中的 ${docCount} 个 Y.Doc ...`);
+    console.log(`💾 Persisting all in-memory ${docCount} Y.Doc instances ...`);
 
     let successCount = 0;
     let failCount = 0;
@@ -346,22 +346,22 @@ async function flushAllDocs() {
       try {
         await saveDocState(docId, ydoc);
         successCount++;
-        console.log(`✅ 退出保存文档 ${docId} 成功`);
+        console.log(`✅ Exit save document ${docId} successful`);
       } catch (err) {
         failCount++;
-        console.error(`❌ 退出保存文档 ${docId} 失败:`, err);
+        console.error(`❌ Exit save document ${docId} failed:`, err);
       }
     }
 
     console.log(
-      `🎯 持久化完成: 成功 ${successCount}/${docCount} 个文档，失败 ${failCount} 个`
+      `🎯 Persistence completed: successful ${successCount}/${docCount} documents, failed ${failCount}`
     );
   } catch (err) {
-    console.error("❌ 持久化所有文档失败:", err);
+    console.error("❌ Failed to persist all documents:", err);
   }
 }
 
-// 在常见的退出信号(SIGINT Ctrl+C、SIGTERM)以及进程异常退出前触发持久化
+// Trigger persistence before common exit signals (SIGINT Ctrl+C, SIGTERM) and abnormal process exit
 ["SIGINT", "SIGTERM", "beforeExit"].forEach((event) => {
   process.on(event, async () => {
     await flushAllDocs();

@@ -7,27 +7,27 @@ const UserSchema = new Schema(
   {
     email: {
       type: String,
-      required: [true, "邮箱是必需的"],
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
       match: [
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-        "请输入有效的邮箱地址",
+        "Please enter a valid email address",
       ],
     },
     username: {
       type: String,
-      required: [true, "用户名是必需的"],
+      required: [true, "Username is required"],
       trim: true,
-      minlength: [2, "用户名至少2个字符"],
-      maxlength: [30, "用户名最多30个字符"],
+      minlength: [2, "Username must be at least 2 characters"],
+      maxlength: [30, "Username must be at most 30 characters"],
     },
     password: {
       type: String,
-      required: [true, "密码是必需的"],
-      minlength: [6, "密码至少6个字符"],
-      select: false, // 默认查询不返回密码
+      required: [true, "Password is required"],
+      minlength: [6, "Password must be at least 6 characters"],
+      select: false, // Default query does not return password
     },
     avatar: {
       type: String,
@@ -45,7 +45,7 @@ const UserSchema = new Schema(
   }
 );
 
-// 密码加密中间件
+// Password encryption middleware
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -58,7 +58,7 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-// 密码验证方法
+// Password verification method
 UserSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };

@@ -18,29 +18,29 @@ const TABS = {
 };
 
 const DocumentList = () => {
-  // 状态管理
+  // State management
   const [activeTab, setActiveTab] = useState(TABS.documents);
   const [searchValue, setSearchValue] = useState('');
   const [isNewDocModalOpen, setIsNewDocModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-  // 文档、成员等数据（实际应从接口获取）
+  // Document, member data (should be fetched from API)
   const [documents, setDocuments] = useState([
     { key: '1', name: 'Document title 1', updated: 'Apr 16' },
     { key: '2', name: 'Document title 2', updated: 'Apr 16' },
     { key: '3', name: 'Document title 3', updated: 'Apr 16' },
   ]);
   const [members] = useState([
-    { name: '张三', role: '成员' },
-    { name: '李四', role: '成员' },
+    { name: 'Zhang San', role: 'Member' },
+    { name: 'Li Si', role: 'Member' },
   ]);
 
-  // 过滤文档
+  // Filter documents
   const filteredDocuments = documents.filter(doc => doc.name.includes(searchValue));
 
-  // 预留：接口调用获取数据
+  // Reserved: API call to get data
   // useEffect(() => { fetchDocuments(); }, []);
 
-  // 渲染右侧内容
+  // Render right-side content
   const renderContent = () => {
     switch (activeTab) {
       case TABS.documents:

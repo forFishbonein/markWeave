@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 14:17:32
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-20 02:43:20
+ * @LastEditTime: 2025-09-03 04:42:34
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -37,21 +37,21 @@ function connectMongo() {
 }
 
 /**
- * 将Yjs文档转换为JSON格式
- * @param {Y.Doc} ydoc Yjs文档
- * @returns {Object} JSON表示的文档内容
+ * Convert Yjs document to JSON format
+ * @param {Y.Doc} ydoc Yjs document
+ * @returns {Object} JSON representation of document content
  */
 function yjsToJson(ydoc) {
   try {
-    // 获取Yjs中的文本内容
+    // Get text content from Yjs
     const ytext = ydoc.getText("prosemirror");
     const content = ytext.toString();
 
-    // 获取格式信息（如果有的话）
+    // Get format info (if any)
     const ymap = ydoc.getMap("meta");
     const meta = ymap.toJSON();
 
-    // 简单的JSON结构
+    // Simple JSON structure
     return {
       type: "doc",
       content: content
@@ -73,11 +73,11 @@ function yjsToJson(ydoc) {
             },
           ],
       meta: meta,
-      // 保存完整的Yjs状态用于恢复
+      // Save complete Yjs state for recovery
       yjsState: Buffer.from(Y.encodeStateAsUpdate(ydoc)).toString("base64"),
     };
   } catch (err) {
-    console.error("Yjs转JSON失败:", err);
+    console.error("Yjs to JSON failed:", err);
     return {
       type: "doc",
       content: [
@@ -92,22 +92,22 @@ function yjsToJson(ydoc) {
 }
 
 /**
- * 将JSON格式转换回Yjs文档
- * @param {Object} jsonContent JSON内容
- * @param {Y.Doc} ydoc 目标Yjs文档
+ * Convert JSON format back to Yjs document
+ * @param {Object} jsonContent JSON content
+ * @param {Y.Doc} ydoc Target Yjs document
  */
 function jsonToYjs(jsonContent, ydoc) {
   try {
     if (jsonContent.yjsState) {
-      // 如果有保存的Yjs状态，直接恢复
+      // If saved Yjs state exists, restore directly
       const state = Buffer.from(jsonContent.yjsState, "base64");
       Y.applyUpdate(ydoc, new Uint8Array(state));
     } else if (jsonContent.content) {
-      // 否则从JSON内容重建
+      // Otherwise rebuild from JSON content
       const ytext = ydoc.getText("prosemirror");
       let textContent = "";
 
-      // 提取文本内容
+      // Extract text content
       const extractText = (nodes) => {
         nodes.forEach((node) => {
           if (node.type === "text") {
@@ -124,7 +124,7 @@ function jsonToYjs(jsonContent, ydoc) {
         ytext.insert(0, textContent);
       }
 
-      // 恢复元数据
+      // Restore metadata
       if (jsonContent.meta) {
         const ymap = ydoc.getMap("meta");
         Object.entries(jsonContent.meta).forEach(([key, value]) => {
@@ -133,29 +133,29 @@ function jsonToYjs(jsonContent, ydoc) {
       }
     }
   } catch (err) {
-    console.error("JSON转Yjs失败:", err);
+    console.error("JSON to Yjs failed:", err);
   }
 }
 
 /**
- * 保存Yjs文档状态并转换为JSON存储
- * @param {string} docId 文档唯一标识
- * @param {Y.Doc} ydoc 当前 Y.Doc
- * @param {string} userId 用户ID (可选，仅在创建文档时需要)
- * @param {string} teamId 团队ID (可选，仅在创建文档时需要)
+ * Save Yjs document state and convert to JSON storage
+ * @param {string} docId Document unique identifier
+ * @param {Y.Doc} ydoc Current Y.Doc
+ * @param {string} userId User ID (optional, only needed when creating document)
+ * @param {string} teamId Team ID (optional, only needed when creating document)
  */
 export async function saveDocState(docId, ydoc, userId = null, teamId = null) {
   try {
     await connectMongo();
 
-    // 将Yjs转换为JSON格式
+    // Convert Yjs to JSON format
     const jsonContent = yjsToJson(ydoc);
 
-    // 检查文档是否已存在
+    // Check if document already exists
     const existingDoc = await Doc.findOne({ docId });
 
     if (existingDoc) {
-      // 文档已存在，仅更新内容
+      // Document exists, only update content
       const result = await Doc.updateOne(
         { docId },
         {
@@ -169,11 +169,13 @@ export async function saveDocState(docId, ydoc, userId = null, teamId = null) {
         }
       );
       console.log(
-        `✅ 更新文档 ${docId} 内容成功 (版本: ${existingDoc.version + 1})`
+        `✅ Updated document ${docId} content successfully (version: ${
+          existingDoc.version + 1
+        })`
       );
       return result;
     } else if (userId) {
-      // 文档不存在且提供了userId，创建新文档
+      // Document doesn't exist and userId provided, create new document
       const result = await Doc.updateOne(
         { docId },
         {
@@ -189,30 +191,30 @@ export async function saveDocState(docId, ydoc, userId = null, teamId = null) {
             teamId: teamId,
             participants: [{ userId, role: "owner" }],
             createdAt: new Date(),
-            title: "未命名文档",
+            title: "Untitled Document",
           },
         },
         { upsert: true }
       );
-      console.log(`✅ 创建并保存文档 ${docId} 成功`);
+      console.log(`✅ Created and saved document ${docId} successfully`);
       return result;
     } else {
-      // 文档不存在且没有提供userId，记录警告但不抛出错误
+      // Document doesn't exist and no userId provided, log warning but don't throw error
       console.warn(
-        `⚠️ 文档 ${docId} 不存在且无法创建（缺少用户信息），跳过保存`
+        `⚠️ Document ${docId} doesn't exist and cannot be created (missing user info), skipping save`
       );
       return null;
     }
   } catch (err) {
-    console.error("❌ 保存文档状态失败:", err);
+    console.error("❌ Failed to save document state:", err);
     throw err;
   }
 }
 
 /**
- * 从数据库加载JSON内容并转换回Yjs文档
- * @param {string} docId 文档唯一标识
- * @param {Y.Doc} ydoc 当前 Y.Doc
+ * Load JSON content from database and convert back to Yjs document
+ * @param {string} docId Document unique identifier
+ * @param {Y.Doc} ydoc Current Y.Doc
  */
 export async function loadDocState(docId, ydoc) {
   console.log("📄 Loading docId:", docId);
@@ -223,24 +225,30 @@ export async function loadDocState(docId, ydoc) {
     const doc = await Doc.findOne({ docId });
 
     if (!doc || !doc.content) {
-      console.log(`ℹ️ 文档 ${docId} 尚无持久化状态，创建新文档`);
+      console.log(
+        `ℹ️ Document ${docId} has no persistent state yet, creating new document`
+      );
       return false;
     }
 
-    // 将JSON内容转换回Yjs
+    // Convert JSON content back to Yjs
     jsonToYjs(doc.content, ydoc);
 
-    console.log(`✅ 加载文档 ${docId} 成功 (${doc.title || "未命名文档"})`);
+    console.log(
+      `✅ Loaded document ${docId} successful (${
+        doc.title || "Untitled Document"
+      })`
+    );
     return true;
   } catch (err) {
-    console.error("❌ 加载文档状态失败:", err);
+    console.error("❌ Failed to load document state:", err);
     return false;
   }
 }
 
 /**
- * 获取文档JSON内容（用于API访问）
- * @param {string} docId 文档唯一标识
+ * Get document JSON content (for API access)
+ * @param {string} docId Document unique identifier
  */
 export async function loadDocContent(docId) {
   try {
@@ -252,7 +260,7 @@ export async function loadDocContent(docId) {
     );
 
     if (!doc) {
-      console.log(`ℹ️ 文档 ${docId} 不存在`);
+      console.log(`ℹ️ Document ${docId} does not exist`);
       return null;
     }
 
@@ -276,17 +284,17 @@ export async function loadDocContent(docId) {
       version: doc.version,
     };
   } catch (err) {
-    console.error("❌ 加载文档内容失败:", err);
+    console.error("❌ Failed to load document content:", err);
     throw err;
   }
 }
 
 /**
- * 保存JSON文档内容（用于API更新）
- * @param {string} docId 文档唯一标识
- * @param {Object} content JSON格式的文档内容
- * @param {string} userId 用户ID
- * @param {string} teamId 团队ID
+ * Save JSON document content (for API update)
+ * @param {string} docId Document unique identifier
+ * @param {Object} content JSON format document content
+ * @param {string} userId User ID
+ * @param {string} teamId Team ID
  */
 export async function saveDocContent(docId, content, userId, teamId = null) {
   try {
@@ -304,23 +312,23 @@ export async function saveDocContent(docId, content, userId, teamId = null) {
           teamId: teamId,
           participants: [{ userId, role: "owner" }],
           createdAt: new Date(),
-          title: "未命名文档",
+          title: "Untitled Document",
         },
       },
       { upsert: true }
     );
 
-    console.log(`✅ 保存文档 ${docId} 内容成功`);
+    console.log(`✅ Saved document ${docId} content successfully`);
     return result;
   } catch (err) {
-    console.error("❌ 保存文档内容失败:", err);
+    console.error("❌ Failed to save document content:", err);
     throw err;
   }
 }
 
 /**
- * 获取文档基本信息
- * @param {string} docId 文档ID
+ * Get document basic info
+ * @param {string} docId Document ID
  */
 export async function getDocumentInfo(docId) {
   try {
@@ -335,15 +343,15 @@ export async function getDocumentInfo(docId) {
 
     return doc;
   } catch (err) {
-    console.error("❌ 获取文档信息失败:", err);
+    console.error("❌ Failed to get document info:", err);
     throw err;
   }
 }
 
 /**
- * 更新文档标题
- * @param {string} docId 文档ID
- * @param {string} title 新标题
+ * Update document title
+ * @param {string} docId Document ID
+ * @param {string} title New title
  */
 export async function updateDocumentTitle(docId, title) {
   try {
@@ -359,27 +367,27 @@ export async function updateDocumentTitle(docId, title) {
       }
     );
 
-    console.log(`✅ 更新文档 ${docId} 标题成功: ${title}`);
+    console.log(`✅ Updated document ${docId} title successfully: ${title}`);
     return result;
   } catch (err) {
-    console.error("❌ 更新文档标题失败:", err);
+    console.error("❌ Failed to update document title:", err);
     throw err;
   }
 }
 
 /**
- * 删除文档
- * @param {string} docId 文档ID
+ * Delete document
+ * @param {string} docId Document ID
  */
 export async function deleteDocument(docId) {
   try {
     await connectMongo();
 
     const result = await Doc.deleteOne({ docId });
-    console.log(`✅ 删除文档 ${docId} 成功`);
+    console.log(`✅ Deleted document ${docId} successfully`);
     return result;
   } catch (err) {
-    console.error("❌ 删除文档失败:", err);
+    console.error("❌ Failed to delete document:", err);
     throw err;
   }
 }

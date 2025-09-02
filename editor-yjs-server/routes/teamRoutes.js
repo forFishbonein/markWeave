@@ -6,38 +6,38 @@ import { validateRequest } from "../middleware/validationMiddleware.js";
 
 const router = express.Router();
 
-// 邀请相关路由（不需要authentication的部分）
-// 获取邀请详情（公开访问，通过令牌）
+// Invitation related routes (parts that don't need authentication)
+// Get invitation details (public access, with token)
 router.get(
   "/invite/:token",
-  [param("token").notEmpty().withMessage("邀请令牌不能为空")],
+  [param("token").notEmpty().withMessage("Invitation token cannot be empty")],
   validateRequest,
   teamController.getInviteDetails
 );
 
-// 拒绝邀请（不需要认证）
+// Reject invitation (no authentication needed)
 router.post(
   "/invite/:token/reject",
-  [param("token").notEmpty().withMessage("邀请令牌不能为空")],
+  [param("token").notEmpty().withMessage("Invitation token cannot be empty")],
   validateRequest,
   teamController.rejectInvite
 );
 
-// 接受邀请（需要认证）
+// Accept invitation (authentication required)
 router.post(
   "/invite/:token/accept",
-  [param("token").notEmpty().withMessage("邀请令牌不能为空")],
+  [param("token").notEmpty().withMessage("Invitation token cannot be empty")],
   validateRequest,
   authenticate,
   teamController.acceptInvite
 );
 
-// 以下路由需要认证
+// Following routes require authentication
 router.use(authenticate);
 
 router.post(
   "/",
-  [body("name").notEmpty().withMessage("团队名称不能为空")],
+  [body("name").notEmpty().withMessage("Team name cannot be empty")],
   validateRequest,
   teamController.createTeam
 );
@@ -46,7 +46,7 @@ router.get("/", teamController.getUserTeams);
 
 router.get(
   "/:teamId",
-  [param("teamId").isMongoId().withMessage("无效的团队ID")],
+  [param("teamId").isMongoId().withMessage("Invalid team ID")],
   validateRequest,
   teamController.getTeamDetails
 );
@@ -54,8 +54,8 @@ router.get(
 router.put(
   "/:teamId",
   [
-    param("teamId").isMongoId().withMessage("无效的团队ID"),
-    body("name").optional().notEmpty().withMessage("团队名称不能为空"),
+    param("teamId").isMongoId().withMessage("Invalid team ID"),
+    body("name").optional().notEmpty().withMessage("Team name cannot be empty"),
   ],
   validateRequest,
   teamController.updateTeam
@@ -64,9 +64,9 @@ router.put(
 router.post(
   "/:teamId/invite",
   [
-    param("teamId").isMongoId().withMessage("无效的团队ID"),
-    body("email").isEmail().withMessage("请输入有效的邮箱地址"),
-    body("role").optional().isIn(["admin", "member"]).withMessage("无效的角色"),
+    param("teamId").isMongoId().withMessage("Invalid team ID"),
+    body("email").isEmail().withMessage("Please enter a valid email address"),
+    body("role").optional().isIn(["admin", "member"]).withMessage("Invalid role"),
   ],
   validateRequest,
   teamController.inviteMember
@@ -75,8 +75,8 @@ router.post(
 router.delete(
   "/:teamId/members/:memberId",
   [
-    param("teamId").isMongoId().withMessage("无效的团队ID"),
-    param("memberId").isMongoId().withMessage("无效的成员ID"),
+    param("teamId").isMongoId().withMessage("Invalid team ID"),
+    param("memberId").isMongoId().withMessage("Invalid member ID"),
   ],
   validateRequest,
   teamController.removeMember

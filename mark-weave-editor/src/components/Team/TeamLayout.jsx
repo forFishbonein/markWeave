@@ -19,7 +19,7 @@ const TeamLayout = () => {
         minWidth: 0,
         background: '#fafbfc'
       }}>
-        {/* 可选顶部栏 TeamHeader */}
+        {/* Optional top bar TeamHeader */}
         <Outlet />
       </div>
     </div>

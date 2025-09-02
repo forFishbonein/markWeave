@@ -1,6 +1,6 @@
 /**
- * ShareDB OT客户端 - 稳定版本
- * 参考Yjs WebsocketProvider的实现方式，确保连接稳定性
+ * ShareDB OT Client - Stable Version
+ * Referencing Yjs WebsocketProvider’s implementation to ensure connection stability
  */
 class OTClient {
   constructor() {
@@ -26,38 +26,38 @@ class OTClient {
   }
 
   /**
-   * 连接到OT服务器 - 增强版本
+   * Connect to OT server - Enhanced version
    */
   connect(url = "ws://localhost:1235") {
     return new Promise((resolve, reject) => {
       if (this.isConnected) {
-        console.log("✅ OT客户端已连接");
+        console.log("✅ OT client connected");
         resolve();
         return;
       }
 
       if (this.isConnecting) {
-        console.log("⏳ OT客户端正在连接中...");
+        console.log("⏳ OT client connecting...");
         return;
       }
 
       this.url = url;
       this.isConnecting = true;
-      console.log("🔌 尝试连接到OT服务器:", url);
+      console.log("🔌 Trying to connect to OT server:", url);
 
       try {
         this.ws = new WebSocket(url);
         const connectStart = performance.now();
 
-        // 设置连接超时
+        // Settings connection timeout
         const connectTimeout = setTimeout(() => {
           if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
-            console.error("❌ OT连接超时");
+            console.error("❌ OT connection timeout");
             this.ws.close();
             this.isConnecting = false;
-            reject(new Error("连接超时"));
+            reject(new Error("Connection timeout"));
           }
-        }, 10000); // 10秒超时
+        }, 10000); // 10s timeout
 
         this.ws.onopen = () => {
           clearTimeout(connectTimeout);
@@ -67,7 +67,7 @@ class OTClient {
           this.isConnecting = false;
           this.reconnectAttempts = 0;
 
-          console.log("✅ OT客户端连接成功");
+          console.log("✅ OT client connection successful");
           this.startHeartbeat();
           resolve();
         };
@@ -78,7 +78,7 @@ class OTClient {
             this.handleMessage(message);
             this.performanceMetrics.bytesReceived += event.data.length;
           } catch (error) {
-            console.error("处理OT消息失败:", error);
+            console.error("Failed to process OT message:", error);
           }
         };
 
@@ -88,7 +88,7 @@ class OTClient {
           this.isConnecting = false;
           this.stopHeartbeat();
 
-          console.log("🔌 OT客户端连接关闭", {
+          console.log("🔌 OT client connection closed", {
             code: event.code,
             reason: event.reason,
             wasClean: event.wasClean,
@@ -96,7 +96,7 @@ class OTClient {
 
           this.triggerCallback("disconnect", { event });
 
-          // 自动重连
+          // Auto reconnect
           if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect();
           }
@@ -106,28 +106,28 @@ class OTClient {
           clearTimeout(connectTimeout);
           this.isConnecting = false;
 
-          console.error("❌ OT客户端WebSocket错误:", error);
-          console.error("WebSocket错误详情:", {
+          console.error("❌ OT client WebSocket error:", error);
+          console.error("WebSocket error details:", {
             url: url,
             readyState: this.ws?.readyState,
             error: error,
           });
 
           if (this.reconnectAttempts === 0) {
-            // 只在第一次连接失败时reject
+            // Reject only on the first connection failure
             reject(error);
           }
         };
       } catch (error) {
         this.isConnecting = false;
-        console.error("❌ 创建WebSocket连接失败:", error);
+        console.error("❌ Create WebSocket connection failed:", error);
         reject(error);
       }
     });
   }
 
   /**
-   * 自动重连
+   * Auto reconnect
    */
   scheduleReconnect() {
     if (this.isConnecting || this.isConnected) return;
@@ -135,20 +135,22 @@ class OTClient {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
-    console.log(`🔄 ${delay}ms后尝试第${this.reconnectAttempts}次重连...`);
+    console.log(
+      `🔄 Attempting reconnect #${this.reconnectAttempts} in ${delay}ms...`
+    );
 
     setTimeout(() => {
       if (!this.isConnected && !this.isConnecting) {
-        console.log(`🔄 执行第${this.reconnectAttempts}次重连`);
+        console.log(`🔄 Executing reconnect #${this.reconnectAttempts}`);
         this.connect(this.url).catch((error) => {
-          console.error("重连失败:", error);
+          console.error("Reconnect failed:", error);
         });
       }
     }, delay);
   }
 
   /**
-   * 开始心跳检测
+   * Start heartbeat check
    */
   startHeartbeat() {
     this.stopHeartbeat();
@@ -156,11 +158,11 @@ class OTClient {
       if (this.isConnected) {
         this.ping();
       }
-    }, 30000); // 30秒心跳
+    }, 30000); // 30s heartbeat
   }
 
   /**
-   * 停止心跳检测
+   * Stop heartbeat check
    */
   stopHeartbeat() {
     if (this.heartbeatInterval) {
@@ -170,13 +172,13 @@ class OTClient {
   }
 
   /**
-   * 处理服务器消息
+   * Handle server messages
    */
   handleMessage(message) {
     switch (message.type) {
       case "connection":
         this.connectionId = message.id;
-        console.log("🆔 收到连接ID:", message.id);
+        console.log("🆔 Received connection ID:", message.id);
         this.triggerCallback("connected", { connectionId: message.id });
         break;
       case "doc":
@@ -190,22 +192,22 @@ class OTClient {
         this.handlePong(message);
         break;
       case "error":
-        console.error("OT服务器错误:", message.error);
+        console.error("OT server error:", message.error);
         this.triggerCallback("error", message);
         break;
       default:
-        console.warn("未知的OT消息类型:", message.type);
+        console.warn("Unknown OT message type:", message.type);
     }
   }
 
   /**
-   * 处理文档更新
+   * Handle document updates
    */
   handleDocumentUpdate(message) {
     const { collection, id, data, version } = message;
     const docKey = `${collection}/${id}`;
 
-    console.log("📄 收到文档更新:", { collection, id, version });
+    console.log("📄 Received document update:", { collection, id, version });
 
     if (!this.documents.has(docKey)) {
       this.documents.set(docKey, {
@@ -224,23 +226,23 @@ class OTClient {
   }
 
   /**
-   * 处理操作
+   * Handle operation
    */
   handleOperation(message) {
     const { collection, id, op, version } = message;
     const docKey = `${collection}/${id}`;
 
-    console.log("⚡ 收到操作:", { collection, id, version });
+    console.log("⚡ Received operation:", { collection, id, version });
 
-    // 🔥 修复：过滤自己发送的操作，防止重复应用
-    // 检查消息层的客户端ID
+    // 🔥 Fix: filter out operations sent by self to prevent duplicate application
+    // Check client ID in the message layer
     if (message._clientId === this.connectionId) {
-      console.log("🔄 [OT] 跳过自己发送的操作", {
+      console.log("🔄 [OT] Skipping self-sent operation", {
         messageClientId: message._clientId,
         myClientId: this.connectionId,
         messageId: message._messageId,
       });
-      return; // 不处理自己发送的操作
+      return; // Don’t process self-sent operations
     }
 
     if (this.documents.has(docKey)) {
@@ -252,7 +254,7 @@ class OTClient {
           doc.version = version;
         }
       } catch (error) {
-        console.error("应用操作失败:", error);
+        console.error("Applying operation failed:", error);
       }
     }
 
@@ -260,7 +262,7 @@ class OTClient {
   }
 
   /**
-   * 处理pong响应（延迟测量）
+   * Handle pong response (latency measurement)
    */
   handlePong(message) {
     const latency = performance.now() - message.clientTimestamp;
@@ -274,15 +276,15 @@ class OTClient {
   }
 
   /**
-   * 订阅文档
+   * Subscribe to documents
    */
   subscribeDocument(collection, id) {
     if (!this.isConnected) {
-      console.warn("WebSocket未连接，无法订阅文档");
+      console.warn("WebSocket not connected, cannot subscribe to document");
       return;
     }
 
-    console.log("📝 订阅文档:", { collection, id });
+    console.log("📝 Subscribe to document:", { collection, id });
 
     const message = {
       type: "subscribe",
@@ -295,10 +297,10 @@ class OTClient {
   }
 
   /**
-   * 提交操作
+   * Submit operation
    */
   submitOperation(collection, id, op) {
-    console.log("🔥 [DEBUG] submitOperation 被调用", {
+    console.log("🔥 [DEBUG] submitOperation called", {
       collection,
       id,
       op,
@@ -310,7 +312,9 @@ class OTClient {
     });
 
     if (!this.isConnected) {
-      console.warn("❌ [DEBUG] WebSocket未连接，无法提交操作");
+      console.warn(
+        "❌ [DEBUG] WebSocket not connected, cannot submit operation"
+      );
       return;
     }
 
@@ -318,7 +322,10 @@ class OTClient {
     let doc = this.documents.get(docKey);
 
     if (!doc) {
-      console.warn("⚠️ [DEBUG] 文档不存在，创建新文档:", docKey);
+      console.warn(
+        "⚠️ [DEBUG] Document does not exist, creating new document:",
+        docKey
+      );
       doc = {
         collection,
         id,
@@ -328,16 +335,16 @@ class OTClient {
       this.documents.set(docKey, doc);
     }
 
-    console.log("📄 [DEBUG] 当前文档状态:", doc);
+    console.log("📄 [DEBUG] Current document state:", doc);
 
-    // 🔥 修复：为操作添加客户端标识，防止重复应用
-    // 注意：ShareDB操作应该是数组格式，不能用扩展操作符直接合并
+    // 🔥 Fix: add client identifier to operation to prevent duplicate application
+    // Note: ShareDB operations should be array format, cannot directly merge with spread
     let enhancedOp;
     if (Array.isArray(op)) {
-      // 如果操作是数组格式（正确的Delta格式），保持数组格式
-      enhancedOp = op; // 不修改原始操作格式
+      // If op is array format (valid Delta format), keep it
+      enhancedOp = op;
     } else {
-      // 如果是对象格式，使用扩展操作符
+      // If object format, extend with client info
       enhancedOp = {
         ...op,
         _clientId: this.connectionId,
@@ -352,17 +359,17 @@ class OTClient {
       type: "op",
       collection,
       id,
-      op: enhancedOp, // 使用增强后的操作
+      op: enhancedOp, // use enhanced operation
       version: doc.version,
       timestamp: performance.now(),
-      // 🔥 在消息层添加客户端标识，用于过滤
+      // 🔥 Add client ID at message layer for filtering
       _clientId: this.connectionId,
       _messageId: `${this.connectionId}_${Date.now()}_${Math.random()
         .toString(36)
         .substr(2, 9)}`,
     };
 
-    console.log("📤 [DEBUG] 准备发送消息:", message);
+    console.log("📤 [DEBUG] Preparing to send message:", message);
 
     try {
       this.sendMessage(message);
@@ -370,16 +377,16 @@ class OTClient {
       this.performanceMetrics.lastOperationTime = performance.now();
 
       console.log(
-        "✅ [DEBUG] 操作发送成功，操作计数:",
+        "✅ [DEBUG] Operation sent successfully, total ops count:",
         this.performanceMetrics.operationsCount
       );
     } catch (error) {
-      console.error("❌ [DEBUG] 发送操作失败:", error);
+      console.error("❌ [DEBUG] Sending operation failed:", error);
     }
   }
 
   /**
-   * 发送ping请求（延迟测量）
+   * Send ping request (latency measurement)
    */
   ping() {
     if (!this.isConnected) return;
@@ -393,10 +400,10 @@ class OTClient {
   }
 
   /**
-   * 发送消息到服务器
+   * Send message to server
    */
   sendMessage(message) {
-    console.log("🔥 [DEBUG] sendMessage 被调用", {
+    console.log("🔥 [DEBUG] sendMessage called", {
       messageType: message.type,
       wsExists: !!this.ws,
       wsReadyState: this.ws?.readyState,
@@ -406,17 +413,20 @@ class OTClient {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       try {
         const data = JSON.stringify(message);
-        console.log("📤 [DEBUG] 发送WebSocket数据:", data);
+        console.log("📤 [DEBUG] Sending WebSocket data:", data);
 
         this.ws.send(data);
         this.performanceMetrics.bytesSent += data.length;
 
-        console.log("✅ [DEBUG] WebSocket发送成功，字节数:", data.length);
+        console.log(
+          "✅ [DEBUG] WebSocket send successful, bytes:",
+          data.length
+        );
       } catch (error) {
-        console.error("❌ [DEBUG] 发送消息失败:", error);
+        console.error("❌ [DEBUG] Sending message failed:", error);
       }
     } else {
-      console.warn("❌ [DEBUG] WebSocket未连接，无法发送消息", {
+      console.warn("❌ [DEBUG] WebSocket not connected, cannot send message", {
         readyState: this.ws?.readyState,
         isConnected: this.isConnected,
         wsStates: {
@@ -430,7 +440,7 @@ class OTClient {
   }
 
   /**
-   * 注册回调函数
+   * Register callback function
    */
   on(event, callback) {
     if (!this.callbacks.has(event)) {
@@ -440,7 +450,7 @@ class OTClient {
   }
 
   /**
-   * 移除回调函数
+   * Remove callback function
    */
   off(event, callback) {
     if (this.callbacks.has(event)) {
@@ -453,7 +463,7 @@ class OTClient {
   }
 
   /**
-   * 触发回调函数
+   * Trigger callback function
    */
   triggerCallback(event, data) {
     if (this.callbacks.has(event)) {
@@ -461,14 +471,14 @@ class OTClient {
         try {
           callback(data);
         } catch (error) {
-          console.error("回调函数执行失败:", error);
+          console.error("Callback execution failed:", error);
         }
       });
     }
   }
 
   /**
-   * 应用rich-text操作
+   * Apply rich-text operation
    */
   applyRichTextOp(doc, op) {
     if (!doc) {
@@ -483,7 +493,7 @@ class OTClient {
   }
 
   /**
-   * 获取文档内容
+   * Get document content
    */
   getDocument(collection, id) {
     const docKey = `${collection}/${id}`;
@@ -491,7 +501,7 @@ class OTClient {
   }
 
   /**
-   * 获取性能指标
+   * Get performance metrics
    */
   getPerformanceMetrics() {
     const latencies = this.performanceMetrics.networkLatency;
@@ -516,7 +526,7 @@ class OTClient {
   }
 
   /**
-   * 重置性能指标
+   * Reset performance metrics
    */
   resetMetrics() {
     this.performanceMetrics = {
@@ -530,35 +540,35 @@ class OTClient {
   }
 
   /**
-   * 手动重连
+   * Manual reconnect
    */
   reconnect() {
     if (this.isConnected || this.isConnecting) {
-      console.log("已连接或正在连接中，无需重连");
+      console.log("Already connected or connecting, no need to reconnect");
       return;
     }
 
-    console.log("🔄 手动重连OT服务器");
+    console.log("🔄 Manually reconnect to OT server");
     this.reconnectAttempts = 0;
     return this.connect(this.url);
   }
 
   /**
-   * 断开连接
+   * Disconnect
    */
   disconnect() {
-    console.log("🔌 主动断开OT连接");
+    console.log("🔌 Actively disconnect OT connection");
     this.stopHeartbeat();
 
     if (this.ws) {
-      this.ws.close(1000, "主动断开");
+      this.ws.close(1000, "Active disconnect");
       this.ws = null;
     }
 
     this.isConnected = false;
     this.isConnecting = false;
     this.connectionId = null;
-    this.reconnectAttempts = this.maxReconnectAttempts; // 防止自动重连
+    this.reconnectAttempts = this.maxReconnectAttempts; // Prevent auto reconnect
   }
 }
 

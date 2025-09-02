@@ -4,39 +4,39 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-// 创建结果目录 - 使用相对于项目根目录的路径
+// Create results directory - use path relative to project root
 const resultsDir = path.join(__dirname, "../test-results");
 if (!fs.existsSync(resultsDir)) {
   fs.mkdirSync(resultsDir, { recursive: true });
 }
 
-// 生成时间戳
+// Generated timestamp
 const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-const dateStr = new Date().toLocaleString("zh-CN");
+const dateStr = new Date().toLocaleString("en-US");
 
-console.log(`🚀 开始运行CRDT测试套件... (${dateStr})`);
+console.log(`🚀 Starting CRDT test suite... (${dateStr})`);
 
 try {
-  // 运行测试并捕获输出
+  // Run test and capture output
   const output = execSync("npm run test:crdt", {
     encoding: "utf8",
     stdio: "pipe",
     maxBuffer: 1024 * 1024 * 10, // 10MB buffer
-    cwd: path.join(__dirname, "../.."), // 设置工作目录为项目根目录
+    cwd: path.join(__dirname, "../.."), // Set working directory to project root
   });
 
-  // 保存详细日志
+  // Save detailed log
   const logFile = path.join(resultsDir, `test-log-${timestamp}.txt`);
   fs.writeFileSync(
     logFile,
-    `CRDT测试结果报告
-生成时间: ${dateStr}
+    `CRDTtest结果报告
+Generated Time: ${dateStr}
 ====================================
 
 ${output}`
   );
 
-  // 运行JSON格式的测试结果
+  // Run JSON format test results
   let jsonResult = null;
   try {
     const jsonOutput = execSync("npm run test:crdt:json", {
@@ -45,39 +45,39 @@ ${output}`
       cwd: path.join(__dirname, "../.."),
     });
 
-    // 保存JSON结果
+    // Save JSON results
     const jsonFile = path.join(resultsDir, `test-results-${timestamp}.json`);
     fs.writeFileSync(jsonFile, jsonOutput);
 
-    // 解析JSON结果
+    // Parse JSON results
     jsonResult = JSON.parse(jsonOutput);
   } catch (jsonError) {
-    console.warn("⚠️  JSON格式保存失败，但文本日志已保存");
-    console.warn("JSON错误:", jsonError.message);
+    console.warn("⚠️  JSON format save failed, but text log saved");
+    console.warn("JSON error:", jsonError.message);
   }
 
-  // 生成摘要
+  // Generate summary
   let summary = `
-📊 测试完成时间: ${dateStr}
-📁 详细日志: ${path.relative(process.cwd(), logFile)}
+📊 Test完成时间: ${dateStr}
+📁 Detailed log: ${path.relative(process.cwd(), logFile)}
 `;
 
   if (jsonResult) {
     summary += `
-📈 测试统计:
-   - 总测试套件: ${jsonResult.numTotalTestSuites || 0}
-   - 通过套件: ${jsonResult.numPassedTestSuites || 0}
-   - 失败套件: ${jsonResult.numFailedTestSuites || 0}
-   - 总测试数: ${jsonResult.numTotalTests || 0}
-   - 通过测试: ${jsonResult.numPassedTests || 0}
-   - 失败测试: ${jsonResult.numFailedTests || 0}
-   - 运行时间: ${jsonResult.testResults?.[0]?.perfStats?.runtime || 0}ms
+📈 test统计:
+   - 总test套件: ${jsonResult.numTotalTestSuites || 0}
+   - passed套件: ${jsonResult.numPassedTestSuites || 0}
+   - failed套件: ${jsonResult.numFailedTestSuites || 0}
+   - 总test数: ${jsonResult.numTotalTests || 0}
+   - passedtest: ${jsonResult.numPassedTests || 0}
+   - failedtest: ${jsonResult.numFailedTests || 0}
+   - run时间: ${jsonResult.testResults?.[0]?.perfStats?.runtime || 0}ms
 `;
   }
 
   console.log(summary);
-  console.log("✅ 测试结果已保存!");
+  console.log("✅ Test results saved!");
 } catch (error) {
-  console.error("❌ 测试运行失败:", error.message);
+  console.error("❌ testrunfailed:", error.message);
   process.exit(1);
 }

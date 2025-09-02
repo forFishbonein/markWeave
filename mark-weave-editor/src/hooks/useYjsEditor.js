@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-08-31 05:21:08
+ * @LastEditTime: 2025-09-03 04:22:10
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -24,22 +24,22 @@ import {
 import { syncToProseMirror } from "../crdt/crdtSync";
 // import { richTextKeymap } from "../plugins/keymap";
 import { schema } from "../plugins/schema";
-import { createKeymap } from "../plugins/keymap"; // ← 注意引用
+import { createKeymap } from "../plugins/keymap"; // ← Note reference
 import { insertChar, insertText, deleteChars } from "../crdt/crdtActions";
 import { cursorPlugin, createDecorations } from "../old/cursor-plugin";
 import { useAuth } from "../contexts/AuthContext";
 
-// 统一读取属性，兼容普通对象与 Y.Map
+// Unified property reading, compatible with plain objects and Y.Map
 const getProp = (obj, key) =>
   typeof obj?.get === "function" ? obj.get(key) : obj[key];
 
 export function useYjsEditor(docId, editorRef) {
   const viewRef = useRef(null);
-  // 额外引用，用于在最外层 cleanup 中访问
+  // Additional reference for access in outer cleanup
   const providerRef = useRef(null);
   const awarenessRef = useRef(null);
   const syncIntervalRef = useRef(null);
-  const ydocRef = useRef(null); // 添加 ydoc 引用
+  const ydocRef = useRef(null); // Add ydoc reference
 
   const [editorView, setEditorView] = useState(null);
   const [awareness, setAwareness] = useState(null);
@@ -47,17 +47,17 @@ export function useYjsEditor(docId, editorRef) {
   const [isConnected, setIsConnected] = useState(false); // Add connection status state
   const { user: authUser } = useAuth();
 
-  console.log("当前文档ID:", docId);
+  console.log("Current document ID:", docId);
 
   useEffect(() => {
     let cleanup = () => {};
 
-    // 为每个文档创建独立的 Y.Doc，彻底避免跨文档数据污染
-    console.log("🔄 为文档", docId, "创建新的 Y.Doc");
+    // Create independent Y.Doc for each document to avoid cross-document data pollution
+    console.log("🔄 For document", docId, "creating new Y.Doc");
     resetYDoc();
-    const newYDoc = getYDoc(); // 使用 getter 获取实际的 Y.Doc 实例
-    ydocRef.current = newYDoc; // 存储到 ref 中
-    ydocRef.current = newYDoc; // 存储到 ref 中
+    const newYDoc = getYDoc(); // Use getter to get actual Y.Doc instance
+    ydocRef.current = newYDoc; // Store in ref
+    ydocRef.current = newYDoc; // Store in ref
 
     const fetchInitialState = async () => {
       try {
@@ -67,7 +67,7 @@ export function useYjsEditor(docId, editorRef) {
         if (res.ok) {
           const data = await res.json();
           if (data && data.update) {
-            // 在浏览器环境中使用 atob 和 Uint8Array 替代 Buffer
+            // Use atob and Uint8Array instead of Buffer in browser environment
             const binaryString = atob(data.update);
             const uint8 = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
@@ -76,17 +76,17 @@ export function useYjsEditor(docId, editorRef) {
             newYDoc.transact(() => {
               Y.applyUpdate(newYDoc, uint8);
             });
-            console.log("✅ 应用初始Yjs状态更新完成");
+            console.log("✅ Applied initial Yjs state update successfully");
           }
         }
       } catch (err) {
-        console.warn("⚠️ 获取初始Yjs状态失败:", err);
+        console.warn("⚠️ Failed to get initial Yjs state:", err);
       }
     };
 
-    // 先同步一次数据库里最新的完整状态
+    // First sync the latest complete state from database
     fetchInitialState().finally(() => {
-      // 然后再连接 WebSocket，避免重复增量
+      // Then connect WebSocket to avoid duplicate increments
       console.log("🔍 Debug: newYDoc instance:", newYDoc);
       console.log("🔍 Debug: newYDoc type:", typeof newYDoc);
       console.log("🔍 Debug: newYDoc.on exists:", typeof newYDoc?.on);
@@ -96,21 +96,21 @@ export function useYjsEditor(docId, editorRef) {
         "ws://localhost:1234",
         docId,
         newYDoc,
-        { disableBc: true } // 关键：禁用 BroadcastChannel，强制走 WebSocket
+        { disableBc: true } // Key: disable BroadcastChannel, force WebSocket
       );
       setProvider(wsProvider);
 
-      // 保存到 ref，方便外层 cleanup
+      // Save to ref for outer cleanup
       providerRef.current = wsProvider;
 
       const aw = wsProvider.awareness;
 
-      // 获取当前登录用户的ID用于判断是否为本人
+      // Get current logged-in user ID to determine if it's self
       const currentUserId = authUser?.userId;
 
-      // 设置用户信息 - 立即生效
+      // Set user info - immediate effect
       const setUserInfo = () => {
-        // 使用真实登录用户信息
+        // Use real logged-in user info
         if (authUser) {
           const userInfo = {
             name: authUser.username || authUser.email || "Unknown User",
@@ -118,87 +118,87 @@ export function useYjsEditor(docId, editorRef) {
             userId: authUser.userId,
             color: "#2563eb",
             timestamp: Date.now(),
-            online: true, // 明确标记在线状态
+            online: true, // Explicitly mark online status
           };
 
           aw.setLocalStateField("user", userInfo);
-          console.log("✅ 立即设置用户信息:", userInfo);
+          console.log("✅ Immediately set user info:", userInfo);
 
-          // 强制触发awareness同步 - 这是关键！
+          // Force trigger awareness sync - this is key!
           setTimeout(() => {
             aw.setLocalStateField("trigger", Date.now());
-            // console.log("🔄 强制触发awareness同步");
+            // console.log("🔄 Force trigger awareness sync");
           }, 100);
         } else {
           const fallbackUser = {
-            name: "访客" + Math.floor(Math.random() * 100),
+            name: "Guest" + Math.floor(Math.random() * 100),
             color: "#10b981",
             timestamp: Date.now(),
             online: true,
           };
           aw.setLocalStateField("user", fallbackUser);
-          console.log("⚠️ 设置访客信息:", fallbackUser);
+          console.log("⚠️ Setting guest info:", fallbackUser);
 
-          // 同样强制触发同步
+          // Also force trigger sync
           setTimeout(() => {
             aw.setLocalStateField("trigger", Date.now());
-            // console.log("🔄 强制触发awareness同步(访客)");
+            // console.log("🔄 Force trigger awareness sync (Guest)");
           }, 100);
         }
       };
 
-      // WebSocket状态监听
+      // WebSocket status monitoring
       wsProvider.on("status", (event) => {
-        console.log("🔌 WebSocket状态:", event.status);
+        console.log("🔌 WebSocket status:", event.status);
         setIsConnected(event.status === "connected"); // Update connection status
         if (event.status === "connected") {
-          // console.log("✅ WebSocket已连接");
-          // WebSocket连接后重新设置用户信息并强制同步
+          // console.log("✅ WebSocket connected");
+          // Reset user info and force sync after WebSocket connection
           setUserInfo();
 
-          // 额外的强制同步措施
+          // Additional forced sync measures
           setTimeout(() => {
-            // console.log("🚀 WebSocket连接后强制同步用户状态");
+            // console.log("🚀 Force sync user state after WebSocket connection");
             aw.setLocalStateField("forceSync", Date.now());
 
-            // 发送一个空的文档更新来触发同步
+            // Send empty document update to trigger sync
             newYDoc.transact(() => {
-              // 这会触发WebSocket同步
+              // This will trigger WebSocket sync
             });
           }, 200);
         }
       });
 
-      // 立即设置用户信息
+      // Immediately set user info
       setUserInfo();
 
-      // 移除定期同步，只在用户实际活动时更新状态
+      // Remove periodic sync, only update state on actual user activity
       // const syncInterval = setInterval(() => {
       //   if (aw.getLocalState().user) {
-      //     // 更新时间戳触发awareness变化
+      //     // Update timestamp to trigger awareness change
       //     aw.setLocalStateField("lastSeen", Date.now());
       //     // TODO
-      //     // console.log("⏰ 定期同步用户在线状态");
+      //     // console.log("⏰ Periodic sync of user online status");
       //   }
-      // }, 3000); // 每3秒同步一次
+      // }, 3000); // Sync every 3 seconds
 
       setAwareness(aw);
-      // 存到 ref，用于外层 cleanup
+      // Store in ref for outer cleanup
       awarenessRef.current = aw;
-      // syncIntervalRef.current = syncInterval; // 不再需要，因为移除了定时器
+      // syncIntervalRef.current = syncInterval; // No longer needed because timer was removed
 
       wsProvider.on("status", (event) => {
-        console.log("🔌 WebSocket状态变化：", event.status);
+        console.log("🔌 WebSocket status change:", event.status);
         if (event.status === "connected") {
-          console.log("✅ WebSocket已连接，用户可以开始协作");
+          console.log("✅ WebSocket connected, users can start collaborating");
         } else if (event.status === "disconnected") {
-          console.log("❌ WebSocket连接断开");
+          console.log("❌ WebSocket disconnected");
         }
       });
 
-      // 监听awareness变化 - 实时同步
+      // Listen to awareness changes - real-time sync
       wsProvider.awareness.on("change", (changes) => {
-        // console.log("👥 Awareness状态变化:", {
+        // console.log("👥 Awareness state change:", {
         //   added: changes.added,
         //   updated: changes.updated,
         //   removed: changes.removed,
@@ -206,20 +206,20 @@ export function useYjsEditor(docId, editorRef) {
         //     .length,
         // });
 
-        // 强制触发awareness状态更新
+        // Force trigger awareness state update
         if (changes.added.length > 0 || changes.removed.length > 0) {
-          console.log("🔄 用户加入/离开，强制同步状态");
+          console.log("🔄 User joined/left, forcing state sync");
         }
       });
-      // 创建 UndoManager，监听 ychars 和 yformatOps
-      // 1. 创建 UndoManager
+      // Create UndoManager, listen to ychars and yformatOps
+      // 1. Create UndoManager
       const undoManager = new UndoManager([ychars, yformatOps]);
 
-      // 2. 创建 keymap 插件，传入 undoManager
+      // 2. Create keymap plugin, pass undoManager
       const myKeymapPlugin = createKeymap(undoManager);
       if (editorRef.current && !viewRef.current) {
-        // 注意：不使用 ySyncPlugin！我们自己管理 CRDT 同步
-        // 初始化一个空的 ProseMirror 文档（可以先从 CRDT 中生成，如果为空则会自动填充空格）
+        // Note: don't use ySyncPlugin! We manage CRDT sync ourselves
+        // Initialize empty ProseMirror document (can generate from CRDT first, auto-fill with spaces if empty)
         const initialDoc = convertCRDTToProseMirrorDoc();
         console.log("initialDoc：", initialDoc, newYDoc);
         const state = EditorState.create({
@@ -231,28 +231,28 @@ export function useYjsEditor(docId, editorRef) {
           state,
           dispatchTransaction(tr) {
             if (!viewRef.current) return;
-            // console.log("📝 监听到 ProseMirror 变更:", tr);
+            // console.log("📝 Detected ProseMirror change:", tr);
             try {
               if (tr.getMeta("fromSync")) {
                 // console.log("🚀 fromSync newState:", newState);
-                //一旦这里updateState了，那么页面上的内容自然就会跟随改变了，跟下面的 steps 没有关系的！
+                // Once updateState here, page content will naturally follow changes, unrelated to steps below!
                 const newState = viewRef.current.state.apply(tr);
                 viewRef.current.updateState(newState);
                 return;
               }
 
-              // 应用用户输入到当前 state
+              // Apply user input to current state
               let newState = viewRef.current.state.apply(tr);
               // console.log("🚀newState", newState);
               viewRef.current.updateState(newState);
-              // 处理每个 transaction 中的步骤
+              // Process each step in transaction
               tr.steps.forEach((step) => {
                 if (step.slice && step.slice.content.size > 0) {
-                  // 🚀 获取插入位置
-                  const insertPos = step.from; // ProseMirror 文档中的插入位置
-                  console.log(`📝 文字插入到位置 ${insertPos}`);
+                  // 🚀 Get insertion position
+                  const insertPos = step.from; // Insertion position in ProseMirror document
+                  console.log(`📝 Text inserted at position ${insertPos}`);
 
-                  // 🚀 获取插入位置前一个字符的 opId
+                  // 🚀 Get opId of character before insertion position
                   let afterId = null;
                   if (insertPos > 1) {
                     const chars = ychars.toArray();
@@ -269,7 +269,7 @@ export function useYjsEditor(docId, editorRef) {
                   }
                   console.log(`📝 afterId: ${afterId}`);
 
-                  // 🚀 直接从 slice 中读取文本
+                  // 🚀 Read text directly from slice
                   console.log(
                     "step.slice.content",
                     insertPos,
@@ -278,13 +278,13 @@ export function useYjsEditor(docId, editorRef) {
                     step.from,
                     step.to
                   );
-                  // const text = newState.doc.textBetween(step.from, step.to); //这个好像不对
+                  // const text = newState.doc.textBetween(step.from, step.to); // This seems wrong
                   const text = step.slice.content.textBetween(
                     0,
                     step.slice.content.size
                   );
-                  console.log("text", text); //取出本次要插入的内容
-                  // 根据文本长度决定调用 insertText 或 insertChar
+                  console.log("text", text); // Extract content to be inserted this time
+                  // Decide to call insertText or insertChar based on text length
                   if (text.length > 1) {
                     insertText(afterId, text, aw);
                   } else {
@@ -294,13 +294,13 @@ export function useYjsEditor(docId, editorRef) {
                   step.from !== step.to &&
                   step.slice?.content.size === 0
                 ) {
-                  // 🚀 这里处理删除操作
-                  // console.log("❌ 发现删除操作:", step);
-                  deleteChars(step.from, step.to); // 🔥 直接调用批量删除
+                  // 🚀 Handle delete operation here
+                  // console.log("❌ Found delete operation:", step);
+                  deleteChars(step.from, step.to); // 🔥 Call batch delete directly
                 }
               });
             } catch (e) {
-              //因为这里如果新的newState和原来的一样，会报错Applying a mismatched transaction，我们要避免这个报错
+              // Because if newState is same as original, will error "Applying a mismatched transaction", we need to avoid this error
               console.log("error", e);
               return;
             }
@@ -308,7 +308,7 @@ export function useYjsEditor(docId, editorRef) {
         });
         viewRef.current = view;
 
-        // --- 实时同步本地光标到awareness ---  ——> 这是光标能出现的关键
+        // --- Real-time sync local cursor to awareness ---  ——> This is key for cursor appearance
         view.dom.addEventListener("mouseup", updateCursorAwareness);
         view.dom.addEventListener("keyup", updateCursorAwareness);
         function updateCursorAwareness() {
@@ -321,10 +321,10 @@ export function useYjsEditor(docId, editorRef) {
             color: user?.color || "#ffa500",
           });
         }
-        // 初始化时同步一次
+        // Sync once on initialization
         // setTimeout(updateCursorAwareness, 100);
 
-        // 监听 awareness 变化，实时更新光标装饰，避免堆积 ——> 这是光标能移动的关键
+        // Listen to awareness changes, real-time update cursor decorations, avoid accumulation ——> This is key for cursor movement
         aw.on("change", () => {
           const decoSet = createDecorations(view.state, aw);
           view.dispatch(view.state.tr.setMeta("cursorDecorations", decoSet));
@@ -333,7 +333,7 @@ export function useYjsEditor(docId, editorRef) {
         setEditorView(view);
         syncToProseMirror(view, docId);
       }
-      //自己管理 awareness 里的光标，不需要 yCursorPlugin
+      // Manage cursor in awareness ourselves, no need for yCursorPlugin
 
       setTimeout(() => {
         // console.log(
@@ -341,16 +341,16 @@ export function useYjsEditor(docId, editorRef) {
         //   ychars.toArray(),
         //   ychars.toArray()[ychars.toArray().length - 1]?.opId
         // );
-        //todo 进行同步测试的
+        // TODO: for sync testing
         /**
-         * 我的理解：这里测试感觉没啥用，因为不能得到最新的数据，得不到合适的插入位置
-         * 但是如果用户自己手动数据那肯定是可以拿到插入位置的，既然有插入位置那么一定就是符合合并要求的，因为就只需要根据插入位置来就可以了！
+         * My understanding: this test seems useless because it cannot get the latest data or suitable insertion position
+         * But if users manually input data, they can definitely get the insertion position. Since there is an insertion position, it must meet merge requirements, because you only need to follow the insertion position!
          *
-         * 至于格式的合并，因为我们有 wins 策略，自然也是可以应付过来的！
-         * 可以再在这里测试一下格式的合并，需要先构造数据然后我们手动去调用那个函数，回头试一下！
+         * As for format merging, since we have wins strategy, we can naturally handle it!
+         * Can test format merging here, need to construct data first then manually call that function, try it later!
          */
         // if (user && JSON.parse(user).name === "User71") {
-        //   insertText(ychars.toArray()[ychars.toArray().length - 1]?.opId, "你好");
+        //   insertText(ychars.toArray()[ychars.toArray().length - 1]?.opId, "Hello");
         // } else {
         //   insertText(
         //     ychars.toArray()[ychars.toArray().length - 1]?.opId,
@@ -360,16 +360,16 @@ export function useYjsEditor(docId, editorRef) {
       }, 0);
       // const intervalId = setInterval(() => {
       //   window.location.reload();
-      // }, 2000); // 每 5000 毫秒（5 秒）刷新一次页面
-      // 页面卸载时清理用户状态
+      // }, 2000); // Refresh page every 5000 milliseconds (5 seconds)
+      // Clean up user state when page unloads
       const handleBeforeUnload = () => {
         aw.setLocalStateField("user", null);
       };
       window.addEventListener("beforeunload", handleBeforeUnload);
 
-      // 定义 cleanup 逻辑，并存储到外层变量
+      // Define cleanup logic and store in outer variable
       cleanup = () => {
-        // clearInterval(syncInterval); // 不再需要，因为移除了定时器
+        // clearInterval(syncInterval); // No longer needed because timer was removed
 
         aw.setLocalState(null);
 
@@ -387,11 +387,11 @@ export function useYjsEditor(docId, editorRef) {
       };
     });
 
-    // 最外层 cleanup — React 确保组件卸载时调用
+    // Outermost cleanup — React ensures call when component unmounts
     return () => {
       cleanup();
     };
-  }, [docId, authUser]); // 添加authUser依赖
+  }, [docId, authUser]); // Add authUser dependency
 
   return [editorView, awareness, provider, isConnected, ydocRef.current]; // Add ydoc to return values
 }

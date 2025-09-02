@@ -6,12 +6,12 @@ class ApiService {
     this.baseURL = API_BASE_URL;
   }
 
-  // 获取基础URL
+  // Get base URL
   getBaseURL() {
     return this.baseURL;
   }
 
-  // 通用请求方法
+  // Common request method
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
     const token = localStorage.getItem("token");
@@ -30,17 +30,17 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.msg || data.message || "请求失败");
+        throw new Error(data.msg || data.message || "Request failed");
       }
 
       return data;
     } catch (error) {
-      console.error("API请求错误:", error);
+      console.error("API request error:", error);
       throw error;
     }
   }
 
-  // 认证相关API
+  // Authentication related API
   async register(userData) {
     return this.request("/auth/register", {
       method: "POST",
@@ -59,12 +59,12 @@ class ApiService {
     return this.request("/auth/profile");
   }
 
-  // 便捷方法，和 getProfile 功能相同
+  // Convenience method, same functionality as getProfile
   async getCurrentUser() {
     return this.getProfile();
   }
 
-  // 团队相关API
+  // Team related API
   async createTeam(teamData) {
     return this.request("/teams", {
       method: "POST",
@@ -100,7 +100,7 @@ class ApiService {
     });
   }
 
-  // 文档相关API
+  // Document related API
   async createDocument(documentData) {
     return this.request("/documents", {
       method: "POST",
@@ -116,7 +116,7 @@ class ApiService {
     return this.request(`/documents/${docId}`);
   }
 
-  // 便捷方法，和 getDocumentDetails 功能相同
+  // Convenience method, same functionality as getDocumentDetails
   async getDocument(docId) {
     return this.getDocumentDetails(docId);
   }
@@ -134,7 +134,7 @@ class ApiService {
     });
   }
 
-  // 文档内容相关API
+  // Document content related API
   async getDocumentContent(docId) {
     return this.request(`/doc/${docId}`);
   }

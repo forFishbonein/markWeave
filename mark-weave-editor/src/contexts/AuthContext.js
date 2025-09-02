@@ -57,18 +57,18 @@ const initialState = {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // 检查token并加载用户信息
+  // Check token and load user info
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         try {
           const response = await apiService.getProfile();
-          // 确保处理后端返回的数据格式 { success: true, user: {...} }
+          // Ensure handling of backend returned data format { success: true, user: {...} }
           const user = response.user || response;
           dispatch({ type: "SET_USER", payload: user });
         } catch (error) {
-          console.error("认证检查失败:", error);
+          console.error("Authentication check failed:", error);
           dispatch({ type: "AUTH_ERROR", payload: error.message });
         }
       } else {
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // 登录
+  // Login
   const login = async (credentials) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 注册
+  // Register
   const register = async (userData) => {
     try {
       dispatch({ type: "SET_LOADING", payload: true });
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 登出
+  // Logout
   const logout = () => {
     dispatch({ type: "LOGOUT" });
   };

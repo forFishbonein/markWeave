@@ -1,4 +1,13 @@
 /*
+ * @FilePath: crdtActions.cjs
+ * @Author: Aron
+ * @Date: 2025-09-03 04:14:43
+ * @LastEditors: Please set LastEditors
+ * @LastEditTime: 2025-09-03 04:15:19
+ * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
+ * @Descripttion:
+ */
+/*
  * CommonJS wrapper for CRDT actions module
  * Used by tests to properly isolate Y.Doc instances
  */
@@ -26,7 +35,9 @@ function createCRDTActions(ychars, yformatOps) {
     let index;
     if (afterId) {
       // 找到afterId字符的位置
-      const afterIndex = ychars.toArray().findIndex((c) => getProp(c, "opId") === afterId);
+      const afterIndex = ychars
+        .toArray()
+        .findIndex((c) => getProp(c, "opId") === afterId);
       if (afterIndex === -1) {
         console.warn(`⚠️ afterId ${afterId} 未找到，插入到开头`);
         index = 0;
@@ -36,23 +47,23 @@ function createCRDTActions(ychars, yformatOps) {
       }
     } else {
       // afterId为null时，插入到开头，但要考虑时间戳排序
-      const currentTimestamp = parseInt(opId.split('@')[0]);
+      const currentTimestamp = parseInt(opId.split("@")[0]);
       const chars = ychars.toArray();
       let insertIndex = 0;
-      
+
       // 向后查找，直到找到时间戳更大的字符
       while (insertIndex < chars.length) {
         const nextChar = chars[insertIndex];
         const nextOpId = getProp(nextChar, "opId");
-        const nextTimestamp = parseInt(nextOpId.split('@')[0]);
-        
+        const nextTimestamp = parseInt(nextOpId.split("@")[0]);
+
         // 如果下一个字符的时间戳更大，则插入在它之前
         if (nextTimestamp > currentTimestamp) {
           break;
         }
         insertIndex++;
       }
-      
+
       index = insertIndex;
     }
 
@@ -66,7 +77,7 @@ function createCRDTActions(ychars, yformatOps) {
 
     for (let i = 0; i < charsArr.length; i++) {
       const ch = charsArr[i];
-      
+
       // 生成唯一 opId，使用正常时间戳 + 递增 counter，保证唯一且可排序
       const opId = `${Date.now()}_${localCounter}@client`;
       localCounter += 1; // 递增计数，保证同一毫秒内的字符仍然可排序
@@ -80,7 +91,9 @@ function createCRDTActions(ychars, yformatOps) {
       let index;
       if (currentAfterId) {
         // 找到afterId字符的位置
-        const afterIndex = ychars.toArray().findIndex((c) => getProp(c, "opId") === currentAfterId);
+        const afterIndex = ychars
+          .toArray()
+          .findIndex((c) => getProp(c, "opId") === currentAfterId);
         if (afterIndex === -1) {
           console.warn(`⚠️ afterId ${currentAfterId} 未找到，插入到开头`);
           index = 0;
@@ -92,7 +105,7 @@ function createCRDTActions(ychars, yformatOps) {
         // afterId为null时，插入到开头
         index = 0;
       }
-      
+
       // 插入当前字符操作
       ychars.insert(index, [newChar]);
 
@@ -255,7 +268,7 @@ function createCRDTActions(ychars, yformatOps) {
     removeEm,
     addLink,
     removeLink,
-    resetCounters
+    resetCounters,
   };
 }
 

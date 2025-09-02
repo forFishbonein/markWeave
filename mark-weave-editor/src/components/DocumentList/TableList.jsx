@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import '../DocumentList/documentList.css';
 
 const columns = [
-  { title: '名称', dataIndex: 'name', key: 'name' },
-  { title: '最后更新时间', dataIndex: 'updated', key: 'updated' },
+  { title: 'Name', dataIndex: 'name', key: 'name' },
+  { title: 'Last Updated', dataIndex: 'updated', key: 'updated' },
 ];
 
 const TableList = ({ documents }) => {

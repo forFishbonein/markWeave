@@ -75,7 +75,7 @@ function main() {
     // Execute tests and capture output
     const rawOutput = execSync("npm run test:crdt", {
       encoding: "utf8",
-      cwd: path.join(__dirname, "../.."), // 调整工作目录到项目根目录
+      cwd: path.join(__dirname, "../.."), // Adjust working directory to project root
     });
 
     // Clean output

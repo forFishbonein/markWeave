@@ -1,6 +1,6 @@
 /**
- * OT性能监控器 - 真实数据版本
- * 完全基于真实WebSocket消息和OT操作的性能监控
+ * OT Performance Monitor - Real Data Version
+ * Performance monitoring completely based on real WebSocket messages and OT operations
  */
 class OTPerformanceMonitor {
   constructor() {
@@ -10,7 +10,7 @@ class OTPerformanceMonitor {
       .toString(36)
       .substr(2, 9)}`;
 
-    // 性能数据
+    // Performance data
     this.metrics = {
       operationsCount: 0,
       totalOperationSize: 0,
@@ -21,7 +21,7 @@ class OTPerformanceMonitor {
       keystrokes: 0,
       operationLatencies: [],
       networkLatencies: [],
-      // 🔥 新增：端到端延迟指标
+      // 🔥 New: End-to-end latency metrics
       endToEndLatencies: [],
       realNetworkBytes: {
         sent: 0,
@@ -29,7 +29,7 @@ class OTPerformanceMonitor {
       },
     };
 
-    // 真实操作队列 - 用于匹配用户操作和服务器响应
+    // Real operation queue - for matching user operations and server responses
     this.pendingOperations = [];
     this.websocketMessageQueue = [];
     this.realNetworkStats = {
@@ -39,13 +39,13 @@ class OTPerformanceMonitor {
       bytesReceived: 0,
     };
 
-    // 🔥 新增：端到端延迟相关
+    // 🔥 New: End-to-end latency related
     this.pendingE2E = new Map(); // {hash: timestamp}
-    this.pendingOperationMessages = new Map(); // {messageId: timestamp} - 用于匹配操作和响应
+    this.pendingOperationMessages = new Map(); // {messageId: timestamp} - for matching operations and responses
     this.originalSend = null;
     this.originalOnMessage = null;
 
-    // 绑定方法
+    // Bind methods
     this.handleKeydown = this.handleKeydown.bind(this);
     this.handleDocUpdate = this.handleDocUpdate.bind(this);
     this.handleOperation = this.handleOperation.bind(this);
@@ -53,7 +53,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 计算CRC32哈希
+   * Calculate CRC32 hash
    */
   crc32(data) {
     let crc = 0xffffffff;
@@ -64,7 +64,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 简单字符串哈希
+   * Simple string hash
    */
   simpleHash(str) {
     let hash = 0;
@@ -78,7 +78,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * CRC32查找表
+   * CRC32 lookup table
    */
   get crc32Table() {
     if (!this._crc32Table) {
@@ -95,17 +95,17 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 开始监控  ——> 调用了setupRealEventListeners
+   * Start monitoring  ——> Called setupRealEventListeners
    */
   startMonitoring(otClient) {
-    console.log("🔍 [OT] startMonitoring被调用", {
+    console.log("🔍 [OT] startMonitoring called", {
       isMonitoring: this.isMonitoring,
       hasOtClient: !!otClient,
       otClientType: typeof otClient,
     });
 
     if (this.isMonitoring) {
-      console.log("⚠️ [OT] 监控已启动，跳过");
+      console.log("⚠️ [OT] Monitoring already started, skipping");
       return;
     }
 
@@ -113,76 +113,76 @@ class OTPerformanceMonitor {
     this.isMonitoring = true;
     this.startTime = performance.now();
 
-    console.log("🚀 [OT] 开始真实性能监控");
-    console.log(`🔑 [MULTI-WINDOW] OT客户端信息:`, {
+    console.log("🚀 [OT] Starting real performance monitoring");
+    console.log(`🔑 [MULTI-WINDOW] OT client info:`, {
       windowId: this.windowId,
       otClientConnected: !!(this.otClient && this.otClient.isConnected),
       userAgent: navigator.userAgent.includes("Chrome") ? "Chrome" : "Other",
-      sessionStorage: sessionStorage.length, // 无痕窗口会有不同的session
+      sessionStorage: sessionStorage.length, // Incognito windows will have different sessions
     });
 
-    // 设置真实事件监听
+    // Set up real event listeners
     this.setupRealEventListeners();
 
-    // 🔥 新增：定期清理过期的E2E数据
+    // 🔥 New: Periodically clean expired E2E data
     this.e2eCleanupInterval = setInterval(() => {
       this.cleanupExpiredE2EData();
-    }, 5000); // 每5秒清理一次
+    }, 5000); // Clean every 5 seconds
   }
 
   /**
-   * 设置真实事件监听器  ——> 核心函数
+   * Set up real event listeners  ——> Core function
    */
   setupRealEventListeners() {
-    // 键盘事件监听
+    // Keyboard event listening
     document.addEventListener("keydown", this.handleKeydown);
 
-    // OT客户端事件监听
+    // OT client event listening
     if (this.otClient) {
-      console.log("🔧 [OT] 设置OT客户端事件监听器");
+      console.log("🔧 [OT] Setting up OT client event listeners");
       this.otClient.on("docUpdate", this.handleDocUpdate);
       this.otClient.on("operation", this.handleOperation);
       this.otClient.on("pong", this.handlePong);
-      console.log("✅ [OT] OT客户端事件监听器设置完成");
+      console.log("✅ [OT] OT client event listeners setup completed");
     } else {
-      console.log("⚠️ [OT] OT客户端不存在，无法设置事件监听器");
+      console.log("⚠️ [OT] OT client does not exist, cannot set up event listeners");
     }
 
-    // 连接状态监听
+    // Connection status monitoring
     this.monitorConnectionEvents();
 
-    // 🔥 关键：真实WebSocket消息拦截
+    // 🔥 Key: Real WebSocket message interception
     this.setupRealWebSocketMonitoring();
 
-    // 🔥 新增：清理旧的E2E数据，确保从干净状态开始
+    // 🔥 New: Clean old E2E data, ensure starting from clean state
     this.pendingE2E.clear();
-    console.log("✅ [OT] 真实事件监听器已设置，E2E数据已清理");
+    console.log("✅ [OT] Real event listeners set up, E2E data cleaned");
   }
 
   /**
-   * 设置真实WebSocket监控
+   * Set up real WebSocket monitoring
    */
   setupRealWebSocketMonitoring() {
     if (!this.otClient || !this.otClient.ws) {
-      console.log("⚠️ [OT] WebSocket不存在，稍后重试");
+      console.log("⚠️ [OT] WebSocket does not exist, retrying later");
       setTimeout(() => {
         if (this.isMonitoring && this.otClient && this.otClient.ws) {
           this.setupRealWebSocketMonitoring();
         }
-      }, 300); // 🔥 优化：加快同步频率
+      }, 300); // 🔥 Optimization: Speed up sync frequency
       return;
     }
 
     const ws = this.otClient.ws;
-    console.log("🔍 [OT] 开始监控真实WebSocket消息");
+    console.log("🔍 [OT] Starting to monitor real WebSocket messages");
 
-    // 🔥 新增：拦截发送的消息 - 支持E2E延迟计算
+    // 🔥 New: Intercept sent messages - support E2E latency calculation
     this.originalSend = ws.send.bind(ws);
     ws.send = (data) => {
       const timestamp = performance.now();
       const size = data.length || data.byteLength || 0;
 
-      // 记录网络事件
+      // Record network events
       this.metrics.networkEvents.push({
         type: "send",
         timestamp,
@@ -190,26 +190,26 @@ class OTPerformanceMonitor {
         windowId: this.windowId,
       });
 
-      // 🔥 修复：更新真实网络统计
+      // 🔥 Fix: Update real network statistics
       this.realNetworkStats.messagesSent++;
       this.realNetworkStats.bytesSent += size;
       this.metrics.realNetworkBytes.sent += size;
 
-      // 🔥 计算CRC32哈希并记录发送时间 - 支持多种数据格式
+      // 🔥 Calculate CRC32 hash and record send time - support multiple data formats
       let hash = null;
       if (data instanceof Uint8Array) {
         hash = this.crc32(data);
       } else if (data instanceof ArrayBuffer) {
         hash = this.crc32(new Uint8Array(data));
       } else if (typeof data === "string") {
-        // 对于字符串，使用简单的哈希
+        // For strings, use simple hash
         hash = this.simpleHash(data);
       }
 
       if (hash !== null) {
         this.pendingE2E.set(hash, timestamp);
 
-        // 🔥 新增：提取messageId用于操作匹配
+        // 🔥 New: Extract messageId for operation matching
         let messageId = null;
         let clientId = null;
         if (typeof data === "string") {
@@ -218,13 +218,13 @@ class OTPerformanceMonitor {
             messageId = message._messageId || message.messageId;
             clientId = message._clientId || message.clientId;
           } catch (e) {
-            // 忽略JSON解析错误
+            // Ignore JSON parsing errors
           }
         }
 
         if (messageId) {
           this.pendingOperationMessages.set(messageId, timestamp);
-          // 🔥 新增：同时存储clientId作为备用匹配
+          // 🔥 New: Also store clientId as backup matching
           if (clientId) {
             this.pendingOperationMessages.set(
               `${clientId}_${messageId}`,
@@ -232,16 +232,16 @@ class OTPerformanceMonitor {
             );
           }
           console.log(
-            `📤 [E2E] 发送操作消息，messageId: ${messageId}, clientId: ${clientId}, 时间戳: ${timestamp}, 大小: ${size}字节`
+            `📤 [E2E] Sending operation message, messageId: ${messageId}, clientId: ${clientId}, timestamp: ${timestamp}, size: ${size}bytes`
           );
         } else {
           console.log(
-            `📤 [E2E] 发送消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节`
+            `📤 [E2E] Sending message, hash: ${hash}, timestamp: ${timestamp}, size: ${size}bytes`
           );
         }
 
-        // 🔥 新增：发送时调试信息
-        console.log(`🔍 [E2E] 发送调试信息:`, {
+        // 🔥 New: Debug info on send
+        console.log(`🔍 [E2E] send调试信息:`, {
           hash,
           messageId,
           pendingE2ESize: this.pendingE2E.size,
@@ -254,7 +254,7 @@ class OTPerformanceMonitor {
             typeof data === "string" ? data.substring(0, 100) : "Binary data",
         });
       } else {
-        console.log(`📤 [E2E] 发送消息但跳过E2E计算:`, {
+        console.log(`📤 [E2E] Sending message but skipping E2E calculation:`, {
           dataType: typeof data,
           isUint8Array: data instanceof Uint8Array,
           isArrayBuffer: data instanceof ArrayBuffer,
@@ -263,17 +263,17 @@ class OTPerformanceMonitor {
         });
       }
 
-      console.log(`📤 [OT] 发送消息: ${size}字节`);
+      console.log(`📤 [OT] Sending message: ${size}bytes`);
       return this.originalSend(data);
     };
 
-    // 🔥 新增：拦截接收的消息 - 支持E2E延迟计算
+    // 🔥 New: Intercept received messages - support E2E latency calculation
     this.originalOnMessage = ws.onmessage;
     ws.addEventListener("message", (event) => {
       const timestamp = performance.now();
       const size = event.data.length || event.data.byteLength || 0;
 
-      // 记录网络事件
+      // Record network events
       this.metrics.networkEvents.push({
         type: "receive",
         timestamp,
@@ -281,26 +281,26 @@ class OTPerformanceMonitor {
         windowId: this.windowId,
       });
 
-      // 🔥 修复：更新真实网络统计
+      // 🔥 Fix: Update real network statistics
       this.realNetworkStats.messagesReceived++;
       this.realNetworkStats.bytesReceived += size;
       this.metrics.realNetworkBytes.received += size;
 
-      // 🔥 计算CRC32哈希并计算端到端延迟 - 支持多种数据格式
+      // 🔥 Calculate CRC32 hash and calculate end-to-end latency - support multiple data formats
       let hash = null;
       if (event.data instanceof Uint8Array) {
         hash = this.crc32(event.data);
       } else if (event.data instanceof ArrayBuffer) {
         hash = this.crc32(new Uint8Array(event.data));
       } else if (typeof event.data === "string") {
-        // 对于字符串，使用简单的哈希
+        // For strings, use simple hash
         hash = this.simpleHash(event.data);
       }
 
       if (hash !== null) {
         const sendTime = this.pendingE2E.get(hash);
 
-        // 🔥 新增：尝试通过messageId匹配操作响应
+        // 🔥 New: Try to match operation responses via messageId
         let operationSendTime = null;
         let matchedMessageId = null;
 
@@ -308,9 +308,9 @@ class OTPerformanceMonitor {
           try {
             const message = JSON.parse(event.data);
 
-            // 🔥 新增：调试消息结构
+            // 🔥 New: Debug message structure
             if (message.type === "docUpdate") {
-              console.log(`🔍 [E2E] docUpdate消息结构:`, {
+              console.log(`🔍 [E2E] docUpdate message structure:`, {
                 messageType: message.type,
                 hasData: !!message.data,
                 dataKeys: message.data ? Object.keys(message.data) : [],
@@ -319,7 +319,7 @@ class OTPerformanceMonitor {
               });
             }
 
-            // 检查是否是操作响应（docUpdate类型）
+            // Check if it's operation response (docUpdate type)
             if (
               message.type === "docUpdate" &&
               message.data &&
@@ -329,7 +329,7 @@ class OTPerformanceMonitor {
               operationSendTime =
                 this.pendingOperationMessages.get(matchedMessageId);
             }
-            // 🔥 新增：尝试其他可能的消息结构
+            // 🔥 New: Try other possible message structures
             else if (message.type === "docUpdate" && message._messageId) {
               matchedMessageId = message._messageId;
               operationSendTime =
@@ -339,7 +339,7 @@ class OTPerformanceMonitor {
               message.data &&
               typeof message.data === "object"
             ) {
-              // 尝试在data对象中查找messageId
+              // Try to find messageId in data object
               const possibleMessageId =
                 message.data._messageId ||
                 message.data.messageId ||
@@ -350,13 +350,13 @@ class OTPerformanceMonitor {
                   this.pendingOperationMessages.get(matchedMessageId);
               }
             }
-            // 🔥 新增：尝试基于clientId的匹配
+            // 🔥 New: Try matching based on clientId
             else if (
               message.type === "docUpdate" &&
               message.data &&
               message.data.clientId
             ) {
-              // 尝试匹配clientId开头的key
+              // Try to match keys starting with clientId
               for (const [
                 key,
                 timestamp,
@@ -368,11 +368,11 @@ class OTPerformanceMonitor {
                 }
               }
             }
-            // 🔥 新增：基于时间窗口的智能匹配
+            // 🔥 New: Intelligent matching based on time window
             if (message.type === "docUpdate" && !operationSendTime) {
-              // 如果没有找到直接匹配，尝试匹配最近发送的操作
+              // If no direct match found, try to match recently sent operations
               const now = performance.now();
-              const timeWindow = 10000; // 10秒窗口，更宽松
+              const timeWindow = 10000; // 10 second window，更宽松
               let bestMatch = null;
               let bestTimeDiff = Infinity;
 
@@ -380,7 +380,7 @@ class OTPerformanceMonitor {
                 key,
                 sendTime,
               ] of this.pendingOperationMessages.entries()) {
-                const timeDiff = now - sendTime; // 只考虑正向时间差
+                const timeDiff = now - sendTime; // Only consider positive time differences
                 if (
                   timeDiff >= 0 &&
                   timeDiff < timeWindow &&
@@ -395,12 +395,12 @@ class OTPerformanceMonitor {
                 matchedMessageId = bestMatch.key;
                 operationSendTime = bestMatch.sendTime;
                 console.log(
-                  `🔍 [E2E] 基于时间窗口匹配: ${matchedMessageId}, 时间差: ${bestTimeDiff.toFixed(
+                  `🔍 [E2E] Time window based matching: ${matchedMessageId}, time diff: ${bestTimeDiff.toFixed(
                     1
                   )}ms`
                 );
               } else {
-                console.log(`🔍 [E2E] 时间窗口内无匹配操作，可用操作:`, {
+                console.log(`🔍 [E2E] No matching operations in time window, available operations:`, {
                   pendingOperations: Array.from(
                     this.pendingOperationMessages.entries()
                   ).map(([key, time]) => ({
@@ -414,17 +414,17 @@ class OTPerformanceMonitor {
               }
             }
           } catch (e) {
-            // 忽略JSON解析错误
+            // Ignore JSON parsing errors
           }
         }
 
         console.log(
-          `📥 [E2E] 接收消息，哈希: ${hash}, 时间戳: ${timestamp}, 大小: ${size}字节, 有发送时间: ${!!sendTime}, 有操作时间: ${!!operationSendTime}`
+          `📥 [E2E] Receiving message, hash: ${hash}, timestamp: ${timestamp}, size: ${size}bytes, has send time: ${!!sendTime}, has operation time: ${!!operationSendTime}`
         );
 
-        // 🔥 新增：调试信息
+        // 🔥 New: Debug info
         if (!sendTime && !operationSendTime) {
-          console.log(`🔍 [E2E] 调试信息:`, {
+          console.log(`🔍 [E2E] Debug info:`, {
             hash,
             matchedMessageId,
             pendingE2ESize: this.pendingE2E.size,
@@ -437,20 +437,20 @@ class OTPerformanceMonitor {
               typeof event.data === "string"
                 ? event.data.substring(0, 100)
                 : "Binary data",
-            pendingHashes: Array.from(this.pendingE2E.keys()).slice(-5), // 最近5个哈希
+            pendingHashes: Array.from(this.pendingE2E.keys()).slice(-5), // Recent 5 hashes
             pendingMessageIds: Array.from(
               this.pendingOperationMessages.keys()
-            ).slice(-5), // 最近5个messageId
+            ).slice(-5), // Recent 5 messageIds
           });
         }
 
-        // 使用操作匹配时间或哈希匹配时间
+        // Use operation match time or hash match time
         const actualSendTime = operationSendTime || sendTime;
 
         if (actualSendTime) {
           const e2eLatency = timestamp - actualSendTime;
 
-          // 记录合理的端到端延迟 - 放宽过滤条件
+          // Record reasonable end-to-end latency - relax filtering conditions
           if (e2eLatency >= 0 && e2eLatency < 20000) {
             this.metrics.endToEndLatencies.push({
               latency: e2eLatency,
@@ -464,7 +464,7 @@ class OTPerformanceMonitor {
               messageId: matchedMessageId,
             });
 
-            // 保持最近200个样本
+            // Keep recent 200 samples
             if (this.metrics.endToEndLatencies.length > 200) {
               this.metrics.endToEndLatencies =
                 this.metrics.endToEndLatencies.slice(-200);
@@ -472,27 +472,27 @@ class OTPerformanceMonitor {
 
             console.log(
               `🌐 [E2E] ${
-                operationSendTime ? "操作" : "WebSocket"
-              }端到端延迟: ${e2eLatency.toFixed(1)}ms, ${
+                operationSendTime ? "Operation" : "WebSocket"
+              }end-to-end latency: ${e2eLatency.toFixed(1)}ms, ${
                 operationSendTime
                   ? `messageId: ${matchedMessageId}`
-                  : `哈希: ${hash}`
+                  : `hash: ${hash}`
               }`
             );
             console.log(
-              `📊 [E2E] 端到端延迟数组长度: ${this.metrics.endToEndLatencies.length}`
+              `📊 [E2E] End-to-end latency array length: ${this.metrics.endToEndLatencies.length}`
             );
           } else {
             console.log(
-              `⚠️ [E2E] 延迟异常: ${e2eLatency.toFixed(1)}ms, ${
+              `⚠️ [E2E] Latency anomaly: ${e2eLatency.toFixed(1)}ms, ${
                 operationSendTime
                   ? `messageId: ${matchedMessageId}`
-                  : `哈希: ${hash}`
+                  : `hash: ${hash}`
               }`
             );
           }
 
-          // 删除已处理的消息
+          // Delete processed messages
           if (operationSendTime) {
             this.pendingOperationMessages.delete(matchedMessageId);
           } else {
@@ -500,11 +500,11 @@ class OTPerformanceMonitor {
           }
         } else {
           console.log(
-            `📥 [E2E] 收到未知消息，哈希: ${hash}, messageId: ${matchedMessageId}`
+            `📥 [E2E] 收到未知消息，hash: ${hash}, messageId: ${matchedMessageId}`
           );
         }
       } else {
-        console.log(`📥 [E2E] 接收消息但跳过E2E计算:`, {
+        console.log(`📥 [E2E] Receiving message but skipping E2E calculation:`, {
           dataType: typeof event.data,
           isUint8Array: event.data instanceof Uint8Array,
           isArrayBuffer: event.data instanceof ArrayBuffer,
@@ -513,22 +513,22 @@ class OTPerformanceMonitor {
         });
       }
 
-      console.log(`📥 [OT] 接收消息: ${size}字节`);
+      console.log(`📥 [OT] Receiving message: ${size}bytes`);
 
-      // 调用原始处理函数
+      // Call original handler function
       if (this.originalOnMessage) {
         this.originalOnMessage.call(ws, event);
       }
     });
 
-    // 监听连接状态变化
+    // Listen to connection state changes
     ws.onopen = (event) => {
       this.metrics.connectionEvents.push({
         type: "open",
         timestamp: performance.now(),
         windowId: this.windowId,
       });
-      console.log("🔗 [OT] WebSocket连接已建立");
+      console.log("🔗 [OT] WebSocket connection established");
     };
 
     ws.onclose = (event) => {
@@ -539,27 +539,27 @@ class OTPerformanceMonitor {
         reason: event.reason,
         windowId: this.windowId,
       });
-      console.log("❌ [OT] WebSocket连接已关闭");
+      console.log("❌ [OT] WebSocket connection closed");
     };
 
     ws.onerror = (error) => {
       this.metrics.connectionEvents.push({
         type: "error",
         timestamp: performance.now(),
-        error: error.message || "WebSocket错误",
+        error: error.message || "WebSocket error",
         windowId: this.windowId,
       });
-      console.error("💥 [OT] WebSocket错误:", error);
+      console.error("💥 [OT] WebSocket error:", error);
     };
   }
 
   /**
-   * 监控连接事件
+   * Monitor connection events
    */
   monitorConnectionEvents() {
     if (!this.otClient) return;
 
-    // 监听连接状态变化
+    // Listen to connection state changes
     this.otClient.on("connected", () => {
       this.metrics.connectionEvents.push({
         type: "connected",
@@ -578,10 +578,10 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 处理键盘输入（用户操作）
+   * Handle keyboard input（userOperation）
    */
   handleKeydown(event) {
-    // 只监听编辑器内的操作
+    // 只listen编辑器内的Operation
     if (
       !event.target.closest("[contenteditable]") &&
       !event.target.closest(".ProseMirror")
@@ -609,27 +609,27 @@ class OTPerformanceMonitor {
 
     this.metrics.userOperations.push(operation);
 
-    // 只记录可能产生OT操作的按键
+    // 只record可能产生OTOperation的按键
     if (this.isPrintableKey(event.key)) {
       this.pendingOperations.push(operation);
 
-      // 清理过期操作（3秒前，与匹配窗口保持一致）
+      // 清理过期Operation（3秒前，与匹配窗口保持一致）
       const cutoffTime = timestamp - 3000;
       this.pendingOperations = this.pendingOperations.filter(
         (op) => op.timestamp > cutoffTime
       );
 
       console.log(
-        `⌨️ [OT] 记录用户操作: ${event.key}, 待处理队列: ${this.pendingOperations.length}`
+        `⌨️ [OT] recorduserOperation: ${event.key}, pending queue: ${this.pendingOperations.length}`
       );
 
-      // 🔥 移除模拟响应 - 现在完全依赖真实的WebSocket消息
-      // 真实的OT操作会通过WebSocket消息处理
+      // 🔥 Remove simulated responses - now completely rely on real WebSocket messages
+      // 真实的OTOperation会passedWebSocket消息处理
     }
   }
 
   /**
-   * 处理文档更新（真实OT操作完成）
+   * 处理Documentsupdate（真实OTOperation完成）
    */
   handleDocUpdate(data) {
     const timestamp = performance.now();
@@ -639,25 +639,25 @@ class OTPerformanceMonitor {
     this.metrics.totalOperationSize += operationSize;
     this.metrics.operationTimes.push(timestamp);
 
-    console.log(`📄 [OT] 文档更新事件:`, {
+    console.log(`📄 [OT] Document update event:`, {
       data,
       operationSize,
       timestamp,
       operationsCount: this.metrics.operationsCount,
     });
 
-    // 🔥 方案A：用户感知延迟测量（与CRDT保持一致）
-    // OT的特点：需要等待服务器确认才能更新界面
+    // 🔥 Plan A: User perceived latency measurement (consistent with CRDT)
+    // OT characteristic: need to wait for server confirmation to update interface
 
-    // 检查是否为本地操作的服务器确认
-    // OT的docUpdate消息可能没有source字段，我们通过其他方式判断
+    // 检查是否为本地Operation的服务器确认
+    // OT's docUpdate message may not have source field, we judge via other means
     const isLocalOperationConfirm =
       !data ||
       data.source === "local" ||
       data.source === this.windowId ||
       !data.clientId ||
       data.clientId === this.windowId ||
-      (data && typeof data === "object" && Object.keys(data).length === 0); // 空对象也可能是本地确认
+      (data && typeof data === "object" && Object.keys(data).length === 0); // Empty object may also be local confirmation
 
     console.log(
       "data.source",
@@ -666,22 +666,22 @@ class OTPerformanceMonitor {
       isLocalOperationConfirm
     );
 
-    // 🔥 新增：对于OT，我们总是尝试匹配操作，因为每个docUpdate都可能是对本地操作的响应
+    // 🔥 新增：对于OT，我们总是尝试匹配Operation，因为每docUpdate都可能是对本地Operation的响应
     if (true) {
-      // 总是尝试匹配，让findAndRemoveMatchingOperation来决定
-      // 本地操作确认：尝试匹配键盘输入，测量用户感知延迟
+      // Always try to match, let findAndRemoveMatchingOperation decide
+      // 本地Operation确认：尝试匹配键盘输入，测量user感知延迟
       const matchedOperation = this.findAndRemoveMatchingOperation(timestamp);
 
       if (matchedOperation) {
         const userPerceivedLatency = timestamp - matchedOperation.timestamp;
 
         console.log(
-          `⚡ [OT] 用户感知延迟: ${userPerceivedLatency.toFixed(1)}ms`
+          `⚡ [OT] User perceived latency: ${userPerceivedLatency.toFixed(1)}ms`
         );
 
-        // 记录用户感知延迟
+        // Record user perceived latency
         if (userPerceivedLatency >= 0.1 && userPerceivedLatency <= 5000) {
-          // OT可能有更高延迟
+          // OT may have higher latency
           const latencyRecord = {
             latency: userPerceivedLatency,
             timestamp,
@@ -696,23 +696,23 @@ class OTPerformanceMonitor {
           this.metrics.operationLatencies.push(latencyRecord);
 
           console.log(
-            `📊 [OT] 用户感知延迟记录: ${userPerceivedLatency.toFixed(
+            `📊 [OT] User perceived latency recorded: ${userPerceivedLatency.toFixed(
               1
-            )}ms, 操作: ${matchedOperation.key}, 数组长度: ${
+            )}ms, Operation: ${matchedOperation.key}, array length: ${
               this.metrics.operationLatencies.length
             }`
           );
         } else {
           console.log(
-            `⚠️ OT用户感知延迟异常: ${userPerceivedLatency.toFixed(
+            `⚠️ OT user perceived latency anomaly: ${userPerceivedLatency.toFixed(
               1
-            )}ms，已忽略`
+            )}ms, ignored`
           );
         }
       } else {
-        // 无法匹配的本地操作（如格式化或初始化）
-        // OT中这类操作通常也需要服务器往返，所以有一定延迟
-        const estimatedLatency = 50; // 50ms估算的服务器往返时间
+        // 无法匹配的本地Operation（如格式化或初始化）
+        // OT中这类Operation通常也needed服务器往返，所以有一定延迟
+        const estimatedLatency = 50; // 50ms estimated server round trip time
 
         const latencyRecord = {
           latency: estimatedLatency,
@@ -728,32 +728,32 @@ class OTPerformanceMonitor {
         this.metrics.operationLatencies.push(latencyRecord);
 
         console.log(
-          `📊 [OT] 服务器操作延迟(估算): ${estimatedLatency}ms, 数组长度: ${this.metrics.operationLatencies.length}`
+          `📊 [OT] 服务器Operation延迟(估算): ${estimatedLatency}ms, array length: ${this.metrics.operationLatencies.length}`
         );
       }
     } else {
-      // 远程操作：不影响本地用户感知延迟，不记录
-      console.log(`📥 [OT] 远程操作（不影响用户感知）:`, data);
+      // 远程Operation：不影响本地user感知延迟，不record
+      console.log(`📥 [OT] 远程Operation（不影响user感知）:`, data);
     }
   }
 
   /**
-   * 🔥 处理OT多窗口同步确认
+   * 🔥 Handle OT multi-window sync confirmation
    */
 
   /**
-   * 处理操作响应
+   * Handle operation response
    */
   handleOperation(data) {
-    console.log(`⚡ [OT] 收到操作响应:`, data);
-    // 这个方法主要用于记录，实际的延迟计算在handleDocUpdate中
+    console.log(`⚡ [OT] 收到Operation响应:`, data);
+    // This method is mainly for recording, actual latency calculation is in handleDocUpdate
   }
 
   /**
-   * 查找并移除匹配的操作
+   * 查找并移除匹配的Operation
    */
   findAndRemoveMatchingOperation(updateTimestamp) {
-    console.log(`🔍 [OT] 开始查找匹配操作:`, {
+    console.log(`🔍 [OT] start查找匹配Operation:`, {
       updateTimestamp,
       pendingOperationsLength: this.pendingOperations.length,
       pendingOperations: this.pendingOperations.map((op) => ({
@@ -765,23 +765,23 @@ class OTPerformanceMonitor {
 
     if (this.pendingOperations.length === 0) return null;
 
-    // 🔥 增加时间窗口：3秒内的操作才可能匹配（OT可能有更高延迟）
+    // 🔥 增加时间窗口：3秒内的Operation才可能匹配（OT可能有更高延迟）
     const timeWindow = 3000;
     const cutoffTime = updateTimestamp - timeWindow;
 
-    // 过滤有效操作
+    // 过滤有效Operation
     const validOperations = this.pendingOperations.filter(
       (op) => op.timestamp > cutoffTime
     );
 
     if (validOperations.length === 0) {
-      // 清理过期操作
+      // 清理过期Operation
       this.pendingOperations = this.pendingOperations.filter(
         (op) => op.timestamp > cutoffTime
       );
 
-      // 🔥 新增：调试信息
-      console.log(`🔍 [OT] 用户操作匹配失败:`, {
+      // 🔥 New: Debug info
+      console.log(`🔍 [OT] userOperation匹配failed:`, {
         updateTimestamp,
         cutoffTime,
         timeWindow,
@@ -801,16 +801,16 @@ class OTPerformanceMonitor {
       return null;
     }
 
-    // 取最近的操作（LIFO）
+    // 取最近的Operation（LIFO）
     const matchedOp = validOperations[validOperations.length - 1];
 
-    // 从队列中移除
+    // Remove from queue
     this.pendingOperations = this.pendingOperations.filter(
       (op) => op.id !== matchedOp.id
     );
 
-    // 🔥 新增：调试信息
-    console.log(`✅ [OT] 用户操作匹配成功:`, {
+    // 🔥 New: Debug info
+    console.log(`✅ [OT] userOperation匹配successful:`, {
       matchedOperation: matchedOp.key,
       timeDiff: (updateTimestamp - matchedOp.timestamp).toFixed(1) + "ms",
       remainingOperations: this.pendingOperations.length,
@@ -820,7 +820,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 判断是否为可打印字符
+   * Determine if it's a printable character
    */
   isPrintableKey(key) {
     return (
@@ -833,7 +833,7 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 处理pong响应（真实网络延迟测量）
+   * Handle pong response (real network latency measurement)
    */
   handlePong(data) {
     if (data.latency) {
@@ -844,20 +844,20 @@ class OTPerformanceMonitor {
         isReal: true,
       });
 
-      console.log(`🏓 [OT] 真实网络延迟: ${data.latency.toFixed(1)}ms`);
+      console.log(`🏓 [OT] Real network latency: ${data.latency.toFixed(1)}ms`);
     }
   }
 
   /**
-   * 清理过期的E2E数据
+   * Clean expired E2E data
    */
   cleanupExpiredE2EData() {
     const now = performance.now();
-    const maxAge = 10000; // 10秒过期，更短的时间窗口
+    const maxAge = 10000; // 10 seconds expiration, shorter time window
     let cleanedE2ECount = 0;
     let cleanedOperationsCount = 0;
 
-    // 清理过期的E2E数据
+    // Clean expired E2E data
     for (const [hash, timestamp] of this.pendingE2E.entries()) {
       if (now - timestamp > maxAge) {
         this.pendingE2E.delete(hash);
@@ -865,7 +865,7 @@ class OTPerformanceMonitor {
       }
     }
 
-    // 清理过期的操作数据
+    // 清理过期的Operationcount据
     for (const [
       messageId,
       timestamp,
@@ -878,31 +878,31 @@ class OTPerformanceMonitor {
 
     if (cleanedE2ECount > 0 || cleanedOperationsCount > 0) {
       console.log(
-        `🧹 [E2E] 清理了 ${cleanedE2ECount} 个过期E2E数据, ${cleanedOperationsCount} 个过期操作数据, 剩余: E2E=${this.pendingE2E.size}, 操作=${this.pendingOperationMessages.size}`
+        `🧹 [E2E] Cleaned ${cleanedE2ECount} expired E2E data, ${cleanedOperationsCount} 过期Operationcount据, 剩余: E2E=${this.pendingE2E.size}, Operation=${this.pendingOperationMessages.size}`
       );
     }
   }
 
   /**
-   * 获取真实性能统计
+   * Get real performance statistics
    */
   getAggregatedMetrics() {
-    console.log("🔍 [OT监控] getAggregatedMetrics 被调用");
-    console.log("🔍 [OT监控] isMonitoring:", this.isMonitoring);
-    console.log("🔍 [OT监控] startTime:", this.startTime);
-    console.log("🔍 [OT监控] otClientExists:", !!this.otClient);
-    console.log("🔍 [OT监控] otClientConnected:", this.otClient?.isConnected);
+    console.log("🔍 [OT Monitor] getAggregatedMetrics called");
+    console.log("🔍 [OT Monitor] isMonitoring:", this.isMonitoring);
+    console.log("🔍 [OT Monitor] startTime:", this.startTime);
+    console.log("🔍 [OT Monitor] otClientExists:", !!this.otClient);
+    console.log("🔍 [OT Monitor] otClientConnected:", this.otClient?.isConnected);
 
     if (!this.isMonitoring || !this.startTime) {
-      console.log("❌ [OT监控] 监控未启动或开始时间为空，返回null");
+      console.log("❌ [OT Monitor] Monitoring not started or start time is empty, returning null");
       return null;
     }
 
     const now = performance.now();
     const monitoringDuration = (now - this.startTime) / 1000;
 
-    // 🔥 优化：缩短时间窗口为4秒，提升响应速度
-    const recentWindow = 4000; // 从10000ms改为4000ms
+    // 🔥 Optimization: Shorten time window to 4 seconds, improve response speed
+    const recentWindow = 4000; // Change from 10000ms to 4000ms
     const recentTime = now - recentWindow;
 
     const recentLatencies = this.metrics.operationLatencies
@@ -913,48 +913,48 @@ class OTPerformanceMonitor {
     const allNetworkLatencies = this.metrics.networkLatencies.map(
       (l) => l.latency
     );
-    // 🔥 新增：端到端延迟统计
+    // 🔥 New: End-to-end latency statistics
     const allEndToEndLatencies = this.metrics.endToEndLatencies.map(
       (l) => l.latency
     );
 
-    // 🔥 优化：分层P95计算策略
+    // 🔥 Optimization: Layered P95 calculation strategy
     let latenciesToUse, p95Latency, avgLatency;
 
     if (recentLatencies.length >= 12) {
-      // 最近数据充足：使用最近4秒的数据
+      // Recent data sufficient: use recent 4 seconds data
       latenciesToUse = recentLatencies;
-      // 🔥 减少日志输出频率，避免定时器重复输出
+      // 🔥 Reduce log output frequency, avoid timer repetitive output
       if (recentLatencies.length % 10 === 0) {
         console.log(
-          `📊 [OT] 使用最近4秒数据计算P95: ${latenciesToUse.length}个样本`
+          `📊 [OT] Using recent 4 seconds data to calculate P95: ${latenciesToUse.length}samples`
         );
       }
     } else if (allLatencies.length >= 20) {
-      // 历史数据充足：使用全部数据
+      // Historical data sufficient: use all data
       latenciesToUse = allLatencies;
-      // 🔥 减少日志输出频率，避免定时器重复输出
+      // 🔥 Reduce log output frequency, avoid timer repetitive output
       if (allLatencies.length % 10 === 0) {
         console.log(
-          `📊 [OT] 使用全部历史数据计算P95: ${latenciesToUse.length}个样本`
+          `📊 [OT] Using all historical data to calculate P95: ${latenciesToUse.length}samples`
         );
       }
     } else if (allLatencies.length >= 6) {
-      // 数据较少：使用全部数据，但降低置信度
+      // Less data: use all data, but lower confidence
       latenciesToUse = allLatencies;
-      // 🔥 减少日志输出频率，避免定时器重复输出
+      // 🔥 Reduce log output frequency, avoid timer repetitive output
       if (allLatencies.length % 10 === 0) {
         console.log(
-          `📊 [OT] 使用少量数据计算P95: ${latenciesToUse.length}个样本（置信度较低）`
+          `📊 [OT] Using limited data to calculate P95: ${latenciesToUse.length}samples(low confidence)`
         );
       }
     } else {
-      // 数据不足：使用平均值作为P95估算
+      // Insufficient data: use average as P95 estimation
       latenciesToUse = allLatencies;
-      // 🔥 减少日志输出频率，避免定时器重复输出
+      // 🔥 Reduce log output frequency, avoid timer repetitive output
       if (allLatencies.length === 0 || allLatencies.length % 10 === 0) {
         console.log(
-          `📊 [OT] 数据不足，使用平均值估算P95: ${latenciesToUse.length}个样本`
+          `📊 [OT] Insufficient data, using average to estimate P95: ${latenciesToUse.length}samples`
         );
       }
     }
@@ -968,7 +968,7 @@ class OTPerformanceMonitor {
         p95Latency =
           sortedLatencies[Math.floor(sortedLatencies.length * 0.95)] || 0;
       } else {
-        // 样本不足时，使用平均值 * 1.5 作为P95估算
+        // When samples insufficient, use average * 1.5 as P95 estimation
         p95Latency = avgLatency * 1.5;
       }
     } else {
@@ -982,7 +982,7 @@ class OTPerformanceMonitor {
           allNetworkLatencies.length
         : 0;
 
-    // 🔥 新增：端到端延迟统计计算
+    // 🔥 New: End-to-end latency statistics计算
     let avgE2ELatency = 0;
     let p95E2ELatency = 0;
 
@@ -1005,12 +1005,12 @@ class OTPerformanceMonitor {
     }
 
     return {
-      // 基本信息
+      // Basic info
       monitoringDuration,
       isConnected: this.otClient && this.otClient.isConnected,
       windowId: this.windowId,
 
-      // 操作统计
+      // Operation统计
       operationsCount: this.metrics.operationsCount,
       totalOperationSize: this.metrics.totalOperationSize,
       opsPerSecond: this.metrics.operationsCount / monitoringDuration,
@@ -1019,12 +1019,12 @@ class OTPerformanceMonitor {
           ? this.metrics.totalOperationSize / this.metrics.operationsCount
           : 0,
 
-      // 用户操作统计
+      // userOperation统计
       keystrokes: this.metrics.keystrokes,
       keystrokesPerSecond: this.metrics.keystrokes / monitoringDuration,
       pendingOperations: this.pendingOperations.length,
 
-      // 🔥 优化：延迟统计
+      // 🔥 Optimization: Latency statistics
       avgLatency,
       p95Latency,
       avgNetworkLatency,
@@ -1032,12 +1032,12 @@ class OTPerformanceMonitor {
       recentLatencySamples: recentLatencies.length,
       networkLatencySamples: allNetworkLatencies.length,
 
-      // 🔥 新增：端到端延迟统计
+      // 🔥 New: End-to-end latency statistics
       avgE2ELatency,
       p95E2ELatency,
       e2eSamples: allEndToEndLatencies.length,
 
-      // 🔥 新增：数据质量指标
+      // 🔥 New: Data quality metrics
       dataQuality: {
         timeWindow: recentWindow,
         minSamples: 12,
@@ -1057,7 +1057,7 @@ class OTPerformanceMonitor {
             : "low",
       },
 
-      // 🔥 真实网络统计 - 不再使用估算值
+      // 🔥 Real network statistics - no longer use estimated values
       bytesSent: this.metrics.realNetworkBytes.sent,
       bytesReceived: this.metrics.realNetworkBytes.received,
       bytesPerSecond:
@@ -1065,7 +1065,7 @@ class OTPerformanceMonitor {
           this.metrics.realNetworkBytes.received) /
         monitoringDuration,
 
-      // 网络消息统计
+      // Network message statistics
       messagesSent: this.realNetworkStats.messagesSent,
       messagesReceived: this.realNetworkStats.messagesReceived,
       messagesPerSecond:
@@ -1073,14 +1073,14 @@ class OTPerformanceMonitor {
           this.realNetworkStats.messagesReceived) /
         monitoringDuration,
 
-      // 协作统计
+      // Collaboration statistics
       activeConnections: this.otClient && this.otClient.isConnected ? 1 : 0,
-      conflictResolutions: 0, // OT自动处理冲突
+      conflictResolutions: 0, // OT automatically handles conflicts
 
-      // 运行时间
+      // Runtime
       uptime: monitoringDuration * 1000,
 
-      // 数据真实性标记
+      // Data authenticity markers
       dataSource: "real-websocket-monitoring",
       hasRealNetworkData: this.metrics.networkEvents.length > 0,
       hasRealLatencyData:
@@ -1089,36 +1089,36 @@ class OTPerformanceMonitor {
   }
 
   /**
-   * 停止监控
+   * Stop monitoring
    */
   stopMonitoring() {
     this.isMonitoring = false;
 
-    // 清理事件监听器
+    // Clean up event listeners
     document.removeEventListener("keydown", this.handleKeydown);
 
-    // 清理OT事件监听器
+    // Clean up OT event listeners
     if (this.otClient) {
       this.otClient.off("docUpdate", this.handleDocUpdate);
       this.otClient.off("operation", this.handleOperation);
       this.otClient.off("pong", this.handlePong);
     }
 
-    // 🔥 新增：恢复原始WebSocket方法
+    // 🔥 New: Restore original WebSocket methods
     if (this.otClient && this.otClient.ws && this.originalSend) {
       this.otClient.ws.send = this.originalSend;
     }
 
-    // 🔥 新增：清理E2E清理定时器
+    // 🔥 New: Clean up E2E cleanup timer
     if (this.e2eCleanupInterval) {
       clearInterval(this.e2eCleanupInterval);
     }
 
-    console.log("⏹️ 已停止OT性能监控");
+    console.log("⏹️ Stopped OT performance monitoring");
   }
 
   /**
-   * 重置指标
+   * Reset metrics
    */
   resetMetrics() {
     this.metrics = {
@@ -1131,7 +1131,7 @@ class OTPerformanceMonitor {
       keystrokes: 0,
       operationLatencies: [],
       networkLatencies: [],
-      // 🔥 新增：端到端延迟指标
+      // 🔥 New: End-to-end latency metrics
       endToEndLatencies: [],
       realNetworkBytes: {
         sent: 0,
@@ -1150,7 +1150,7 @@ class OTPerformanceMonitor {
     };
     this.startTime = performance.now();
 
-    console.log("🔄 OT性能指标已重置");
+    console.log("🔄 OT performance metrics reset");
   }
 }
 

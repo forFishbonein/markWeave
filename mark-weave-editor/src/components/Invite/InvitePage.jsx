@@ -14,7 +14,7 @@ const InvitePage = () => {
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState(null);
 
-  // 加载邀请详情
+  // Load invitation details
   const loadInviteDetails = async () => {
     try {
       setLoading(true);
@@ -24,11 +24,11 @@ const InvitePage = () => {
       if (data.success) {
         setInvite(data.invite);
       } else {
-        setError(data.msg || '邀请无效');
+        setError(data.msg || 'Invalid invitation');
       }
     } catch (error) {
-      console.error('加载邀请详情失败:', error);
-      setError('加载邀请详情失败');
+      console.error('Failed to load invitation details:', error);
+      setError('Failed to load invitation details');
     } finally {
       setLoading(false);
     }
@@ -40,16 +40,16 @@ const InvitePage = () => {
     }
   }, [token]);
 
-  // 接受邀请
+  // Accept invitation
   const handleAcceptInvite = async () => {
     if (!isAuthenticated) {
-      message.info('请先登录以接受邀请');
+      message.info('Please log in first to accept invitation');
       navigate('/login', { state: { from: `/invite/${token}` } });
       return;
     }
 
     if (user.email !== invite.email) {
-      message.error('当前登录的邮箱与邀请邮箱不匹配');
+      message.error('Current logged-in email does not match invitation email');
       return;
     }
 
@@ -60,20 +60,20 @@ const InvitePage = () => {
       });
 
       if (response.success) {
-        message.success('成功加入团队！');
+        message.success('Successfully joined team!');
         navigate(`/team/${response.team.id}/documents`);
       } else {
-        message.error(response.msg || '接受邀请失败');
+        message.error(response.msg || 'Accept invitationfailed');
       }
     } catch (error) {
-      console.error('接受邀请失败:', error);
-      message.error('接受邀请失败: ' + error.message);
+      console.error('Accept invitationfailed:', error);
+      message.error('Accept invitationfailed: ' + error.message);
     } finally {
       setAccepting(false);
     }
   };
 
-  // 拒绝邀请
+  // Reject invitation
   const handleRejectInvite = async () => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:1234/api'}/teams/invite/${token}/reject`, {
@@ -85,14 +85,14 @@ const InvitePage = () => {
       const data = await response.json();
 
       if (data.success) {
-        message.success('已拒绝邀请');
+        message.success('Invitation rejected');
         navigate('/');
       } else {
-        message.error(data.msg || '拒绝邀请失败');
+        message.error(data.msg || 'Failed to reject invitation');
       }
     } catch (error) {
-      console.error('拒绝邀请失败:', error);
-      message.error('拒绝邀请失败');
+      console.error('Failed to reject invitation:', error);
+      message.error('Failed to reject invitation');
     }
   };
 
@@ -121,11 +121,11 @@ const InvitePage = () => {
       }}>
         <Result
           status="error"
-          title="邀请无效"
+          title="Invalid invitation"
           subTitle={error}
           extra={
             <Button type="primary" onClick={() => navigate('/')}>
-              返回首页
+              Back to Home
             </Button>
           }
         />
@@ -153,44 +153,44 @@ const InvitePage = () => {
       >
         <div style={{ marginBottom: 24 }}>
           <TeamOutlined style={{ fontSize: 48, color: '#2563eb', marginBottom: 16 }} />
-          <h1 style={{ margin: 0, color: '#333' }}>团队邀请</h1>
+          <h1 style={{ margin: 0, color: '#333' }}>Team Invitation</h1>
         </div>
 
         <div style={{ textAlign: 'left', marginBottom: 24 }}>
           <div style={{ marginBottom: 12 }}>
             <TeamOutlined style={{ marginRight: 8, color: '#666' }} />
-            <strong>团队名称:</strong> {invite.teamName}
+            <strong>Team Name:</strong> {invite.teamName}
           </div>
 
           {invite.teamDescription && (
             <div style={{ marginBottom: 12 }}>
-              <strong>团队描述:</strong> {invite.teamDescription}
+              <strong>Team Description:</strong> {invite.teamDescription}
             </div>
           )}
 
           <div style={{ marginBottom: 12 }}>
             <UserOutlined style={{ marginRight: 8, color: '#666' }} />
-            <strong>邀请人:</strong> {invite.inviterName}
+            <strong>Inviter:</strong> {invite.inviterName}
           </div>
 
           <div style={{ marginBottom: 12 }}>
             <MailOutlined style={{ marginRight: 8, color: '#666' }} />
-            <strong>邀请邮箱:</strong> {invite.email}
+            <strong>Invitation Email:</strong> {invite.email}
           </div>
 
           <div style={{ marginBottom: 12 }}>
-            <strong>角色:</strong> {invite.role === 'admin' ? '管理员' : '成员'}
+            <strong>Role:</strong> {invite.role === 'admin' ? 'Administrator' : 'Member'}
           </div>
 
           <div style={{ color: '#666', fontSize: 14 }}>
-            <strong>过期时间:</strong> {new Date(invite.expiresAt).toLocaleString()}
+            <strong>Expiration Time:</strong> {new Date(invite.expiresAt).toLocaleString()}
           </div>
         </div>
 
         {!isAuthenticated ? (
           <div>
             <p style={{ color: '#666', marginBottom: 16 }}>
-              请先登录以接受邀请
+              Please log in first to accept invitation
             </p>
             <Button
               type="primary"
@@ -198,13 +198,13 @@ const InvitePage = () => {
               onClick={() => navigate('/login', { state: { from: `/invite/${token}` } })}
               style={{ marginRight: 12 }}
             >
-              登录
+              Login
             </Button>
             <Button
               size="large"
               onClick={() => navigate('/register', { state: { from: `/invite/${token}` } })}
             >
-              注册
+              Register
             </Button>
           </div>
         ) : user.email === invite.email ? (
@@ -216,28 +216,28 @@ const InvitePage = () => {
               onClick={handleAcceptInvite}
               style={{ marginRight: 12 }}
             >
-              接受邀请
+              Accept invitation
             </Button>
             <Button
               size="large"
               onClick={handleRejectInvite}
             >
-              拒绝邀请
+              Reject invitation
             </Button>
           </div>
         ) : (
           <div>
             <p style={{ color: '#ff4d4f', marginBottom: 16 }}>
-              当前登录的邮箱 ({user.email}) 与邀请邮箱不匹配
+              Current logged-in email ({user.email}) does not match invitation email
             </p>
             <Button
               size="large"
               onClick={() => {
-                // 可以选择登出并重新登录
+                // Can choose to logout and login again
                 navigate('/login');
               }}
             >
-              使用其他账号登录
+              Login with another account
             </Button>
           </div>
         )}

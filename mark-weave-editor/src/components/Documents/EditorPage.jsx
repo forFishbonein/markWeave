@@ -6,8 +6,8 @@ import Editor from '../../components/EditorPage/Editor';
 const EditorPage = () => {
   const { docId } = useParams();
   const handleSave = () => {
-    // 这里可接入实际保存逻辑
-    message.success('保存成功');
+    // Real save logic can be integrated here
+    message.success('Save successful');
   };
   return (
     <div style={{ width: '100%', background: '#fff', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', padding: 32, minHeight: 600, margin: '0', boxSizing: 'border-box' }}>
@@ -17,10 +17,10 @@ const EditorPage = () => {
           style={{ padding: '6px 24px', borderRadius: 4, border: 'none', background: '#1677ff', color: '#fff', fontSize: 16 }}
           onClick={handleSave}
         >
-          保存
+          Save
         </button>
       </div>
-      {/* 这里可加自定义工具栏 */}
+      {/* Custom toolbar can be added here */}
       <Editor docId={docId} />
     </div>
   );

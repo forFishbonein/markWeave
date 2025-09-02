@@ -16,12 +16,12 @@ const Participant = new Schema(
     userId: { type: Types.ObjectId, ref: "User", required: true },
     role: { type: String, enum: ["owner", "editor", "viewer"], required: true },
   },
-  { _id: false } // 不给子文档单独生成 _id
+  { _id: false } // Do not generate separate _id for sub-documents
 );
 
 const DocSchema = new Schema({
   docId: { type: String, required: true, unique: true, index: true },
-  title: { type: String, default: "未命名文档", trim: true },
+  title: { type: String, default: "Untitled Document", trim: true },
   teamId: { type: Types.ObjectId, ref: "Team", required: true },
   content: {
     type: Schema.Types.Mixed,
@@ -34,7 +34,7 @@ const DocSchema = new Schema({
         },
       ],
     },
-  }, // JSON格式的文档内容
+  }, // JSON format document content
   ownerId: { type: Types.ObjectId, ref: "User", required: true },
   participants: { type: [Participant], default: [] },
   createdAt: { type: Date, default: Date.now },
@@ -42,7 +42,7 @@ const DocSchema = new Schema({
   version: { type: Number, default: 1 },
 });
 
-// 添加索引
+// Add index
 DocSchema.index({ docId: 1 });
 DocSchema.index({ teamId: 1 });
 DocSchema.index({ ownerId: 1 });

@@ -1,11 +1,11 @@
-// 调试工具：用于测试API连接
+// Debug tool: for testing API connection
 import apiService from "../services/api";
 
 export const testApiConnection = async () => {
-  console.log("🔍 开始测试API连接...");
+  console.log("🔍 Starting API connection test...");
 
   try {
-    // 测试基础API连接
+    // Test basic API connection
     const response = await fetch(apiService.getBaseURL() + "/api/test", {
       method: "GET",
       headers: {
@@ -14,58 +14,60 @@ export const testApiConnection = async () => {
     });
 
     if (response.ok) {
-      console.log("✅ API服务器连接正常");
+      console.log("✅ API server connection normal");
     } else {
-      console.log("❌ API服务器连接失败:", response.status);
+      console.log("❌ API server connection failed:", response.status);
     }
   } catch (error) {
-    console.log("❌ API连接出错:", error.message);
-    console.log("💡 请检查:");
-    console.log("   1. 后端服务是否启动 (npm start 在 editor-yjs-server 目录)");
-    console.log("   2. 端口是否正确 (默认3001)");
-    console.log("   3. CORS设置是否正确");
+    console.log("❌ API connection error:", error.message);
+    console.log("💡 Please check:");
+    console.log(
+      "   1. Backend service started (npm start in editor-yjs-server directory)"
+    );
+    console.log("   2. Port is correct (default 3001)");
+    console.log("   3. CORS settings are correct");
   }
 };
 
 export const debugAPI = {
-  // 测试用户认证
+  // Test user authentication
   async testAuth() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        console.log("❌ 没有找到认证token");
+        console.log("❌ Authentication token not found");
         return;
       }
 
       const user = await apiService.getCurrentUser();
-      console.log("✅ 用户认证成功:", user);
+      console.log("✅ User authentication successful:", user);
     } catch (error) {
-      console.log("❌ 用户认证失败:", error.message);
+      console.log("❌ User authentication failed:", error.message);
     }
   },
 
-  // 测试团队API
+  // Test team API
   async testTeams() {
     try {
       const teams = await apiService.getUserTeams();
-      console.log("✅ 团队列表:", teams);
+      console.log("✅ Team list:", teams);
     } catch (error) {
-      console.log("❌ 获取团队失败:", error.message);
+      console.log("❌ Get teams failed:", error.message);
     }
   },
 
-  // 测试文档API
+  // Test Documents API
   async testDocuments(teamId) {
     try {
       const docs = await apiService.getTeamDocuments(teamId);
-      console.log("✅ 文档列表:", docs);
+      console.log("✅ Document list:", docs);
     } catch (error) {
-      console.log("❌ 获取文档失败:", error.message);
+      console.log("❌ Get documents failed:", error.message);
     }
   },
 };
 
-// 在浏览器控制台中可以使用：
+// Available in browser console:
 // import { testApiConnection, debugAPI } from './utils/debug'
 // testApiConnection()
 // debugAPI.testAuth()

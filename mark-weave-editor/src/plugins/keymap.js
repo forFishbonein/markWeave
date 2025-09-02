@@ -3,13 +3,13 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:34:02
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-12 01:43:24
+ * @LastEditTime: 2025-09-03 04:07:05
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
 import { keymap } from "prosemirror-keymap";
 import { toggleMark } from "prosemirror-commands";
-import { schema } from "./schema"; // 也可以拆出 schema
+import { schema } from "./schema"; // Can also extract schema
 import {
   addBold,
   removeBold,
@@ -21,158 +21,158 @@ import {
   deleteChars,
 } from "../crdt/crdtActions";
 import { markActive } from "./utils";
-// 定义快捷键，仅处理斜体和加粗等常规操作
-// 这里把 undoManager 作为参数
+// Define shortcuts, only handle italic and bold general operations
+// Pass undoManager as parameter here
 export function createKeymap(undoManager) {
   return keymap({
-    // 此处如果希望调用自定义 addBold，可在此绑定
+    // If you want to call custom addBold, you can bind it here
     // "Mod-b": toggleMark(schema.marks.bold),
     "Mod-b": (state, dispatch) => {
-      console.log("🔥 Cmd + B 被按下");
+      console.log("🔥 Cmd + B was pressed");
       const { from, to, empty } = state.selection;
       console.log("empty", empty);
       if (from === to) {
-        console.warn("⚠️ 不能在空选区加粗！");
+        console.warn("⚠️ Cannot bold empty selection!");
         return false;
       }
-      // ✅ 使用正确的可见索引转换方法
+      // ✅ Use correct visible index conversion method
       const { startId, endId } = getVisibleCharOpIds(from - 1, to);
-      console.log(`🔵 触发 Bold 操作, startId: ${startId}, endId: ${endId}`);
+      console.log(`🔵 Trigger Bold operation, startId: ${startId}, endId: ${endId}`);
       // if (startId && endId) {
-      //   // 这里你可以根据一些判断条件来决定是添加 bold 还是取消 bold，
-      //   // 例如，假设我们总是切换操作（这里简单地先调用 removeBold，然后调用 toggleMark）
-      //   // 你可以实现更细粒度的逻辑：如果当前选区已经是 bold，则调用 removeBold，否则调用 addBold。
+      //   // Here you can decide whether to add bold or cancel bold based on some conditions,
+      //   // For example, assuming we always toggle operations (here simply call removeBold first, then call toggleMark)
+      //   // You can implement more fine-grained logic: if current selection is already bold, call removeBold, otherwise call addBold.
 
-      //   // 示例：先调用 removeBold（假设当前选区已经 bold）
+      //   // Example: first call removeBold (assuming current selection is already bold)
       //   removeBold(startId, endId);
 
-      //   // 再调用内置 toggleMark 来立即显示效果（如果需要）
+      //   // Then call built-in toggleMark to immediately show effect (if needed)
       //   return toggleMark(schema.marks.bold)(state, dispatch);
       // }
       // console.log("state.doc.content.size", state.doc.content.size - 1, to);
-      // 判断是否在文档末尾
-      const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
+      // Determine if at document end
+      const isAtEnd = to === state.doc.content.size - 1; //-1 is the end index!
       console.log("isAtEnd", isAtEnd);
-      // 如果在末尾，我们希望结束边界包含该字符，即 "after"
+      // If at end, we want end boundary to include that character, i.e. "after"
       const boundaryType = isAtEnd ? "after" : "before";
-      // 使用辅助函数判断当前选区是否已经是 bold
+      // Use helper function to check if current selection is already bold
       if (markActive(state, schema.marks.bold)) {
-        console.log("🔵 当前选区已经加粗，调用 removeBold");
+        console.log("🔵 Current selection is already bold, calling removeBold");
         removeBold(startId, endId, boundaryType);
       } else {
-        console.log("🔵 当前选区未加粗，调用 addBold");
+        console.log("🔵 Current selection is not bold, calling addBold");
         addBold(startId, endId, boundaryType);
         // addBold("1@client", "2@client"); // test data
       }
-      // 最后调用内置 toggleMark 立即更新 UI
+      // Finally call built-in toggleMark to immediately update UI
       return toggleMark(schema.marks.bold)(state, dispatch);
       // return true;
     },
     "Mod-i": (state, dispatch) => {
-      console.log("🔥 Cmd + I 被按下");
+      console.log("🔥 Cmd + I was pressed");
       const { from, to, empty } = state.selection;
       if (from === to) {
-        console.warn("⚠️ 不能在空选区斜体！");
+        console.warn("⚠️ Cannot italicize empty selection!");
         return false;
       }
-      // ✅ 使用正确的可见索引转换方法
+      // ✅ Use correct visible index conversion method
       const { startId, endId } = getVisibleCharOpIds(from - 1, to);
-      console.log(`🔵 触发 Italic 操作, startId: ${startId}, endId: ${endId}`);
-      // 判断是否在文档末尾
-      const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
+      console.log(`🔵 Trigger Italic operation, startId: ${startId}, endId: ${endId}`);
+      // Determine if at document end
+      const isAtEnd = to === state.doc.content.size - 1; //-1 is the end index!
       console.log("isAtEnd", isAtEnd);
-      // 如果在末尾，我们希望结束边界包含该字符，即 "after"
+      // If at end, we want end boundary to include that character, i.e. "after"
       const boundaryType = isAtEnd ? "after" : "before";
       if (markActive(state, schema.marks.em)) {
-        console.log("🔵 当前选区已经斜体，调用 removeEm");
+        console.log("🔵 Current selection is already italic, calling removeEm");
         removeEm(startId, endId, boundaryType);
       } else {
-        console.log("🔵 当前选区未斜体，调用 addEm");
+        console.log("🔵 Current selection is not italic, calling addEm");
         addEm(startId, endId, boundaryType);
       }
       return toggleMark(schema.marks.em)(state, dispatch);
     },
     "Mod-k": (state, dispatch) => {
-      console.log("🔥 Cmd + K 被按下");
+      console.log("🔥 Cmd + K was pressed");
       const { from, to, empty } = state.selection;
       if (from === to) {
-        console.warn("⚠️ 不能在空选区设置链接！");
+        console.warn("⚠️ Cannot set link on empty selection!");
         return false;
       }
-      // 提示用户输入链接地址
+      // Prompt user to input link address
       let href = "";
       if (!markActive(state, schema.marks.link)) {
-        href = prompt("请输入链接地址:");
+        href = prompt("Please enter link address:");
         if (!href) return false;
       }
 
-      // ✅ 使用正确的可见索引转换方法
+      // ✅ Use correct visible index conversion method
       const { startId, endId } = getVisibleCharOpIds(from - 1, to);
-      console.log(`🔵 Link 操作, startId: ${startId}, endId: ${endId}`);
-      // 判断是否在文档末尾
-      const isAtEnd = to === state.doc.content.size - 1; //-1 就是末尾的索引了！
+      console.log(`🔵 Link operation, startId: ${startId}, endId: ${endId}`);
+      // Determine if at document end
+      const isAtEnd = to === state.doc.content.size - 1; //-1 is the end index!
       console.log("isAtEnd", isAtEnd);
-      // 如果在末尾，我们希望结束边界包含该字符，即 "after"
+      // If at end, we want end boundary to include that character, i.e. "after"
       const boundaryType = isAtEnd ? "after" : "before";
-      // 根据当前选区是否已有链接，决定调用 removeLink 或 addLink
+      // Based on whether current selection has link, decide to call removeLink or addLink
       if (markActive(state, schema.marks.link)) {
-        console.log("🔵 当前选区已有链接，调用 removeLink");
+        console.log("🔵 Current selection has link, call removeLink");
         removeLink(startId, endId, boundaryType);
       } else {
-        console.log("🔵 当前选区没有链接，调用 addLink", href);
+        console.log("🔵 Current selection has no link, call addLink", href);
         addLink(startId, endId, href, boundaryType);
       }
       return toggleMark(schema.marks.link)(state, dispatch);
     },
     "Mod-z": (state, dispatch) => {
-      console.log("🔥 Cmd+Z 被按下");
-      // 调用 UndoManager.undo() 撤销操作
+      console.log("🔥 Cmd+Z was pressed");
+      // Call UndoManager.undo() to undo operation
       undoManager.undo();
       return true;
     },
     "Mod-Shift-z": (state, dispatch) => {
-      console.log("🔥 Cmd+Shift+Z 被按下");
-      // 调用 UndoManager.redo() 重做操作
+      console.log("🔥 Cmd+Shift+Z was pressed");
+      // Call UndoManager.redo() to redo operation
       undoManager.redo();
       return true;
     },
-    "Backspace": (state, dispatch) => {
+    Backspace: (state, dispatch) => {
       const { from, to } = state.selection;
-      
-      // 如果有选区，正常删除选区内容
+
+      // If has selection, normally delete selection content
       if (from !== to) {
         deleteChars(from, to);
-        return false; // 让ProseMirror继续处理
+        return false; // Let ProseMirror continue processing
       }
-      
-      // 单字符删除（光标位置）
+
+      // Single character deletion (cursor position)
       if (from > 1) {
-        // 删除光标前的一个字符
+        // Delete one character before cursor
         deleteChars(from - 1, from);
-        return false; // 让ProseMirror继续处理
+        return false; // Let ProseMirror continue processing
       } else {
-        // 在文档开始位置，不能删除
-        return true; // 阻止ProseMirror的默认行为
+        // At document start position, cannot delete
+        return true; // Prevent ProseMirror default behavior
       }
     },
-    "Delete": (state, dispatch) => {
+    Delete: (state, dispatch) => {
       const { from, to } = state.selection;
-      
-      // 如果有选区，正常删除选区内容
+
+      // If has selection, normally delete selection content
       if (from !== to) {
         deleteChars(from, to);
-        return false; // 让ProseMirror继续处理
+        return false; // Let ProseMirror continue processing
       }
-      
-      // 单字符删除（光标位置后）
+
+      // singlecharacterdelete（光标位置后）
       const docSize = state.doc.content.size;
       if (from < docSize) {
-        // 删除光标后的一个字符
+        // delete光标后的一characters
         deleteChars(from, from + 1);
-        return false; // 让ProseMirror继续处理
+        return false; // Let ProseMirror continue processing
       } else {
-        // 在文档末尾，不能删除
-        return true; // 阻止ProseMirror的默认行为
+        // atDocumentsend，不能delete
+        return true; // Prevent ProseMirror default behavior
       }
     },
   });

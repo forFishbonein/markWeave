@@ -33,7 +33,7 @@ export const getTeamDetails = async (req, res, next) => {
       .populate("members.userId", "username email")
       .populate("ownerId", "username email");
     if (!team || !team.members.some((m) => m.userId.equals(req.user.userId))) {
-      return res.status(404).json({ msg: "未找到团队" });
+      return res.status(404).json({ msg: "Team not found" });
     }
     res.json(team);
   } catch (err) {
@@ -47,7 +47,7 @@ export const updateTeam = async (req, res, next) => {
     const team = await Team.findById(req.params.teamId);
 
     if (!team || !team.ownerId.equals(req.user.userId)) {
-      return res.status(403).json({ msg: "无权操作" });
+      return res.status(403).json({ msg: "No permission to operate" });
     }
 
     team.name = name || team.name;
@@ -64,12 +64,12 @@ export const inviteMember = async (req, res, next) => {
     const { email, role } = req.body;
     const { teamId } = req.params;
 
-    // 获取团队信息和邀请人信息
+    // Get team info and inviter info
     const team = await Team.findById(teamId).populate("ownerId", "username");
     const inviter = await User.findById(req.user.userId);
 
     if (!team || !inviter) {
-      return res.status(404).json({ msg: "团队或用户不存在" });
+      return res.status(404).json({ msg: "Team or user does not exist" });
     }
 
     const inviterRole = team.members.find((m) =>
@@ -77,19 +77,19 @@ export const inviteMember = async (req, res, next) => {
     )?.role;
 
     if (!(inviterRole === "owner" || inviterRole === "admin")) {
-      return res.status(403).json({ msg: "无权操作" });
+      return res.status(403).json({ msg: "No permission" });
     }
 
-    // 检查用户是否已经是成员
+    // Check if user is already a member
     const invitedUser = await User.findOne({ email });
     if (
       invitedUser &&
       team.members.some((m) => m.userId.equals(invitedUser._id))
     ) {
-      return res.status(400).json({ msg: "用户已经是成员" });
+      return res.status(400).json({ msg: "User is already a member" });
     }
 
-    // 检查是否已有待处理的邀请
+    // Check if there's already a pending invitation
     const existingInvite = await TeamInvite.findOne({
       teamId,
       email,
@@ -97,13 +97,15 @@ export const inviteMember = async (req, res, next) => {
     });
 
     if (existingInvite) {
-      return res.status(400).json({ msg: "该用户已有待处理的邀请" });
+      return res
+        .status(400)
+        .json({ msg: "User already has a pending invitation" });
     }
 
-    // 生成邀请令牌
+    // Generate invite token
     const inviteToken = generateInviteToken();
 
-    // 创建邀请记录
+    // Create invitation record
     const invite = new TeamInvite({
       teamId,
       email,
@@ -113,7 +115,7 @@ export const inviteMember = async (req, res, next) => {
     });
     await invite.save();
 
-    // 发送邀请邮件
+    // Send invitation email
     try {
       await sendTeamInviteEmail({
         email,
@@ -126,17 +128,17 @@ export const inviteMember = async (req, res, next) => {
 
       res.status(201).json({
         success: true,
-        msg: "邀请邮件已发送",
+        msg: "Invitation email sent",
         inviteId: invite._id,
       });
     } catch (emailError) {
-      // 如果邮件发送失败，删除邀请记录
+      // If email sending failed, delete invitation record
       await TeamInvite.findByIdAndDelete(invite._id);
 
-      console.error("邮件发送失败:", emailError);
+      console.error("Email sending failed:", emailError);
       return res.status(500).json({
         success: false,
-        msg: "邮件发送失败，请检查邮箱地址或稍后重试",
+        msg: "Email sending failed, please check email address or try again later",
         error: emailError.message,
       });
     }
@@ -154,11 +156,11 @@ export const removeMember = async (req, res, next) => {
     )?.role;
 
     if (!team || !(removerRole === "owner" || removerRole === "admin")) {
-      return res.status(403).json({ msg: "无权操作" });
+      return res.status(403).json({ msg: "No permission" });
     }
 
     if (team.ownerId.equals(memberId)) {
-      return res.status(400).json({ msg: "不能移除所有者" });
+      return res.status(400).json({ msg: "Cannot remove owner" });
     }
 
     team.members = team.members.filter((m) => !m.userId.equals(memberId));
@@ -169,7 +171,7 @@ export const removeMember = async (req, res, next) => {
   }
 };
 
-// 获取邀请详情（通过令牌）
+// Get invitation details (with token)
 export const getInviteDetails = async (req, res, next) => {
   try {
     const { token } = req.params;
@@ -184,16 +186,16 @@ export const getInviteDetails = async (req, res, next) => {
     if (!invite) {
       return res.status(404).json({
         success: false,
-        msg: "邀请不存在或已过期",
+        msg: "Invite does not exist or has expired",
       });
     }
 
-    // 检查是否过期
+    // Check if expired
     if (invite.expiresAt < new Date()) {
       await TeamInvite.findByIdAndUpdate(invite._id, { status: "expired" });
       return res.status(400).json({
         success: false,
-        msg: "邀请已过期",
+        msg: "Invite has expired",
       });
     }
 
@@ -213,7 +215,7 @@ export const getInviteDetails = async (req, res, next) => {
   }
 };
 
-// 接受邀请
+// Accept invitation
 export const acceptInvite = async (req, res, next) => {
   try {
     const { token } = req.params;
@@ -227,57 +229,57 @@ export const acceptInvite = async (req, res, next) => {
     if (!invite) {
       return res.status(404).json({
         success: false,
-        msg: "邀请不存在或已过期",
+        msg: "Invite does not exist or has expired",
       });
     }
 
-    // 检查是否过期
+    // Check if expired
     if (invite.expiresAt < new Date()) {
       await TeamInvite.findByIdAndUpdate(invite._id, { status: "expired" });
       return res.status(400).json({
         success: false,
-        msg: "邀请已过期",
+        msg: "Invite has expired",
       });
     }
 
-    // 获取当前用户信息
+    // Get current user info
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
-        msg: "用户不存在",
+        msg: "User does not exist",
       });
     }
 
-    // 验证邮箱是否匹配
+    // Verify if email matches
     if (user.email !== invite.email) {
       return res.status(400).json({
         success: false,
-        msg: "邮箱地址不匹配",
+        msg: "Email address does not match",
       });
     }
 
-    // 获取团队信息
+    // Get team info
     const team = await Team.findById(invite.teamId);
     if (!team) {
       return res.status(404).json({
         success: false,
-        msg: "团队不存在",
+        msg: "Team does not exist",
       });
     }
 
-    // 检查是否已经是成员
+    // Check if already a member
     const isAlreadyMember = team.members.some((m) => m.userId.equals(userId));
     if (isAlreadyMember) {
-      // 更新邀请状态
+      // Update invitation status
       await TeamInvite.findByIdAndUpdate(invite._id, { status: "accepted" });
       return res.status(400).json({
         success: false,
-        msg: "你已经是团队成员了",
+        msg: "You are already a team member",
       });
     }
 
-    // 添加用户到团队
+    // Add user to team
     team.members.push({
       userId: userId,
       role: invite.role,
@@ -285,12 +287,12 @@ export const acceptInvite = async (req, res, next) => {
     });
     await team.save();
 
-    // 更新邀请状态
+    // Update invitation status
     await TeamInvite.findByIdAndUpdate(invite._id, { status: "accepted" });
 
     res.json({
       success: true,
-      msg: "成功加入团队",
+      msg: "Successfully joined team",
       team: {
         id: team._id,
         name: team.name,
@@ -302,7 +304,7 @@ export const acceptInvite = async (req, res, next) => {
   }
 };
 
-// 拒绝邀请
+// Reject invitation
 export const rejectInvite = async (req, res, next) => {
   try {
     const { token } = req.params;
@@ -315,16 +317,16 @@ export const rejectInvite = async (req, res, next) => {
     if (!invite) {
       return res.status(404).json({
         success: false,
-        msg: "邀请不存在或已过期",
+        msg: "Invite does not exist or has expired",
       });
     }
 
-    // 更新邀请状态
+    // Update invitation status
     await TeamInvite.findByIdAndUpdate(invite._id, { status: "rejected" });
 
     res.json({
       success: true,
-      msg: "已拒绝邀请",
+      msg: "Invitation rejected",
     });
   } catch (err) {
     next(err);

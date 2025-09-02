@@ -1,4 +1,4 @@
 export const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send("服务器出错了!");
+  res.status(500).send("Server error!");
 };

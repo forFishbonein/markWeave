@@ -65,7 +65,7 @@ const GlobalHeader = () => {
       alignItems: 'center',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)'
     }}>
-      {/* 左侧：Logo */}
+      {/* Left: Logo */}
       <div style={{
         fontSize: '20px',
         fontWeight: 'bold',
@@ -76,7 +76,7 @@ const GlobalHeader = () => {
         MarkWeave
       </div>
 
-      {/* 左侧偏中：性能分析工具栏 */}
+      {/* Left-center: Performance analysis toolbar */}
       <Space size="large" style={{ flex: 1 }}>
         <Button
           type="text"
@@ -123,7 +123,7 @@ const GlobalHeader = () => {
 
       </Space>
 
-      {/* 右侧：用户菜单 */}
+      {/* Right: User menu */}
       <Dropdown menu={{ items: menuItems }} placement="bottomRight">
         <div style={{
           display: 'flex',

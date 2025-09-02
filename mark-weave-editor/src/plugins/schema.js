@@ -8,7 +8,7 @@
  * @Descripttion:
  */
 import { Schema } from "prosemirror-model";
-// 定义 ProseMirror Schema
+// Define ProseMirror Schema
 export const schema = new Schema({
   nodes: {
     doc: { content: "block+" },

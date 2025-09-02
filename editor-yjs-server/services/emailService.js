@@ -1,16 +1,16 @@
 import nodemailer from "nodemailer";
 import crypto from "crypto";
 
-// 邮件配置 - 使用环境变量或测试账户
+// Email configuration - use environment variables or test account
 let transporter;
 
-// 检查是否启用真实邮件发送（需要明确设置ENABLE_REAL_EMAIL=true）
+// Check if real email sending is enabled (requires explicit ENABLE_REAL_EMAIL=true)
 if (
   process.env.ENABLE_REAL_EMAIL === "true" &&
   process.env.SMTP_USER &&
   process.env.SMTP_PASS
 ) {
-  // 使用真实SMTP配置
+  // Use real SMTP configuration
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: process.env.SMTP_PORT || 587,
@@ -20,19 +20,19 @@ if (
       pass: process.env.SMTP_PASS,
     },
   });
-  console.log("📧 真实邮件模式已启用");
+  console.log("📧 Real email mode enabled");
 } else {
-  // 开发模式：不发送真实邮件
-  console.log("⚠️  开发模式：邮件不会真实发送，将在控制台显示邀请链接");
+  // Development mode: no real emails sent
+  console.log("⚠️  Development mode: emails will not be sent, invite links will be shown in console");
   transporter = null;
 }
 
-// 生成邀请令牌
+// Generate invite token
 export function generateInviteToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-// 发送团队邀请邮件
+// Send team invitation email
 export async function sendTeamInviteEmail({
   email,
   teamName,
@@ -45,24 +45,24 @@ export async function sendTeamInviteEmail({
     process.env.FRONTEND_URL || "http://localhost:3000"
   }/invite/${inviteToken}`;
 
-  const roleText = role === "admin" ? "管理员" : "成员";
+  const roleText = role === "admin" ? "Administrator" : "Member";
 
   const mailOptions = {
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: email,
-    subject: `邀请加入团队：${teamName}`,
+    subject: `Invitation to join team: ${teamName}`,
     html: `
       <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
         <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;">
-          <h1 style="color: #2563eb; margin-bottom: 20px;">MarkWeave 团队邀请</h1>
+          <h1 style="color: #2563eb; margin-bottom: 20px;">MarkWeave Team Invitation</h1>
 
           <div style="background: white; padding: 30px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="color: #333; margin-bottom: 20px;">你被邀请加入团队</h2>
+            <h2 style="color: #333; margin-bottom: 20px;">You are invited to join the team</h2>
 
             <div style="text-align: left; margin: 20px 0;">
-              <p><strong>团队名称:</strong> ${teamName}</p>
-              <p><strong>邀请人:</strong> ${inviterName}</p>
-              <p><strong>角色:</strong> ${roleText}</p>
+              <p><strong>Team Name:</strong> ${teamName}</p>
+              <p><strong>Inviter:</strong> ${inviterName}</p>
+              <p><strong>Role:</strong> ${roleText}</p>
             </div>
 
             <div style="margin: 30px 0;">
@@ -70,18 +70,18 @@ export async function sendTeamInviteEmail({
                  style="background: #2563eb; color: white; padding: 12px 30px;
                         text-decoration: none; border-radius: 6px;
                         font-weight: bold; display: inline-block;">
-                接受邀请
+                Accept invitation
               </a>
             </div>
 
             <p style="color: #666; font-size: 14px; margin-top: 20px;">
-              此邀请将在7天后过期。如果你没有申请加入此团队，请忽略此邮件。
+              This invitation will expire in 7 days. If you did not request to join this team, please ignore this email.
             </p>
           </div>
 
           <div style="text-align: center; color: #888; font-size: 12px; margin-top: 20px;">
             <p>© 2025 MarkWeave. All rights reserved.</p>
-            <p>如果按钮无法点击，请复制以下链接到浏览器：</p>
+            <p>If the button cannot be clicked, please copy the following link to your browser:</p>
             <p style="word-break: break-all;">${inviteLink}</p>
           </div>
         </div>
@@ -91,19 +91,19 @@ export async function sendTeamInviteEmail({
 
   try {
     if (transporter) {
-      // 真实邮件发送
+      // Real email sending
       const info = await transporter.sendMail(mailOptions);
-      console.log("✅ 邮件发送成功:", info.messageId);
+      console.log("✅ Email sent successfully:", info.messageId);
       return { success: true, messageId: info.messageId };
     } else {
-      // 开发模式：只显示邀请链接
-      console.log("📧 ===== 邀请邮件内容 (开发模式) =====");
-      console.log(`📮 收件人: ${email}`);
-      console.log(`📋 团队: ${teamName}`);
-      console.log(`👤 邀请人: ${inviterName}`);
-      console.log(`🔗 邀请链接: ${inviteLink}`);
+      // Development mode: only show invite link
+      console.log("📧 ===== Invitation email content (development mode) =====");
+      console.log(`📮 Recipient: ${email}`);
+      console.log(`📋 Team: ${teamName}`);
+      console.log(`👤 Inviter: ${inviterName}`);
+      console.log(`🔗 Invite link: ${inviteLink}`);
       console.log("📧 ===================================");
-      console.log("💡 复制上面的邀请链接到浏览器中测试邀请功能");
+      console.log("💡 Copy the invite link above to browser to test invitation functionality");
 
       return {
         success: true,
@@ -112,19 +112,19 @@ export async function sendTeamInviteEmail({
       };
     }
   } catch (error) {
-    console.error("❌ 邮件发送失败:", error);
-    throw new Error("邮件发送失败: " + error.message);
+    console.error("❌ Email sending failed:", error);
+    throw new Error("Email sending failed: " + error.message);
   }
 }
 
-// 验证邮件配置
+// Verify email configuration
 export async function verifyEmailConfig() {
   try {
     await transporter.verify();
-    console.log("✅ 邮件服务配置正确");
+    console.log("✅ Email service configured correctly");
     return true;
   } catch (error) {
-    console.error("❌ 邮件服务配置错误:", error);
+    console.error("❌ Email service configuration error:", error);
     return false;
   }
 }

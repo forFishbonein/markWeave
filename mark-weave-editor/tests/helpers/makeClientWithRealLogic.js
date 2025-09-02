@@ -12,35 +12,39 @@ const jestIsolate =
   (global.jest && global.jest.isolateModules) || ((fn) => fn());
 
 /**
- * 创建一个"真实"客户端：使用 src/crdt 下的 insertChar/insertText/deleteChars 等 API，
- * 且每个客户端拥有自身独立的 Y.Doc（通过 jest.isolateModules + resetYDoc）。
+ * Create a "real" client: use insertChar/insertText/deleteChars APIs from src/crdt,
+ * and each client has its own independent Y.Doc (via jest.isolateModules + resetYDoc).
  */
 module.exports = function makeClient(id) {
-  // 为每个客户端创建独立的模块实例
+  // Create independent module instance for each client
   let ydoc, ychars;
   let insertChar, insertText, deleteChars;
   let addBold, removeBold, addEm, removeEm, addLink, removeLink;
 
   jestIsolate(() => {
-    // 清除模块缓存以获得独立的实例
+    // Clear module cache to get independent instance
     delete require.cache[require.resolve("../../src/crdt/index.cjs")];
     delete require.cache[require.resolve("../../src/crdt/crdtActions.cjs")];
-    
+
     const crdtIndex = require("../../src/crdt/index.cjs");
     const { createCRDTActions } = require("../../src/crdt/crdtActions.cjs");
-    
-    // 重置Y.Doc以确保独立性
-    const { ydoc: newYdoc, ychars: newYchars, yformatOps: newYformatOps } = crdtIndex.resetYDoc();
-    
+
+    // Reset Y.Doc to ensure independence
+    const {
+      ydoc: newYdoc,
+      ychars: newYchars,
+      yformatOps: newYformatOps,
+    } = crdtIndex.resetYDoc();
+
     ydoc = newYdoc;
     ychars = newYchars;
-    
-    // 使用工厂函数创建绑定到特定Y.Doc的操作函数
+
+    // Use factory function to create operation functions bound to specific Y.Doc
     const actions = createCRDTActions(newYchars, newYformatOps);
-    
-    // 重置计数器确保测试隔离
+
+    // Reset counter to ensure test isolation
     actions.resetCounters();
-    
+
     insertChar = actions.insertChar;
     insertText = actions.insertText;
     deleteChars = actions.deleteChars;

@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "antd/dist/reset.css"; // Ant Design CSS
 import "./index.css";
-import "./utils/benchmarkApi"; // 挂载性能数据采集API
+import "./utils/benchmarkApi"; // Mount performance data collection API
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 

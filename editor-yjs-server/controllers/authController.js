@@ -5,20 +5,20 @@ export const register = async (req, res, next) => {
   try {
     const { email, username, password } = req.body;
 
-    // 检查用户是否已存在
+    // Check if user already exists
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({
         success: false,
-        msg: "用户已存在",
+        msg: "User already exists",
       });
     }
 
-    // 创建新用户
+    // Create new user
     user = new User({ email, username, password });
     await user.save();
 
-    // 生成JWT token
+    // Generate JWT token
     const token = generateToken({ userId: user._id });
 
     res.status(201).json({
@@ -39,29 +39,29 @@ export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // 查找用户（包含密码字段）
+    // Find user (including password field)
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(400).json({
         success: false,
-        msg: "邮箱或密码错误",
+        msg: "Email or password incorrect",
       });
     }
 
-    // 验证密码
+    // Verify password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        msg: "邮箱或密码错误",
+        msg: "Email or password incorrect",
       });
     }
 
-    // 更新最后登录时间
+    // Update last login time
     user.lastLogin = new Date();
     await user.save();
 
-    // 生成JWT token
+    // Generate JWT token
     const token = generateToken({ userId: user._id });
 
     res.json({
@@ -84,7 +84,7 @@ export const getProfile = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        msg: "用户不存在",
+        msg: "User does not exist",
       });
     }
 

@@ -19,9 +19,9 @@ const TeamSidebar = () => {
       try {
         // Load team information
         const response = await apiService.getTeamDetails(teamId);
-        // 后端直接返回团队对象，不需要检查success字段
+        // Backend directly returns team object, no need to check success field
         setTeam(response);
-        console.log('团队信息加载成功:', response);
+        console.log('Team info loaded successfully:', response);
       } catch (error) {
         console.error('Failed to load team information:', error);
         message.error('Failed to load team information: ' + error.message);
