@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:27
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-08-05 23:12:24
+ * @LastEditTime: 2025-09-22 16:49:08
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -33,6 +33,8 @@ function parseOpId(opId) {
   return { timestamp, counter, userId };
 }
 
+// todo 比较两个opId的时间戳，实现 LWW
+// 冲突解决：当同一个字符有多个格式操作时，总是以时间戳最新的操作为准
 function compareOpIds(opId1, opId2) {
   // Check if it's old format (no underscore)
   const isOldFormat1 = !opId1.includes("_");
@@ -175,6 +177,7 @@ export function insertText(afterId, text, awareness = null) {
         const nextChar = chars[insertIndex];
         const nextOpId = getProp(nextChar, "opId");
 
+        //LWW入口
         if (compareOpIds(nextOpId, currentOpId) > 0) {
           break;
         }

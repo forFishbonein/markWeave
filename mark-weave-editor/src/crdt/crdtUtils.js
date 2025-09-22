@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:28:16
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-07-13 02:26:06
+ * @LastEditTime: 2025-09-22 16:48:46
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -51,8 +51,10 @@ export function convertCRDTToProseMirrorDoc(docId) {
   const paragraphContent = ychars
     .toArray()
     .map((char) => {
+      // 如果被删除了就直接返回
       if (getProp(char, "deleted")) return null;
 
+      //获取ch字段
       const chVal = getProp(char, "ch");
       if (!chVal) return null; // Skip empty characters
 
@@ -79,7 +81,9 @@ export function convertCRDTToProseMirrorDoc(docId) {
           .filter((op) => op.action === "removeMark")
           .sort((a, b) => b.timestamp - a.timestamp)[0];
 
-        // **remove-wins logic**
+        //todo 实现remove-wins的逻辑 **remove-wins logic**
+        // 按时间戳排序：分别找到最后的 addMark 和 removeMark 操作
+        // Remove-Wins 策略：如果没有删除操作，或者添加操作的时间戳更新，则应用格式
         if (
           !lastRemoveOp ||
           (lastAddOp && lastAddOp.timestamp > lastRemoveOp.timestamp)

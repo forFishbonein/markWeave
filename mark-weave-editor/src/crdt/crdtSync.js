@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:59:57
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-09-03 04:37:13
+ * @LastEditTime: 2025-09-22 12:35:28
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -16,6 +16,7 @@ import { Buffer } from "buffer";
 export function syncToProseMirror(view, docId) {
   const updateEditor = debounce(() => {
     const ydoc = getYDoc();
+    // todo 把 CRDT 的 Ychars等 转化到 ProseMirror
     const newDoc = convertCRDTToProseMirrorDoc();
     const update = Y.encodeStateAsUpdate(ydoc); // Uint8Array
     const updateB64 = Buffer.from(update).toString("base64");

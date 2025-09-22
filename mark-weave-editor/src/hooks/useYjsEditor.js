@@ -3,7 +3,7 @@
  * @Author: Aron
  * @Date: 2025-03-04 22:35:56
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2025-09-03 04:22:10
+ * @LastEditTime: 2025-09-22 12:35:52
  * Copyright: 2025 xxxTech CO.,LTD. All Rights Reserved.
  * @Descripttion:
  */
@@ -26,7 +26,7 @@ import { syncToProseMirror } from "../crdt/crdtSync";
 import { schema } from "../plugins/schema";
 import { createKeymap } from "../plugins/keymap"; // ← Note reference
 import { insertChar, insertText, deleteChars } from "../crdt/crdtActions";
-import { cursorPlugin, createDecorations } from "../old/cursor-plugin";
+import { cursorPlugin, createDecorations } from "../plugins/cursor-plugin";
 import { useAuth } from "../contexts/AuthContext";
 
 // Unified property reading, compatible with plain objects and Y.Map
@@ -246,6 +246,7 @@ export function useYjsEditor(docId, editorRef) {
               // console.log("🚀newState", newState);
               viewRef.current.updateState(newState);
               // Process each step in transaction
+              // todo 把用户输入转化到 CRDT 的 Ychars
               tr.steps.forEach((step) => {
                 if (step.slice && step.slice.content.size > 0) {
                   // 🚀 Get insertion position

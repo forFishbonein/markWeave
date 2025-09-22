@@ -1,0 +1,369 @@
+{
+  "summary": {
+    "totalBenchmarks": 4,
+    "overallAvgLatency": 9.549286362190955,
+    "overallAvgP95Latency": 18.481258981688974,
+    "overallAvgBandwidth": 3.853323708478762,
+    "overallAvgOperationsPerSecond": 14.052808499937491,
+    "overallAvgE2ELatency": 56.00950771190735,
+    "bestPerformingBenchmark": {
+      "name": "Long Text Collaboration",
+      "avgLatency": 8.40404075299955
+    },
+    "worstPerformingBenchmark": {
+      "name": "Basic Concurrent Input",
+      "avgLatency": 11.67679023548586
+    }
+  },
+  "benchmarks": {
+    "benchmark1": {
+      "name": "Basic Concurrent Input",
+      "description": "The most basic concurrent input; tests core CRDT conflict resolution.",
+      "testType": "concurrent_input",
+      "timestamp": "2025-09-22T10:15:09.100Z",
+      "users": {
+        "userA": {
+          "latency": {
+            "avg": 10.64729900116464,
+            "p95": 14.799999952316284,
+            "samples": 169
+          },
+          "network": {
+            "avgLatency": 0,
+            "bandwidth": 2.9538925191527716,
+            "sentBytes": 8836,
+            "receivedBytes": 11300
+          },
+          "operations": {
+            "total": 169,
+            "perSecond": 25.386810875769868,
+            "keystrokes": 7,
+            "keystrokesPerSecond": 1.0515247108307044
+          },
+          "collaboration": {
+            "activeCollaborators": 1,
+            "awarenessChanges": 25
+          },
+          "e2e": {
+            "avgLatency": 14.573228351713166,
+            "p95Latency": 25.700000047683716,
+            "samples": 127
+          }
+        },
+        "userB": {
+          "latency": {
+            "avg": 12.70628146980708,
+            "p95": 47.09999990463257,
+            "samples": 169
+          },
+          "network": {
+            "avgLatency": 185.60000002384186,
+            "bandwidth": 2.3505964438407507,
+            "sentBytes": 7894,
+            "receivedBytes": 11772
+          },
+          "operations": {
+            "total": 169,
+            "perSecond": 20.684674981455554,
+            "keystrokes": 7,
+            "keystrokesPerSecond": 0.8567616856224194
+          },
+          "collaboration": {
+            "activeCollaborators": 1,
+            "awarenessChanges": 25
+          },
+          "e2e": {
+            "avgLatency": 4.253333334128062,
+            "p95Latency": 16.90000009536743,
+            "samples": 30
+          }
+        }
+      },
+      "summary": {
+        "avgLatency": 11.67679023548586,
+        "avgP95Latency": 30.949999928474426,
+        "avgBandwidth": 2.652244481496761,
+        "avgOperationsPerSecond": 23.035742928612713,
+        "totalOperations": 338,
+        "avgE2ELatency": 9.413280842920614,
+        "avgE2EP95Latency": 21.300000071525574,
+        "totalCollaborators": 1
+      }
+    },
+    "benchmark2": {
+      "name": "Long Text Collaboration",
+      "description": "Continuous long-text input; tests sustained performance and stability.",
+      "testType": "long_text_collaboration",
+      "timestamp": "2025-09-22T10:15:55.594Z",
+      "users": {
+        "userA": {
+          "latency": {
+            "avg": 7.946950472194423,
+            "p95": 14.200000047683716,
+            "samples": 523
+          },
+          "network": {
+            "avgLatency": 9.649999976158142,
+            "bandwidth": 5.425064794350697,
+            "sentBytes": 134922,
+            "receivedBytes": 159611
+          },
+          "operations": {
+            "total": 537,
+            "perSecond": 10.128501830477115,
+            "keystrokes": 182,
+            "keystrokesPerSecond": 3.4327510859345156
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 388
+          },
+          "e2e": {
+            "avgLatency": 5.611500001549721,
+            "p95Latency": 16.299999952316284,
+            "samples": 200
+          }
+        },
+        "userB": {
+          "latency": {
+            "avg": 8.861131033804673,
+            "p95": 14.445828264556365,
+            "samples": 535
+          },
+          "network": {
+            "avgLatency": 100.05000001192093,
+            "bandwidth": 5.251102885619298,
+            "sentBytes": 133476,
+            "receivedBytes": 160083
+          },
+          "operations": {
+            "total": 537,
+            "perSecond": 9.836245741290252,
+            "keystrokes": 184,
+            "keystrokesPerSecond": 3.370333736308019
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 388
+          },
+          "e2e": {
+            "avgLatency": 5.728500000834465,
+            "p95Latency": 16,
+            "samples": 200
+          }
+        }
+      },
+      "summary": {
+        "avgLatency": 8.40404075299955,
+        "avgP95Latency": 14.32291415612004,
+        "avgBandwidth": 5.338083839984998,
+        "avgOperationsPerSecond": 9.982373785883684,
+        "totalOperations": 1074,
+        "avgE2ELatency": 5.6700000011920935,
+        "avgE2EP95Latency": 16.149999976158142,
+        "totalCollaborators": 0
+      }
+    },
+    "benchmark3": {
+      "name": "Rich-text Formatting Collaboration",
+      "description": "Different users insert different text but apply styles to the same span.",
+      "testType": "text_format_collaboration",
+      "timestamp": "2025-09-22T10:16:34.302Z",
+      "users": {
+        "userA": {
+          "latency": {
+            "avg": 8.690678556613394,
+            "p95": 14.232784605488918,
+            "samples": 839
+          },
+          "network": {
+            "avgLatency": 115.67999999523163,
+            "bandwidth": 4.181236211709597,
+            "sentBytes": 177894,
+            "receivedBytes": 214724
+          },
+          "operations": {
+            "total": 1205,
+            "perSecond": 13.140790759345483,
+            "keystrokes": 222,
+            "keystrokesPerSecond": 2.420958961472778
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 483
+          },
+          "e2e": {
+            "avgLatency": 89.05050000727176,
+            "p95Latency": 125.20000004768372,
+            "samples": 200
+          }
+        },
+        "userB": {
+          "latency": {
+            "avg": 9.26196287038543,
+            "p95": 14.4661217335785,
+            "samples": 966
+          },
+          "network": {
+            "avgLatency": 60.24000000953674,
+            "bandwidth": 4.064743726143443,
+            "sentBytes": 172812,
+            "receivedBytes": 215480
+          },
+          "operations": {
+            "total": 1205,
+            "perSecond": 12.917002097810197,
+            "keystrokes": 225,
+            "keystrokesPerSecond": 2.4118883585122775
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 483
+          },
+          "e2e": {
+            "avgLatency": 8.329499997496605,
+            "p95Latency": 33.89999997615814,
+            "samples": 200
+          }
+        }
+      },
+      "summary": {
+        "avgLatency": 8.976320713499412,
+        "avgP95Latency": 14.34945316953371,
+        "avgBandwidth": 4.12298996892652,
+        "avgOperationsPerSecond": 13.028896428577841,
+        "totalOperations": 2410,
+        "avgE2ELatency": 48.69000000238418,
+        "avgE2EP95Latency": 79.55000001192093,
+        "totalCollaborators": 0
+      }
+    },
+    "benchmark4": {
+      "name": "Format Range Overlap",
+      "description": "Both users apply bold with overlapping selection ranges.",
+      "testType": "format_range_overlap",
+      "timestamp": "2025-09-22T10:17:25.495Z",
+      "users": {
+        "userA": {
+          "latency": {
+            "avg": 8.934864855431826,
+            "p95": 14.232784605488918,
+            "samples": 1017
+          },
+          "network": {
+            "avgLatency": 64.47777778572507,
+            "bandwidth": 3.3356077647815994,
+            "sentBytes": 221328,
+            "receivedBytes": 266515
+          },
+          "operations": {
+            "total": 1460,
+            "perSecond": 10.222278545882759,
+            "keystrokes": 276,
+            "keystrokesPerSecond": 1.9324307388107131
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 600
+          },
+          "e2e": {
+            "avgLatency": 133.66200000047684,
+            "p95Latency": 19.5,
+            "samples": 200
+          }
+        },
+        "userB": {
+          "latency": {
+            "avg": 9.345122638126162,
+            "p95": 14.372552739766531,
+            "samples": 1145
+          },
+          "network": {
+            "avgLatency": 47.60000001059638,
+            "bandwidth": 3.2643453222319367,
+            "sentBytes": 215634,
+            "receivedBytes": 267272
+          },
+          "operations": {
+            "total": 1460,
+            "perSecond": 10.106163167468688,
+            "keystrokes": 275,
+            "keystrokesPerSecond": 1.9035581308588283
+          },
+          "collaboration": {
+            "activeCollaborators": 0,
+            "awarenessChanges": 600
+          },
+          "e2e": {
+            "avgLatency": 186.86750000178813,
+            "p95Latency": 79.10000002384186,
+            "samples": 200
+          }
+        }
+      },
+      "summary": {
+        "avgLatency": 9.139993746778995,
+        "avgP95Latency": 14.302668672627725,
+        "avgBandwidth": 3.299976543506768,
+        "avgOperationsPerSecond": 10.164220856675723,
+        "totalOperations": 2920,
+        "avgE2ELatency": 160.26475000113248,
+        "avgE2EP95Latency": 49.30000001192093,
+        "totalCollaborators": 0
+      }
+    }
+  },
+  "comparisons": {
+    "orderedKeys": [
+      "benchmark1",
+      "benchmark2",
+      "benchmark3",
+      "benchmark4"
+    ],
+    "latency": {
+      "avg": [
+        11.67679023548586,
+        8.40404075299955,
+        8.976320713499412,
+        9.139993746778995
+      ],
+      "p95": [
+        30.949999928474426,
+        14.32291415612004,
+        14.34945316953371,
+        14.302668672627725
+      ]
+    },
+    "bandwidth": {
+      "kbps": [
+        2.652244481496761,
+        5.338083839984998,
+        4.12298996892652,
+        3.299976543506768
+      ]
+    },
+    "operations": {
+      "ops": [
+        23.035742928612713,
+        9.982373785883684,
+        13.028896428577841,
+        10.164220856675723
+      ]
+    },
+    "e2e": {
+      "avg": [
+        9.413280842920614,
+        5.6700000011920935,
+        48.69000000238418,
+        160.26475000113248
+      ],
+      "p95": [
+        21.300000071525574,
+        16.149999976158142,
+        79.55000001192093,
+        49.30000001192093
+      ]
+    }
+  },
+  "recommendations": []
+}
